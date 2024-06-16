@@ -11,15 +11,13 @@ const stringBoolean = z.coerce
   .default("false");
 
 const EnvSchema = z.object({
-  NODE_ENV: z.string().default("development"),
-  DB_HOST: z.string(),
-  DB_USER: z.string(),
-  DB_PASSWORD: z.string(),
-  DB_NAME: z.string(),
-  DB_PORT: z.coerce.number(),
-  DATABASE_URL: z.string(),
+  NODE_ENV: z.literal("development").default("development"),
+  DATABASE_URL: z.string().default("local.db"),
   DB_MIGRATING: stringBoolean,
   DB_SEEDING: stringBoolean,
+  MINIO_URL: z.string(),
+  MINIO_ACCESSKEY: z.string(),
+  MINIO_SECRETKEY: z.string(),
 });
 
 export type EnvSchema = z.infer<typeof EnvSchema>;
@@ -27,6 +25,7 @@ export type EnvSchema = z.infer<typeof EnvSchema>;
 expand(config());
 
 try {
+  // console.log(process.env);
   EnvSchema.parse(process.env);
 } catch (error) {
   if (error instanceof ZodError) {
