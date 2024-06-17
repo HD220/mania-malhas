@@ -25,7 +25,7 @@ import { DropzoneProvider } from "@/components/providers/dropzone-provider";
 import { DropEvent, FileRejection } from "react-dropzone";
 import { onSubmit } from "./actions";
 import { z } from "zod";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 
 type PageProps = {
   params: { id: string };
@@ -74,6 +74,11 @@ export default function Page({ params }: PageProps) {
   //     file,
   //   };
   // });
+
+  const onRemove = (index?: number | number[]) => {
+    setFiles((prev) => prev.filter((_, idx) => idx !== index));
+    remove(index);
+  };
 
   const onDrop: <T extends File>(
     acceptedFiles: T[],
@@ -203,7 +208,7 @@ export default function Page({ params }: PageProps) {
                   onDrop,
                 }}
               >
-                <DropzoneImageCarousel items={fields} remove={remove} />
+                <DropzoneImageCarousel items={fields} remove={onRemove} />
               </DropzoneProvider>
               {/* <ImagesCarousel control={form.control} name="images" /> */}
             </CardContent>
