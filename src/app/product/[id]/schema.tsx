@@ -6,7 +6,7 @@ export const formSchema = z.object({
   price: z.coerce.number(),
   images:
     window === undefined
-      ? z.any().array().optional()
+      ? z.object({ url: z.string() }).array().optional()
       : z
           .object({ file: z.instanceof(File) })
           .array()

@@ -23,13 +23,25 @@ import { Input } from "@/components/ui/input";
 import { DropzoneImageCarousel } from "../../../components/dropzone-image-carousel";
 import { DropzoneProvider } from "@/components/providers/dropzone-provider";
 import { DropEvent, FileRejection } from "react-dropzone";
-import { formSchema, formType } from "./schema";
 import { onSubmit } from "./actions";
-import { minioClient } from "@/services/minio";
+import { z } from "zod";
+import { useState } from "react";
 
 type PageProps = {
   params: { id: string };
 };
+
+const formSchema = z.object({
+  name: z.string(),
+  description: z.string(),
+  price: z.coerce.number(),
+  images: z
+    .object({ file: z.instanceof(File) })
+    .array()
+    .optional(),
+});
+
+type formType = z.infer<typeof formSchema>;
 
 export default function Page({ params }: PageProps) {
   const form = useForm<formType>({
@@ -46,40 +58,78 @@ export default function Page({ params }: PageProps) {
     control: form.control,
     name: "images",
   });
-  const files = fields.map(({ file, id }) => {
-    return {
-      id,
-      preview: URL.createObjectURL(file),
-      file,
-    };
-  });
+
+  const [files, setFiles] = useState<
+    {
+      file: File;
+      preview: string;
+      urlUpload: string;
+    }[]
+  >([]);
+
+  // const files = fields.map(({ file, id }) => {
+  //   return {
+  //     id,
+  //     preview: URL.createObjectURL(file),
+  //     file,
+  //   };
+  // });
 
   const onDrop: <T extends File>(
     acceptedFiles: T[],
     fileRejections: FileRejection[],
     event: DropEvent
   ) => void = async (acceptedFiles, fileRejections, event) => {
-    const files = acceptedFiles.map((file) => {
-      return { file };
+    acceptedFiles.forEach(async (file) => {
+      try {
+        const searchParams = new URLSearchParams();
+        searchParams.set("name", file.name);
+        const response = await fetch(
+          `/api/presignedurl?${searchParams.toString()}`,
+          {
+            cache: "no-cache",
+            next: {
+              revalidate: 0,
+            },
+          }
+        );
+        const url = (await response.json()).url;
+
+        setFiles((prev) => [
+          ...prev,
+          { file, preview: URL.createObjectURL(file), urlUpload: url },
+        ]);
+      } catch (error) {
+        console.log(error);
+      }
+    });
+    files?.map(({ file }) => {
+      file;
     });
 
-    append(files);
+    append(files?.map(({ file }) => ({ file })));
   };
 
-  const submit = (values: formType) => {
-    const { name, description, price, images } = values;
+  const submit = async (values: formType) => {
+    const { name, description, price } = values;
 
-    const formdata = new FormData();
-    images?.forEach(({ file }, index) => {
-      formdata.append(`image.${index}`, file);
-    });
+    try {
+      files.forEach(async ({ file, urlUpload }) => {
+        await fetch(urlUpload, {
+          body: file,
+          method: "PUT",
+        });
+      });
 
-    onSubmit({
-      name,
-      description,
-      price,
-      images: [formdata],
-    });
+      await onSubmit({
+        name,
+        description,
+        price,
+        images: files.map(({ urlUpload }) => ({ url: urlUpload })),
+      });
+    } catch (error) {
+      console.log(error);
+    }
   };
 
   return (
@@ -153,7 +203,7 @@ export default function Page({ params }: PageProps) {
                   onDrop,
                 }}
               >
-                <DropzoneImageCarousel items={files} remove={remove} />
+                <DropzoneImageCarousel items={fields} remove={remove} />
               </DropzoneProvider>
               {/* <ImagesCarousel control={form.control} name="images" /> */}
             </CardContent>

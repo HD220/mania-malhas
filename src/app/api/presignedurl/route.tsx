@@ -8,6 +8,9 @@ export async function GET(request: Request) {
 
   if (!fileName) throw new Error("nome de arquivo não fornecido");
 
+  if (!(await minioClient.bucketExists("uploads")))
+    minioClient.makeBucket("uploads");
+
   const url = await minioClient.presignedPutObject("uploads", fileName);
 
   return Response.json({ url });

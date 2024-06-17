@@ -17,7 +17,7 @@ import Image from "next/image";
 import { Button } from "@/components/ui/button";
 
 export type DropzoneImageCarousel = {
-  items: { preview: string; file: File; id: string }[];
+  items: { file: File; id: string }[];
   remove: (index?: number | number[]) => void;
 };
 
@@ -32,7 +32,8 @@ export function DropzoneImageCarousel({
       <CarouselContent className="">
         <DropzoneImageCarouselInput inputProps={getInputProps()} open={open} />
 
-        {items.map(({ id, file, preview }, index) => {
+        {items.map(({ id, file }, index) => {
+          const preview = URL.createObjectURL(file);
           return (
             <DropzoneImageCarouselItem key={id}>
               <Button
