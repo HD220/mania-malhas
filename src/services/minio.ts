@@ -1,4 +1,4 @@
-import env from "@/db/sqlite/env";
+import env from "@/db/postgres/env";
 import * as Minio from "minio";
 
 export const minioClient = new Minio.Client({

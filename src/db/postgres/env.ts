@@ -22,6 +22,9 @@ const EnvSchema = z.object({
   DATABASE_URL: z.string(),
   DB_MIGRATING: stringBoolean,
   DB_SEEDING: stringBoolean,
+  MINIO_URL: z.string(),
+  MINIO_ACCESSKEY: z.string(),
+  MINIO_SECRETKEY: z.string(),
 });
 
 export type EnvSchema = z.infer<typeof EnvSchema>;
