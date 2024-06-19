@@ -16,7 +16,8 @@
     "sqlite:generate": "drizzle-kit generate --config=./src/db/sqlite/drizzle.config.ts",
     "sqlite:migrate": "cross-env DB_MIGRATING=true tsx ./src/db/sqlite/migrate.ts",
     "sqlite:seed": "cross-env DB_SEEDING=true tsx ./src/db/sqlite/seed.ts",
-    "build:postinstall": "npm run pg:migrate"
+    "build:postinstall": "npm run pg:migrate",
+    "build:digitalocean": "npm install --production=false && npm run build && npm ci"
   },
   "dependencies": {
     "@hookform/resolvers": "^3.6.0",
