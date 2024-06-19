@@ -20,7 +20,10 @@ import {
 } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { DropzoneImageCarousel } from "../../../components/dropzone-image-carousel";
+import {
+  DropzoneImageCarousel,
+  type Image,
+} from "../../../components/dropzone-image-carousel";
 import { DropzoneProvider } from "@/components/providers/dropzone-provider";
 import { DropEvent, FileRejection } from "react-dropzone";
 import { onSubmit } from "./actions";
@@ -36,7 +39,12 @@ const formSchema = z.object({
   description: z.string(),
   price: z.coerce.number(),
   images: z
-    .object({ file: z.instanceof(File) })
+    .object({
+      name: z.string(),
+      size: z.number().int(),
+      type: z.string(),
+      urlUpload: z.string(),
+    })
     .array()
     .optional(),
 });
@@ -50,34 +58,14 @@ export default function Page({ params }: PageProps) {
       name: "",
       description: "",
       price: 0,
-      // images: [],
+      images: [],
     },
   });
 
-  const { fields, append, insert, remove } = useFieldArray({
-    control: form.control,
-    name: "images",
-  });
-
-  const [files, setFiles] = useState<
-    {
-      file: File;
-      preview: string;
-      urlUpload: string;
-    }[]
-  >([]);
-
-  // const files = fields.map(({ file, id }) => {
-  //   return {
-  //     id,
-  //     preview: URL.createObjectURL(file),
-  //     file,
-  //   };
-  // });
+  const [files, setFiles] = useState<Image[]>([]);
 
   const onRemove = (index?: number | number[]) => {
     setFiles((prev) => prev.filter((_, idx) => idx !== index));
-    remove(index);
   };
 
   const onDrop: <T extends File>(
@@ -87,41 +75,59 @@ export default function Page({ params }: PageProps) {
   ) => void = async (acceptedFiles, fileRejections, event) => {
     acceptedFiles.forEach(async (file) => {
       try {
-        const searchParams = new URLSearchParams();
-        searchParams.set("name", file.name);
-        const response = await fetch(
-          `/api/presignedurl?${searchParams.toString()}`,
-          {
-            cache: "no-cache",
-            next: {
-              revalidate: 0,
-            },
-          }
-        );
-        const url = (await response.json()).url;
+        // const searchParams = new URLSearchParams();
+        // searchParams.set("name", file.name);
+        // const response = await fetch(
+        //   `/api/presignedurl?${searchParams.toString()}`,
+        //   {
+        //     cache: "no-cache",
+        //     next: {
+        //       revalidate: 0,
+        //     },
+        //   }
+        // );
+        // const url = (await response.json()).url;
 
-        setFiles((prev) => [
-          ...prev,
-          { file, preview: URL.createObjectURL(file), urlUpload: url },
-        ]);
+        const url = "api/s3/file/" + file.name;
+
+        setFiles((prev) => {
+          const newValue = [
+            ...prev,
+            {
+              file: Object.assign(file, {
+                urlPreview: URL.createObjectURL(file),
+                urlUpload: url,
+              }),
+            },
+          ];
+
+          return newValue;
+        });
       } catch (error) {
         console.log(error);
       }
     });
-    files?.map(({ file }) => {
-      file;
-    });
-
-    append(files?.map(({ file }) => ({ file })));
   };
 
-  const submit = async (values: formType) => {
-    const { name, description, price } = values;
+  useEffect(() => {
+    const newValues = files.map(({ file }) => ({
+      name: file.name,
+      size: file.size,
+      type: file.type,
+      urlUpload: file.urlUpload,
+    }));
 
+    form.setValue("images", newValues);
+  }, [files, form]);
+
+  const submit = async (values: formType) => {
+    console.log(values);
+    const { name, description, price, images } = values;
     try {
-      files.forEach(async ({ file, urlUpload }) => {
+      files.forEach(async ({ file }) => {
+        const { urlUpload } = file;
         await fetch(urlUpload, {
-          body: file,
+          body: file as File,
           method: "PUT",
         });
       });
@@ -130,7 +136,7 @@ export default function Page({ params }: PageProps) {
         name,
         description,
         price,
-        images: files.map(({ urlUpload }) => ({ url: urlUpload })),
+        images: files.map(({ file: { urlUpload } }) => ({ url: urlUpload })),
       });
     } catch (error) {
       console.log(error);
@@ -200,17 +206,30 @@ export default function Page({ params }: PageProps) {
                   </FormItem>
                 )}
               />
-              <DropzoneProvider
-                options={{
-                  noClick: true,
-                  noKeyboard: true,
-                  multiple: true,
-                  onDrop,
+
+              <FormField
+                name="images"
+                control={form.control}
+                render={(field) => {
+                  return (
+                    <DropzoneProvider
+                      options={{
+                        noClick: true,
+                        noKeyboard: true,
+                        multiple: true,
+                        onDrop,
+                      }}
+                    >
+                      <DropzoneImageCarousel
+                        multiple={true}
+                        onRemove={onRemove}
+                        files={files}
+                        {...field}
+                      />
+                    </DropzoneProvider>
+                  );
                 }}
-              >
-                <DropzoneImageCarousel items={fields} remove={onRemove} />
-              </DropzoneProvider>
-              {/* <ImagesCarousel control={form.control} name="images" /> */}
+              />
             </CardContent>
             <CardFooter className="flex justify-end">
               <Button type="submit">Salvar</Button>

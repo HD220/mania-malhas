@@ -16,32 +16,45 @@ import { DropzoneInputProps } from "react-dropzone";
 import Image from "next/image";
 import { Button } from "@/components/ui/button";
 
+export type Image = {
+  file: File & {
+    urlPreview: string;
+    urlUpload: string;
+  };
+};
+
 export type DropzoneImageCarousel = {
-  items: { file: File; id: string }[];
-  remove: (index?: number | number[]) => void;
+  multiple?: boolean;
+  onRemove: (index: number) => void;
+  files: Image[];
 };
 
 export function DropzoneImageCarousel({
-  items,
-  remove,
+  onRemove,
+  files,
+  ...rest
 }: DropzoneImageCarousel) {
   const { getRootProps, getInputProps, open } = useDropzone();
 
   return (
     <Carousel className="mx-[50px]" {...getRootProps()}>
       <CarouselContent className="">
-        <DropzoneImageCarouselInput inputProps={getInputProps()} open={open} />
+        <DropzoneImageCarouselInput
+          inputProps={getInputProps()}
+          open={open}
+          {...rest}
+        />
 
-        {items.map(({ id, file }, index) => {
+        {files.map(({ file }, index) => {
           const preview = URL.createObjectURL(file);
           return (
-            <DropzoneImageCarouselItem key={id}>
+            <DropzoneImageCarouselItem key={`${file.name}-${index}`}>
               <Button
                 size="sm"
                 variant={"destructive"}
                 type="button"
                 className="absolute right-0 top-0 rounded-full p-1 h-auto -mx-0 -my-0 z-10"
-                onClick={() => remove(index)}
+                onClick={() => onRemove(index)}
               >
                 <X className="h-3 w-3" />
               </Button>
