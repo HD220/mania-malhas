@@ -3,7 +3,6 @@ import { Inter } from "next/font/google";
 import type { Metadata } from "next";
 import { cn } from "@/lib/utils";
 import { ThemeProvider } from "@/components/providers/theme-provider";
-import { ModeToggle } from "@/components/mode-toggle";
 import { Header } from "@/components/header";
 import AsideBar from "@/components/aside-bar";
 
