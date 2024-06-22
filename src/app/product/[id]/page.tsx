@@ -29,6 +29,8 @@ import { DropEvent, FileRejection } from "react-dropzone";
 import { onSubmit } from "./actions";
 import { z } from "zod";
 import { useEffect, useState } from "react";
+import { useUploadProgress } from "@/hooks/useUploadProgress";
+import { Progress } from "@/components/ui/progress";
 
 type PageProps = {
   params: { id: string };
@@ -52,6 +54,8 @@ const formSchema = z.object({
 type formType = z.infer<typeof formSchema>;
 
 export default function Page({ params }: PageProps) {
+  const [files, setFiles] = useState<Image[]>([]);
+  const { error, progress, upload } = useUploadProgress();
   const form = useForm<formType>({
     resolver: zodResolver(formSchema),
     defaultValues: {
@@ -61,8 +65,6 @@ export default function Page({ params }: PageProps) {
       images: [],
     },
   });
-
-  const [files, setFiles] = useState<Image[]>([]);
 
   const onRemove = (index?: number | number[]) => {
     setFiles((prev) => prev.filter((_, idx) => idx !== index));
@@ -75,61 +77,59 @@ export default function Page({ params }: PageProps) {
   ) => void = async (acceptedFiles, fileRejections, event) => {
     acceptedFiles.forEach(async (file) => {
       try {
-        // const searchParams = new URLSearchParams();
-        // searchParams.set("name", file.name);
-        // const response = await fetch(
-        //   `/api/presignedurl?${searchParams.toString()}`,
-        //   {
-        //     cache: "no-cache",
-        //     next: {
-        //       revalidate: 0,
-        //     },
-        //   }
-        // );
-        // const url = (await response.json()).url;
-
-        const url = "api/s3/file/" + file.name;
-
-        setFiles((prev) => {
-          const newValue = [
-            ...prev,
-            {
-              file: Object.assign(file, {
-                urlPreview: URL.createObjectURL(file),
-                urlUpload: url,
-              }),
+        const searchParams = new URLSearchParams();
+        searchParams.set("name", file.name);
+        const response = await fetch(
+          `/api/presignedurl?${searchParams.toString()}`,
+          {
+            cache: "no-cache",
+            next: {
+              revalidate: 0,
             },
-          ];
+          }
+        );
+        const data = await response.json();
+        const url = data.url;
 
-          return newValue;
-        });
+        setFiles((prev) => [
+          ...prev,
+          {
+            file: {
+              file: file,
+              urlPreview: URL.createObjectURL(file),
+              urlUpload: url,
+            },
+          },
+        ]);
       } catch (error) {
         console.log(error);
       }
     });
   };
 
-  useEffect(() => {
-    const newValues = files.map(({ file }) => ({
-      name: file.name,
-      size: file.size,
-      type: file.type,
-      urlUpload: file.urlUpload,
-    }));
-
-    form.setValue("images", newValues);
-  }, [files, form]);
-
   const submit = async (values: formType) => {
-    console.log(values);
     const { name, description, price, images } = values;
+
     try {
-      files.forEach(async ({ file }) => {
-        const { urlUpload } = file;
-        await fetch(urlUpload, {
-          body: file as File,
-          method: "PUT",
-        });
+      files.forEach(async ({ file: { urlUpload, urlPreview, ...photo } }) => {
+        // const { urlUpload } = file;
+        console.log("enviando foto produto", urlUpload);
+
+        console.log("produto", photo);
+
+        // const controler = fetch(urlUpload, {
+        //   body: photo.file,
+        //   method: "PUT",
+        //   headers: {
+        //     "Content-Type": photo.file.type,
+        //   }
+        // });
+
+        const controller = upload(photo.file, urlUpload);
+        controller.start();
+
+        console.log("foto do produto enviada: ", photo.file.name);
+        console.log("url: ", urlUpload);
       });
 
       await onSubmit({
@@ -212,26 +212,30 @@ export default function Page({ params }: PageProps) {
                 control={form.control}
                 render={(field) => {
                   return (
-                    <DropzoneProvider
-                      options={{
-                        noClick: true,
-                        noKeyboard: true,
-                        multiple: true,
-                        onDrop,
-                      }}
-                    >
-                      <DropzoneImageCarousel
-                        multiple={true}
-                        onRemove={onRemove}
-                        files={files}
-                        {...field}
-                      />
-                    </DropzoneProvider>
+                    <>
+                      <DropzoneProvider
+                        options={{
+                          noClick: true,
+                          noKeyboard: true,
+                          multiple: true,
+                          onDrop,
+                        }}
+                      >
+                        <DropzoneImageCarousel
+                          multiple={true}
+                          onRemove={onRemove}
+                          files={files}
+                          {...field}
+                        />
+                      </DropzoneProvider>
+                      <Progress value={progress * 100} />
+                    </>
                   );
                 }}
               />
             </CardContent>
             <CardFooter className="flex justify-end">
+              {error}
               <Button type="submit">Salvar</Button>
             </CardFooter>
           </Card>

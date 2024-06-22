@@ -17,7 +17,8 @@ import Image from "next/image";
 import { Button } from "@/components/ui/button";
 
 export type Image = {
-  file: File & {
+  file: {
+    file: File;
     urlPreview: string;
     urlUpload: string;
   };
@@ -46,9 +47,9 @@ export function DropzoneImageCarousel({
         />
 
         {files.map(({ file }, index) => {
-          const preview = URL.createObjectURL(file);
+          const preview = URL.createObjectURL(file.file);
           return (
-            <DropzoneImageCarouselItem key={`${file.name}-${index}`}>
+            <DropzoneImageCarouselItem key={`${file.file.name}-${index}`}>
               <Button
                 size="sm"
                 variant={"destructive"}
@@ -61,7 +62,7 @@ export function DropzoneImageCarousel({
               <DropzoneImageCarouselCard>
                 <Image
                   src={preview}
-                  alt={file.name}
+                  alt={file.file.name}
                   fill
                   className="object-cover"
                   onLoad={() => URL.revokeObjectURL(preview)}
