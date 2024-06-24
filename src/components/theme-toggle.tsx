@@ -1,16 +1,10 @@
 "use client";
 
 import * as React from "react";
-import { Moon, Sun } from "lucide-react";
 import { useTheme } from "next-themes";
 
 import { Button } from "@/components/ui/button";
-import {
-  DropdownMenu,
-  DropdownMenuContent,
-  DropdownMenuItem,
-  DropdownMenuTrigger,
-} from "@/components/ui/dropdown-menu";
+import { Moon, Sun } from "lucide-react";
 
 export function ThemeToggle() {
   const { setTheme, theme } = useTheme();
@@ -44,7 +38,7 @@ export function ThemeToggle() {
     <Button
       variant="ghost"
       size="sm"
-      className="m-0 p-1 h-auto w-full"
+      className="m-0 p-2 h-auto w-full"
       onClick={toggle}
     >
       <div className="flex flex-row flex-1 items-center justify-between font-normal">

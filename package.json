@@ -8,13 +8,10 @@
     "start": "next start",
     "lint": "next lint",
     "pg:generate": "drizzle-kit generate --config=./src/db/postgres/drizzle.config.ts",
+    "pg:drop": "drizzle-kit drop --config=./src/db/postgres/drizzle.config.ts",
     "pg:migrate": "cross-env DB_MIGRATING=true tsx ./src/db/postgres/migrate.ts",
     "pg:seed": "cross-env DB_SEEDING=true tsx ./src/db/postgres/seed.ts",
-    "sqlite:generate": "drizzle-kit generate --config=./src/db/sqlite/drizzle.config.ts",
-    "sqlite:migrate": "cross-env DB_MIGRATING=true tsx ./src/db/sqlite/migrate.ts",
-    "sqlite:seed": "cross-env DB_SEEDING=true tsx ./src/db/sqlite/seed.ts",
-    "build:postinstall": "npm run pg:migrate",
-    "build:digitalocean": "npm install --production=false && npm run build && npm ci"
+    "build:postinstall": "npm run pg:migrate"
   },
   "dependencies": {
     "@hookform/resolvers": "^3.6.0",
