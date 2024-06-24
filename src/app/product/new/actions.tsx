@@ -4,6 +4,8 @@ import { db } from "@/db/postgres";
 import { ProductSchema, ProductType } from "../schema";
 import { productTable } from "@/db/postgres/schema/product";
 import { productImageTable } from "@/db/postgres/schema/productImage";
+import { revalidatePath } from "next/cache";
+import { redirect } from "next/navigation";
 
 export async function createProduct(data: ProductType) {
   const validation = ProductSchema.safeParse(data);
@@ -37,7 +39,8 @@ export async function createProduct(data: ProductType) {
       // return productId;
     });
 
-    return product;
+    revalidatePath("/products");
+    redirect("/products");
   } else {
     console.log("dados:", data);
     console.log(validation.error.flatten());
