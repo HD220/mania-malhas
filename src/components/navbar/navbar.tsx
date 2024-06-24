@@ -1,4 +1,3 @@
-import { IconProps } from "../icon";
 import { HTMLAttributes } from "react";
 import { cn } from "@/lib/utils";
 import { NavbarItem, NavbarItemProps } from "./navbar-item";

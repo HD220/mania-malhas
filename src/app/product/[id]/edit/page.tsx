@@ -7,7 +7,7 @@ type PageProps = {
 export default function Page({ params }: PageProps) {
   return (
     <div className="w-full mx-auto">
-      <ProductForm initialValues={{}} />
+      <ProductForm initialValues={{}} onSubmit={async (p) => {}} />
     </div>
   );
 }

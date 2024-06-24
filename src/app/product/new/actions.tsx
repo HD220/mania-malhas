@@ -34,7 +34,7 @@ export async function createProduct(data: ProductType) {
 
       if (insertImages) await Promise.all(insertImages);
 
-      return productId;
+      // return productId;
     });
 
     return product;

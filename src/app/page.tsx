@@ -1,5 +1,3 @@
-import { db } from "@/db/sqlite";
-
 export default async function Home() {
   // const result = await db.select().from(testeTable);
   // console.log(result);
