@@ -3,9 +3,16 @@ import {
   integer,
   pgTable,
   serial,
+  timestamp,
   varchar,
 } from "drizzle-orm/pg-core";
-import { productTable } from "./product";
+import {
+  insertProductSchema,
+  productTable,
+  selectProductSchema,
+} from "./product";
+import { createInsertSchema, createSelectSchema } from "drizzle-zod";
+import { z } from "zod";
 
 export const productImageTable = pgTable(
   "productImage",
@@ -17,6 +24,13 @@ export const productImageTable = pgTable(
     type: varchar("type", { length: 15 }).notNull(),
     size: integer("size").notNull(),
     url: varchar("url", { length: 2000 }).notNull(),
+    createdAt: timestamp("createdAt", { mode: "date", withTimezone: true })
+      .notNull()
+      .defaultNow(),
+    updatedAt: timestamp("updatedAt", { mode: "date", withTimezone: true })
+      .notNull()
+      .defaultNow()
+      .$onUpdate(() => new Date()),
   },
   (table) => {
     return {
@@ -29,5 +43,29 @@ export const productImageTable = pgTable(
   }
 );
 
-export type InsertProductImage = typeof productImageTable.$inferInsert;
-export type SelectProductImage = typeof productImageTable.$inferSelect;
+export const insertProductImageSchema = createInsertSchema(productImageTable);
+export const selectProductImageSchema = createSelectSchema(productImageTable);
+
+export const insertProductWithImageSchema = insertProductSchema.merge(
+  z.object({
+    images: z
+      .object(insertProductImageSchema.partial({ productId: true }).shape)
+      .array()
+      .nullish(),
+  })
+);
+
+export const selectProductWithImageSchema = selectProductSchema.merge(
+  z.object({
+    images: z.object(selectProductImageSchema.shape).array().nullish(),
+  })
+);
+
+export type InsertProductImage = z.input<typeof insertProductImageSchema>;
+export type SelectProductImage = z.input<typeof selectProductImageSchema>;
+export type InsertProductWithImage = z.input<
+  typeof insertProductWithImageSchema
+>;
+export type SelectProductWithImage = z.input<
+  typeof selectProductWithImageSchema
+>;

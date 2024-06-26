@@ -1,13 +1,12 @@
+import { getProductsWithImagesById, updateProduct } from "./actions";
 import { ProductForm } from "@/components/forms/product-form";
 
-type PageProps = {
-  params: { id: string };
-};
+export default async function Page({ params }: { params: { id: number } }) {
+  const product = await getProductsWithImagesById(params.id);
 
-export default function Page({ params }: PageProps) {
   return (
     <div className="w-full mx-auto">
-      <ProductForm initialValues={{}} onSubmit={async (p) => {}} />
+      <ProductForm onSubmit={updateProduct} initialValues={product} />
     </div>
   );
 }

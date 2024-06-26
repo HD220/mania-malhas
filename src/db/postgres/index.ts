@@ -7,7 +7,7 @@ const getConnectionDb = () => {
     max: env.DB_MIGRATING || env.DB_SEEDING ? 1 : undefined,
     onnotice: env.DB_SEEDING ? () => {} : undefined,
   });
-  const db = drizzle(connection, { logger: true });
+  const db = drizzle(connection, { logger: false });
   return {
     connection,
     db,

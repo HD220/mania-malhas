@@ -2,11 +2,14 @@
 
 import { DefaultValues, useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
-import { FormImages } from "./types";
 import { useState } from "react";
 import { DropEvent, FileRejection } from "react-dropzone";
 import { createHash } from "crypto";
-import { ProductSchema, ProductType } from "@/app/product/schema";
+import {
+  InsertProductWithImage,
+  SelectProductImage,
+  insertProductWithImageSchema,
+} from "@/db/postgres/schema/productImage";
 
 function uploadS3(
   url: string,
@@ -23,22 +26,49 @@ function uploadS3(
   xhr.send(file);
 }
 
+export type FormImages = Record<
+  string,
+  Pick<
+    SelectProductImage,
+    "id" | "name" | "s3name" | "size" | "type" | "url"
+  > & { file?: File; progress: number; urlUpload?: string }
+>;
+
 export type UseProductFormProps = {
-  initialValues?: DefaultValues<ProductType>;
-  onSubmit: (props: ProductType) => Promise<void>;
+  initialValues?: DefaultValues<InsertProductWithImage>;
+  onSubmit: (data: InsertProductWithImage) => Promise<void>;
 };
 
 export function useProductForm({
   initialValues,
   onSubmit,
 }: UseProductFormProps) {
-  const form = useForm<ProductType>({
-    resolver: zodResolver(ProductSchema),
+  const form = useForm<InsertProductWithImage>({
+    resolver: zodResolver(insertProductWithImageSchema),
     defaultValues: {
       ...initialValues,
     },
   });
-  const [images, setImages] = useState<FormImages>({});
+
+  const toObject: any =
+    initialValues?.images?.reduce(
+      (prev, curr) => ({
+        ...prev,
+        [curr!.s3name!]: {
+          id: curr?.id,
+          name: curr?.name,
+          type: curr?.type,
+          s3name: curr?.s3name,
+          size: curr?.size,
+          url: curr?.url,
+          progress: 1,
+          file: "",
+        },
+      }),
+      {}
+    ) || {};
+
+  const [images, setImages] = useState<FormImages>(toObject);
 
   const addImage: <T extends File>(
     acceptedFiles: T[],
@@ -52,14 +82,10 @@ export function useProductForm({
           .update(imageBuffer)
           .digest("hex");
 
-        console.log(imageFingerPrint, file.name, !(imageFingerPrint in images));
-
         if (!(imageFingerPrint in images)) {
           const fileExt = file.type.split("/")[1]; // 'image/png' -> ['image','png'][1] -> png
           const searchParams = new URLSearchParams();
           searchParams.set("name", `${imageFingerPrint}.${fileExt}`);
-
-          console.log(imageFingerPrint, fileExt);
 
           const response = await fetch(
             `/api/presignedurl?${searchParams.toString()}`,
@@ -74,12 +100,13 @@ export function useProductForm({
           const presignedUrl = data.url;
 
           setImages((prev) => {
+            const key: any = imageFingerPrint;
             return {
               ...prev,
-              [imageFingerPrint]: {
+              [key]: {
                 file: file,
                 progress: 0,
-                urlPreview: URL.createObjectURL(file),
+                url: URL.createObjectURL(file),
                 urlUpload: presignedUrl,
               },
             };
@@ -99,11 +126,22 @@ export function useProductForm({
     });
   };
 
-  const submit = async (formData: ProductType) => {
-    const uploadedImages: any = [];
+  const submit = async (formData: InsertProductWithImage) => {
+    const allImages = Object.values(images);
+    const uploadedImages = allImages
+      .filter((image) => image.progress === 1)
+      .map((image) => ({
+        s3name: image.s3name,
+        name: image.name,
+        size: image.size,
+        type: image.type,
+        url: image.url,
+      }));
     for (const key in images) {
       if (images[key].progress !== 1) {
-        uploadS3(images[key].urlUpload, images[key].file, (progress) => {
+        console.log("image", images[key].urlUpload!);
+
+        uploadS3(images[key].urlUpload!, images[key].file!, (progress) => {
           setImages((prev) => {
             return {
               ...prev,
@@ -115,16 +153,14 @@ export function useProductForm({
           });
         });
         uploadedImages.push({
-          s3_name: key,
-          name: images[key].file.name,
-          size: images[key].file.size,
-          type: images[key].file.type,
-          url: images[key].urlUpload.split("?")[0],
+          s3name: key,
+          name: images[key].file!.name,
+          size: images[key].file!.size,
+          type: images[key].file!.type,
+          url: images[key].urlUpload!.split("?")[0],
         });
       }
     }
-
-    console.log("images", uploadedImages);
 
     return await onSubmit({
       ...formData,

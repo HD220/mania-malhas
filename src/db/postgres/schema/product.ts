@@ -1,11 +1,32 @@
-import { decimal, pgTable, serial, text, varchar } from "drizzle-orm/pg-core";
+import {
+  decimal,
+  pgTable,
+  real,
+  serial,
+  text,
+  timestamp,
+  varchar,
+} from "drizzle-orm/pg-core";
+import { createInsertSchema, createSelectSchema } from "drizzle-zod";
+import { z } from "zod";
 
 export const productTable = pgTable("product", {
   id: serial("id").primaryKey(),
   name: varchar("name", { length: 100 }).notNull(),
   description: text("description").notNull(),
-  price: decimal("price", { precision: 16, scale: 7 }).notNull(),
+  price: decimal("price").notNull().$type<number>(),
+  createdAt: timestamp("createdAt", { mode: "date", withTimezone: true })
+    .notNull()
+    .defaultNow(),
+  updatedAt: timestamp("updatedAt", { mode: "date", withTimezone: true })
+    .notNull()
+    .defaultNow()
+    .$onUpdate(() => new Date()),
 });
 
-export type InsertProduct = typeof productTable.$inferInsert;
-export type SelectProduct = typeof productTable.$inferSelect;
+export const insertProductSchema = createInsertSchema(productTable, {
+  price: z.coerce.number().positive(),
+});
+export const selectProductSchema = createSelectSchema(productTable, {
+  price: z.coerce.number().positive(),
+});

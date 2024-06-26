@@ -1,18 +1,11 @@
 import { ProductCard } from "@/components/product-card";
 import { Search } from "@/components/search";
 import { Button } from "@/components/ui/button";
-import { db } from "@/db/postgres";
-import { productTable } from "@/db/postgres/schema/product";
-import { productImageTable } from "@/db/postgres/schema/productImage";
-import { eq } from "drizzle-orm";
 import Link from "next/link";
+import { getProductsWithImages } from "./actions";
 
 export default async function Page() {
-  const products = await db
-    .select({
-      id: productTable.id,
-    })
-    .from(productTable);
+  const products = await getProductsWithImages();
 
   return (
     <div className="flex flex-col gap-3">

@@ -43,7 +43,7 @@ export function ProductForm({ initialValues, onSubmit }: UseProductFormProps) {
                 control={form.control}
                 render={({ field }) => (
                   <InputField
-                    disabled={field.value === undefined}
+                    disabled={true}
                     label="Código"
                     placeholder={field.value?.toString() ?? "NOVO"}
                     className="basis-1/5"
