@@ -29,6 +29,20 @@
       "when": 1719355529118,
       "tag": "0003_yellow_vector",
       "breakpoints": true
+    },
+    {
+      "idx": 4,
+      "version": "7",
+      "when": 1719455877323,
+      "tag": "0004_first_wolfsbane",
+      "breakpoints": true
+    },
+    {
+      "idx": 5,
+      "version": "7",
+      "when": 1719455951630,
+      "tag": "0005_shiny_husk",
+      "breakpoints": true
     }
   ]
 }

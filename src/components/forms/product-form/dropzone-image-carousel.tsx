@@ -14,12 +14,12 @@ import { DropzoneInputProps } from "react-dropzone";
 import Image from "next/image";
 import { Button } from "@/components/ui/button";
 import { Plus, X } from "lucide-react";
-import { FormImages } from "./useProductForm";
+import { FormType } from "./schema";
 
 export type DropzoneImageCarousel = {
   multiple?: boolean;
-  onRemove: (index: string) => void;
-  files: FormImages;
+  onRemove: (index: number) => Promise<void>;
+  files: FormType["images"];
 };
 
 export function DropzoneImageCarousel({
@@ -38,32 +38,34 @@ export function DropzoneImageCarousel({
           {...rest}
         />
 
-        {Object.keys(files).map((key) => {
-          const file = files[key];
+        {files?.map((file, index) => {
           return (
-            <DropzoneImageCarouselItem key={`${file.name}-${key}`}>
-              <Button
-                size="sm"
-                variant={"destructive"}
-                type="button"
-                className="absolute right-0 top-0 rounded-full p-1 h-auto -mx-0 -my-0 z-10"
-                onClick={() => onRemove(key)}
-              >
-                <X className="h-3 w-3" />
-              </Button>
-              <DropzoneImageCarouselCard>
-                <Image
-                  src={file.url!}
-                  alt={file.name!}
-                  fill
-                  className="object-cover"
-                  onLoad={() => URL.revokeObjectURL(file.url!)}
-                />
-                <span className="absolute top-[50%] left-[50%] -translate-x-1/2 -translate-y-1/2 ">
-                  {((file.progress || 0) * 100.0).toFixed(2)}%
-                </span>
-              </DropzoneImageCarouselCard>
-            </DropzoneImageCarouselItem>
+            file.active && (
+              <DropzoneImageCarouselItem key={`${file.name}`}>
+                <Button
+                  size="sm"
+                  variant={"destructive"}
+                  type="button"
+                  className="absolute right-0 top-0 rounded-full p-1 h-auto -mx-0 -my-0 z-10"
+                  onClick={() => onRemove(index)}
+                >
+                  <X className="h-3 w-3" />
+                </Button>
+                <DropzoneImageCarouselCard>
+                  <Image
+                    src={file.url}
+                    alt={file.name}
+                    fill
+                    sizes="100%"
+                    className="object-cover"
+                    onLoad={() => URL.revokeObjectURL(file.url)}
+                  />
+                  <span className="absolute top-[50%] left-[50%] -translate-x-1/2 -translate-y-1/2 ">
+                    {((file.progress || 0) * 100.0).toFixed(2)}%
+                  </span>
+                </DropzoneImageCarouselCard>
+              </DropzoneImageCarouselItem>
+            )
           );
         })}
       </CarouselContent>

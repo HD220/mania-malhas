@@ -1,4 +1,5 @@
 import {
+  boolean,
   foreignKey,
   integer,
   pgTable,
@@ -23,6 +24,7 @@ export const productImageTable = pgTable(
     name: varchar("name", { length: 255 }).notNull(),
     type: varchar("type", { length: 15 }).notNull(),
     size: integer("size").notNull(),
+    active: boolean("active").default(true).notNull(),
     url: varchar("url", { length: 2000 }).notNull(),
     createdAt: timestamp("createdAt", { mode: "date", withTimezone: true })
       .notNull()
@@ -50,6 +52,7 @@ export const insertProductWithImageSchema = insertProductSchema.merge(
   z.object({
     images: z
       .object(insertProductImageSchema.partial({ productId: true }).shape)
+      .merge(z.object({ progress: z.number().optional() }))
       .array()
       .nullish(),
   })

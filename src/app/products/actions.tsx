@@ -6,12 +6,10 @@ import {
   SelectProductWithImage,
   productImageTable,
 } from "@/db/postgres/schema/productImage";
-import { eq } from "drizzle-orm";
+import { eq, and } from "drizzle-orm";
 import { unstable_noStore as noCache } from "next/cache";
 
-export async function getProductsWithImages(): Promise<
-  SelectProductWithImage[]
-> {
+export async function getProductsWithImages() {
   noCache();
 
   const products = await db
@@ -20,18 +18,26 @@ export async function getProductsWithImages(): Promise<
       name: productTable.name,
       description: productTable.description,
       price: productTable.price,
+      active: productTable.active,
       createdAt: productTable.createdAt,
       updatedAt: productTable.updatedAt,
     })
-    .from(productTable);
-  // .where(eq(productTable.id, id));
+    .from(productTable)
+    .where(eq(productTable.active, true))
+    .orderBy(productTable.id);
 
   const productWithImages = Promise.all(
     products.map(async (product) => {
       const images = await db
         .select()
         .from(productImageTable)
-        .where(eq(productImageTable.productId, product.id));
+        .where(
+          and(
+            eq(productImageTable.productId, product.id),
+            eq(productImageTable.active, true)
+          )
+        )
+        .orderBy(productImageTable.id);
 
       return {
         ...product,

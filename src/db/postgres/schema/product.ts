@@ -1,4 +1,5 @@
 import {
+  boolean,
   decimal,
   pgTable,
   real,
@@ -14,7 +15,10 @@ export const productTable = pgTable("product", {
   id: serial("id").primaryKey(),
   name: varchar("name", { length: 100 }).notNull(),
   description: text("description").notNull(),
-  price: decimal("price").notNull().$type<number>(),
+  price: decimal("price", { precision: 16, scale: 7 })
+    .notNull()
+    .$type<number>(),
+  active: boolean("active").default(true).notNull(),
   createdAt: timestamp("createdAt", { mode: "date", withTimezone: true })
     .notNull()
     .defaultNow(),
@@ -27,6 +31,9 @@ export const productTable = pgTable("product", {
 export const insertProductSchema = createInsertSchema(productTable, {
   price: z.coerce.number().positive(),
 });
+export type InsertProduct = z.input<typeof insertProductSchema>;
+
 export const selectProductSchema = createSelectSchema(productTable, {
   price: z.coerce.number().positive(),
 });
+export type SelectProduct = z.input<typeof selectProductSchema>;

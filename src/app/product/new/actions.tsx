@@ -1,17 +1,14 @@
 "use server";
 
+import { FormType, formSchema } from "@/components/forms/product-form/schema";
 import { db } from "@/db/postgres";
 import { productTable } from "@/db/postgres/schema/product";
-import {
-  InsertProductWithImage,
-  insertProductWithImageSchema,
-  productImageTable,
-} from "@/db/postgres/schema/productImage";
+import { productImageTable } from "@/db/postgres/schema/productImage";
 import { revalidatePath } from "next/cache";
 import { redirect } from "next/navigation";
 
-export async function createProduct(data: InsertProductWithImage) {
-  const validation = insertProductWithImageSchema.safeParse(data);
+export async function createProduct(data: FormType) {
+  const validation = formSchema.safeParse(data);
 
   if (validation.success) {
     const product = await db.transaction(async (tx) => {
@@ -21,6 +18,7 @@ export async function createProduct(data: InsertProductWithImage) {
           name: data.name,
           description: data.description,
           price: data.price,
+          active: true,
         })
         .returning({ id: productTable.id });
 
@@ -32,6 +30,7 @@ export async function createProduct(data: InsertProductWithImage) {
           size: image.size,
           type: image.type,
           url: image.url,
+          active: true,
         })
       );
 

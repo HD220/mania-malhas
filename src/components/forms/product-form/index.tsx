@@ -21,7 +21,7 @@ import {
 import { DropzoneImageCarousel } from "@/components/forms/product-form/dropzone-image-carousel";
 
 export function ProductForm({ initialValues, onSubmit }: UseProductFormProps) {
-  const { form, addImage, removeImage, submit, images } = useProductForm({
+  const { form, addImage, removeImage, submit } = useProductForm({
     initialValues,
     onSubmit,
   });
@@ -101,7 +101,7 @@ export function ProductForm({ initialValues, onSubmit }: UseProductFormProps) {
               <DropzoneImageCarousel
                 multiple={true}
                 onRemove={removeImage}
-                files={images}
+                files={form.watch("images")}
               />
             </DropzoneProvider>
           </CardContent>

@@ -7,6 +7,7 @@ import {
   FormMessage,
 } from "@/components/ui/form";
 import { Input } from "@/components/ui/input";
+import { forwardRef } from "react";
 
 export type InputFieldProps = {
   label?: string;
@@ -15,20 +16,27 @@ export type InputFieldProps = {
   disabled?: boolean;
 };
 
-export function InputField({
-  className,
-  label = "",
-  placeholder = "",
-  disabled = false,
-  ...field
-}: InputFieldProps) {
-  return (
-    <FormItem className={className}>
-      <FormLabel>{label}</FormLabel>
-      <FormControl>
-        <Input {...field} placeholder={placeholder} disabled={disabled} />
-      </FormControl>
-      <FormMessage />
-    </FormItem>
-  );
-}
+const InputField = forwardRef<HTMLInputElement, InputFieldProps>(
+  (
+    { className, label = "", placeholder = "", disabled = false, ...field },
+    ref
+  ) => {
+    return (
+      <FormItem className={className}>
+        <FormLabel>{label}</FormLabel>
+        <FormControl>
+          <Input
+            {...field}
+            ref={ref}
+            placeholder={placeholder}
+            disabled={disabled}
+          />
+        </FormControl>
+        <FormMessage />
+      </FormItem>
+    );
+  }
+);
+InputField.displayName = "InputField";
+
+export { InputField };
