@@ -1,5 +1,6 @@
 import { type ClassValue, clsx } from "clsx";
-import { createHash } from "crypto";
+import { subtle } from "crypto";
+// import { createHash } from "crypto";
 import { twMerge } from "tailwind-merge";
 
 export function cn(...inputs: ClassValue[]) {
@@ -28,9 +29,16 @@ export async function uploadS3(
   });
 }
 
+function arrayBufferToArray(buffer: ArrayBuffer) {
+  return Array.from(new Uint8Array(buffer));
+}
+
+function arrayToHex(array: number[]) {
+  return array.map((byte) => byte.toString(16).padStart(2, "0")).join("");
+}
+
 export async function createHashFromFile(file: File) {
   const buffer = Buffer.from(await file.arrayBuffer());
-  const fingerPrint = createHash("sha256").update(buffer).digest("hex");
-
-  return fingerPrint;
+  const hashBuffer = await subtle.digest("SHA-256", buffer);
+  return arrayToHex(arrayBufferToArray(hashBuffer));
 }
