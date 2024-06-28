@@ -1,6 +1,4 @@
 import { type ClassValue, clsx } from "clsx";
-import { subtle } from "crypto";
-// import { createHash } from "crypto";
 import { twMerge } from "tailwind-merge";
 
 export function cn(...inputs: ClassValue[]) {
@@ -39,6 +37,6 @@ function arrayToHex(array: number[]) {
 
 export async function createHashFromFile(file: File) {
   const buffer = Buffer.from(await file.arrayBuffer());
-  const hashBuffer = await subtle.digest("SHA-256", buffer);
+  const hashBuffer = await window.crypto.subtle.digest("SHA-256", buffer);
   return arrayToHex(arrayBufferToArray(hashBuffer));
 }
