@@ -1,7 +1,7 @@
-import "@/styles/globals.css";
+// import "@/styles/globals.css";
 import { Inter } from "next/font/google";
 import type { Metadata } from "next";
-import { cn } from "@/lib/utils";
+// import { cn } from "@/lib/utils";
 // import { ThemeProvider } from "@/components/providers/theme-provider";
 // import { Header } from "@/components/header";
 // import AsideBar from "@/components/aside-bar";
@@ -23,10 +23,10 @@ export default function RootLayout({
   return (
     <html lang="pt-BR">
       <body
-        className={cn(
-          "min-h-screen bg-background font-sans antialiased",
-          inter.variable
-        )}
+        // className={cn(
+        //   "min-h-screen bg-background font-sans antialiased",
+        //   inter.variable
+        // )}
         suppressHydrationWarning={true}
       >
         {/* <ThemeProvider
