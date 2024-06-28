@@ -2,9 +2,9 @@ import "@/styles/globals.css";
 import { Inter } from "next/font/google";
 import type { Metadata } from "next";
 import { cn } from "@/lib/utils";
-import { ThemeProvider } from "@/components/providers/theme-provider";
-import { Header } from "@/components/header";
-import AsideBar from "@/components/aside-bar";
+// import { ThemeProvider } from "@/components/providers/theme-provider";
+// import { Header } from "@/components/header";
+// import AsideBar from "@/components/aside-bar";
 
 const inter = Inter({ subsets: ["latin"], variable: "--font-sans" });
 
@@ -27,20 +27,20 @@ export default function RootLayout({
         )}
         suppressHydrationWarning={true}
       >
-        <ThemeProvider
+        {/* <ThemeProvider
           attribute="class"
           defaultTheme="system"
           enableSystem
           disableTransitionOnChange
-        >
-          <div className="grid min-h-screen w-full md:grid-cols-[220px_1fr] lg:grid-cols-[280px_1fr]">
-            <AsideBar />
-            <div className="flex flex-col">
-              <Header />
-              <main className="p-6">{children}</main>
-            </div>
+        > */}
+        <div className="grid min-h-screen w-full md:grid-cols-[220px_1fr] lg:grid-cols-[280px_1fr]">
+          {/* <AsideBar /> */}
+          <div className="flex flex-col">
+            {/* <Header /> */}
+            <main className="p-6">{children}</main>
           </div>
-        </ThemeProvider>
+        </div>
+        {/* </ThemeProvider> */}
       </body>
     </html>
   );
