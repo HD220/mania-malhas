@@ -40,7 +40,6 @@ export default function RootLayout({
               <main className="p-6">{children}</main>
             </div>
           </div>
-          {/* <ModeToggle /> */}
         </ThemeProvider>
       </body>
     </html>
