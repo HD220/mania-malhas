@@ -3,7 +3,7 @@
 import { useFieldArray, useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { createHashFromFile, uploadS3 } from "@/lib/utils";
-import { FormType, formSchema } from "./schema";
+import { FormType, formSchema } from "@/db/postgres/schema/productImage";
 
 export type UseProductFormProps = {
   initialValues?: FormType;

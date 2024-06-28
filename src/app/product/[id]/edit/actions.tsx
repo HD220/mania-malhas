@@ -1,9 +1,9 @@
 "use server";
 
-import { FormType } from "@/components/forms/product-form/schema";
 import { db } from "@/db/postgres";
 import { productTable } from "@/db/postgres/schema/product";
 import {
+  FormType,
   insertProductWithImageSchema,
   productImageTable,
 } from "@/db/postgres/schema/productImage";

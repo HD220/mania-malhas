@@ -14,7 +14,7 @@ import { DropzoneInputProps } from "react-dropzone";
 import Image from "next/image";
 import { Button } from "@/components/ui/button";
 import { Plus, X } from "lucide-react";
-import { FormType } from "./schema";
+import { FormType } from "@/db/postgres/schema/productImage";
 
 export type DropzoneImageCarousel = {
   multiple?: boolean;

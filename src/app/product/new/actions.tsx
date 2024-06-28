@@ -1,9 +1,12 @@
 "use server";
 
-import { FormType, formSchema } from "@/components/forms/product-form/schema";
 import { db } from "@/db/postgres";
 import { productTable } from "@/db/postgres/schema/product";
-import { productImageTable } from "@/db/postgres/schema/productImage";
+import {
+  FormType,
+  formSchema,
+  productImageTable,
+} from "@/db/postgres/schema/productImage";
 import { revalidatePath } from "next/cache";
 import { redirect } from "next/navigation";
 
