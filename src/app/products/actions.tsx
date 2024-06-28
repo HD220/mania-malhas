@@ -2,10 +2,7 @@
 
 import { db } from "@/db/postgres";
 import { productTable } from "@/db/postgres/schema/product";
-import {
-  SelectProductWithImage,
-  productImageTable,
-} from "@/db/postgres/schema/productImage";
+import { productImageTable } from "@/db/postgres/schema/productImage";
 import { eq, and } from "drizzle-orm";
 import { unstable_noStore as noCache } from "next/cache";
 

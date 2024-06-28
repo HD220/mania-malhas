@@ -1,12 +1,11 @@
 "use server";
 
-import { FormType, formSchema } from "@/components/forms/product-form/schema";
+import { FormType } from "@/components/forms/product-form/schema";
 import { db } from "@/db/postgres";
 import { productTable } from "@/db/postgres/schema/product";
 import {
   insertProductWithImageSchema,
   productImageTable,
-  selectProductWithImageSchema,
 } from "@/db/postgres/schema/productImage";
 import { minioClient } from "@/services/minio";
 import { and, eq, sql } from "drizzle-orm";
