@@ -21,26 +21,26 @@ export default function RootLayout({
   return (
     <html lang="pt-BR">
       <body
-        // className={cn(
-        //   "min-h-screen bg-background font-sans antialiased",
-        //   inter.variable
-        // )}
+        className={cn(
+          "min-h-screen bg-background font-sans antialiased",
+          inter.variable
+        )}
         suppressHydrationWarning={true}
       >
-        {/* <ThemeProvider
+        <ThemeProvider
           attribute="class"
           defaultTheme="system"
           enableSystem
           disableTransitionOnChange
-        > */}
-        <div className="grid min-h-screen w-full md:grid-cols-[220px_1fr] lg:grid-cols-[280px_1fr]">
-          {/* <AsideBar /> */}
-          <div className="flex flex-col">
-            {/* <Header /> */}
-            <main className="p-6">{children}</main>
+        >
+          <div className="grid min-h-screen w-full md:grid-cols-[220px_1fr] lg:grid-cols-[280px_1fr]">
+            <AsideBar />
+            <div className="flex flex-col">
+              <Header />
+              <main className="p-6">{children}</main>
+            </div>
           </div>
-        </div>
-        {/* </ThemeProvider> */}
+        </ThemeProvider>
       </body>
     </html>
   );
