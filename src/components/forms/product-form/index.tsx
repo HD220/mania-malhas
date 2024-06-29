@@ -19,6 +19,7 @@ import {
   useProductForm,
 } from "@/components/forms/product-form/useProductForm";
 import { DropzoneImageCarousel } from "@/components/forms/product-form/dropzone-image-carousel";
+import { Checkbox } from "@/components/ui/checkbox";
 
 export function ProductForm({ initialValues, onSubmit }: UseProductFormProps) {
   const { form, addImage, removeImage, submit } = useProductForm({
@@ -88,7 +89,23 @@ export function ProductForm({ initialValues, onSubmit }: UseProductFormProps) {
                   />
                 )}
               />
+              <FormField
+                name="active"
+                control={form.control}
+                render={({ field: { value, ...rest } }) => (
+                  <div className="flex items-center space-x-2">
+                    <Checkbox id="active" checked={value} {...rest} />
+                    <label
+                      htmlFor="active"
+                      className="text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70"
+                    >
+                      Ativo?
+                    </label>
+                  </div>
+                )}
+              />
             </div>
+
             <DropzoneProvider
               options={{
                 noClick: true,
