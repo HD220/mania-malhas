@@ -1,12 +1,10 @@
 import "@/styles/globals.css";
 import { Inter } from "next/font/google";
 import type { Metadata } from "next";
-// import { cn } from "@/lib/utils";
-// import { ThemeProvider } from "@/components/providers/theme-provider";
-// import { Header } from "@/components/header";
-// import AsideBar from "@/components/aside-bar";
-
-//"build:postinstall": "npm run pg:migrate"
+import { cn } from "@/lib/utils";
+import { ThemeProvider } from "@/components/providers/theme-provider";
+import { Header } from "@/components/header";
+import AsideBar from "@/components/aside-bar";
 
 const inter = Inter({ subsets: ["latin"], variable: "--font-sans" });
 

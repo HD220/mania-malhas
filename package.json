@@ -14,7 +14,8 @@
     "pg:generate": "drizzle-kit generate --config=./src/db/postgres/drizzle.config.ts",
     "pg:drop": "drizzle-kit drop --config=./src/db/postgres/drizzle.config.ts",
     "pg:migrate": "cross-env DB_MIGRATING=true tsx ./src/db/postgres/migrate.ts",
-    "pg:seed": "cross-env DB_SEEDING=true tsx ./src/db/postgres/seed.ts"
+    "pg:seed": "cross-env DB_SEEDING=true tsx ./src/db/postgres/seed.ts",
+    "build:postinstall": "npm run pg:migrate"
   },
   "dependencies": {
     "@hookform/resolvers": "^3.6.0",
