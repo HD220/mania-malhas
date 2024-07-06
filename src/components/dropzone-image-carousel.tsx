@@ -14,12 +14,12 @@ import { DropzoneInputProps } from "react-dropzone";
 import Image from "next/image";
 import { Button } from "@/components/ui/button";
 import { Plus, X } from "lucide-react";
-import { FormType } from "@/db/postgres/schema/productImage";
+import { FormProduct } from "./forms/product-form/useProductForm";
 
 export type DropzoneImageCarousel = {
   multiple?: boolean;
   onRemove: (index: number) => Promise<void>;
-  files: FormType["images"];
+  files: FormProduct["images"];
 };
 
 export function DropzoneImageCarousel({
@@ -53,12 +53,12 @@ export function DropzoneImageCarousel({
                 </Button>
                 <DropzoneImageCarouselCard>
                   <Image
-                    src={file.url}
+                    src={file.url!}
                     alt={file.name}
                     fill
                     sizes="100%"
                     className="object-cover"
-                    onLoad={() => URL.revokeObjectURL(file.url)}
+                    onLoad={() => URL.revokeObjectURL(file.url!)}
                   />
                   <span className="absolute top-[50%] left-[50%] -translate-x-1/2 -translate-y-1/2 ">
                     {((file.progress || 0) * 100.0).toFixed(2)}%

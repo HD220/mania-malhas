@@ -1,10 +1,11 @@
 import "@/styles/globals.css";
 import { Inter } from "next/font/google";
 import type { Metadata } from "next";
-import { cn } from "@/lib/utils";
+import { cn } from "@/utils";
 import { ThemeProvider } from "@/components/providers/theme-provider";
 import { Header } from "@/components/header";
 import AsideBar from "@/components/aside-bar";
+import { Toaster } from "@/components/ui/toaster";
 
 const inter = Inter({ subsets: ["latin"], variable: "--font-sans" });
 
@@ -41,6 +42,7 @@ export default function RootLayout({
             </div>
           </div>
         </ThemeProvider>
+        <Toaster />
       </body>
     </html>
   );

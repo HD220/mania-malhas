@@ -2,10 +2,10 @@ import { ProductCard } from "@/components/product-card";
 import { Search } from "@/components/search";
 import { Button } from "@/components/ui/button";
 import Link from "next/link";
-import { getProductsWithImages } from "./actions";
+import { getProducts } from "./actions";
 
 export default async function Page() {
-  const products = await getProductsWithImages();
+  const products = await getProducts();
 
   return (
     <div className="flex flex-col gap-3">

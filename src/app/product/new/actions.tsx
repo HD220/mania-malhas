@@ -1,51 +1,18 @@
 "use server";
 
-import { db } from "@/db/postgres";
-import { productTable } from "@/db/postgres/schema/product";
 import {
-  FormType,
-  formSchema,
-  productImageTable,
-} from "@/db/postgres/schema/productImage";
+  InsertProductWithImages,
+  insertProductWithImagesSchema,
+} from "@/db/repositories/schemas/productImageSchema";
+import createProductUseCase from "@/usecases/product/createProductUseCase";
 import { revalidatePath } from "next/cache";
 import { redirect } from "next/navigation";
 
-export async function createProduct(data: FormType) {
-  const validation = formSchema.safeParse(data);
+export async function createProduct(data: InsertProductWithImages) {
+  const parsed = insertProductWithImagesSchema.parse(data);
 
-  if (validation.success) {
-    const product = await db.transaction(async (tx) => {
-      const [{ id: productId }] = await tx
-        .insert(productTable)
-        .values({
-          name: data.name,
-          description: data.description,
-          price: data.price,
-          active: true,
-        })
-        .returning({ id: productTable.id });
+  await createProductUseCase(parsed);
 
-      const insertImages = data.images?.map((image) =>
-        tx.insert(productImageTable).values({
-          productId,
-          name: image.name,
-          s3name: image.s3name,
-          size: image.size,
-          type: image.type,
-          url: image.url,
-          active: true,
-        })
-      );
-
-      if (insertImages) await Promise.all(insertImages);
-
-      // return productId;
-    });
-
-    revalidatePath("/products");
-    redirect("/products");
-  } else {
-    console.log("dados:", data);
-    console.log(validation.error.flatten());
-  }
+  revalidatePath("/products");
+  redirect("/products");
 }

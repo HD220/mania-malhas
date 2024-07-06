@@ -15,7 +15,7 @@ import {
 } from "@/components/ui/carousel";
 import { AspectRatio } from "@/components/ui/aspect-ratio";
 import Link from "next/link";
-import { SelectProductWithImage } from "@/db/postgres/schema/productImage";
+import { SelectProductWithImages } from "@/db/repositories/schemas/productImageSchema";
 
 export async function ProductCard({
   id,
@@ -23,7 +23,7 @@ export async function ProductCard({
   description,
   price,
   images,
-}: SelectProductWithImage) {
+}: SelectProductWithImages) {
   return (
     <Card className="flex flex-col overflow-clip">
       <Carousel className="">

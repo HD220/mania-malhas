@@ -1,7 +1,6 @@
 "use client";
 
 import { Form, FormField } from "@/components/ui/form";
-
 import {
   Card,
   CardContent,
@@ -12,14 +11,15 @@ import {
 } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { DropzoneProvider } from "@/components/providers/dropzone-provider";
-import { InputField } from "@/components/forms/product-form/input-field";
-import { InputMoneyField } from "@/components/forms/product-form/input-money-field";
+import { InputField } from "@/components/input-field";
+import { InputMoneyField } from "@/components/input-money-field";
 import {
   UseProductFormProps,
   useProductForm,
 } from "@/components/forms/product-form/useProductForm";
-import { DropzoneImageCarousel } from "@/components/forms/product-form/dropzone-image-carousel";
+import { DropzoneImageCarousel } from "@/components/dropzone-image-carousel";
 import { Checkbox } from "@/components/ui/checkbox";
+import { Alert, AlertTitle } from "@/components/ui/alert";
 
 export function ProductForm({ initialValues, onSubmit }: UseProductFormProps) {
   const { form, addImage, removeImage, submit } = useProductForm({
@@ -89,21 +89,6 @@ export function ProductForm({ initialValues, onSubmit }: UseProductFormProps) {
                   />
                 )}
               />
-              <FormField
-                name="active"
-                control={form.control}
-                render={({ field: { value, ...rest } }) => (
-                  <div className="flex items-center space-x-2">
-                    <Checkbox id="active" checked={value} {...rest} />
-                    <label
-                      htmlFor="active"
-                      className="text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70"
-                    >
-                      Ativo?
-                    </label>
-                  </div>
-                )}
-              />
             </div>
 
             <DropzoneProvider
@@ -111,7 +96,7 @@ export function ProductForm({ initialValues, onSubmit }: UseProductFormProps) {
                 noClick: true,
                 noKeyboard: true,
                 multiple: true,
-                // accept: { "image/*": [] },
+                accept: { "image/*": [] },
                 onDrop: addImage,
               }}
             >
@@ -122,7 +107,26 @@ export function ProductForm({ initialValues, onSubmit }: UseProductFormProps) {
               />
             </DropzoneProvider>
           </CardContent>
-          <CardFooter className="flex justify-end">
+          <CardFooter className="flex justify-between items-end">
+            <FormField
+              name="active"
+              control={form.control}
+              render={({ field: { value, ...rest } }) => (
+                <div className="flex items-center space-x-2">
+                  <Checkbox
+                    id="active"
+                    checked={value === undefined ? true : value}
+                    onChange={rest.onChange}
+                  />
+                  <label
+                    htmlFor="active"
+                    className="text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70"
+                  >
+                    Ativo?
+                  </label>
+                </div>
+              )}
+            />
             <Button type="submit">Salvar</Button>
           </CardFooter>
         </Card>
