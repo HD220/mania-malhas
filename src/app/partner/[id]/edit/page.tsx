@@ -1,14 +1,14 @@
-import { getProductWithImagesById, updateProduct } from "./actions";
-import { ProductForm } from "@/components/forms/product-form";
+import { getPartnerById, updatePartner } from "./actions";
+import { PartnerForm } from "@/components/forms/partner-form";
 
 export default async function Page({ params }: { params: { id: string } }) {
-  const product = await getProductWithImagesById(params.id);
+  const product = await getPartnerById(params.id);
 
-  if (!product) throw new Error("Produto não encontado!");
+  if (!product) throw new Error("Cliente não encontado!");
 
   return (
     <div className="w-full mx-auto">
-      <ProductForm onSubmit={updateProduct} initialValues={product} />
+      <PartnerForm onSubmit={updatePartner} initialValues={product} />
     </div>
   );
 }

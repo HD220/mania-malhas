@@ -14,7 +14,8 @@ import { DropzoneInputProps } from "react-dropzone";
 import Image from "next/image";
 import { Button } from "@/components/ui/button";
 import { Plus, X } from "lucide-react";
-import { FormProduct } from "./forms/product-form/useProductForm";
+import { FormProduct } from "../forms/product-form/useProductForm";
+import { Progress } from "./progress";
 
 export type DropzoneImageCarousel = {
   multiple?: boolean;
@@ -60,9 +61,11 @@ export function DropzoneImageCarousel({
                     className="object-cover"
                     onLoad={() => URL.revokeObjectURL(file.url!)}
                   />
-                  <span className="absolute top-[50%] left-[50%] -translate-x-1/2 -translate-y-1/2 ">
-                    {((file.progress || 0) * 100.0).toFixed(2)}%
-                  </span>
+                  <Progress
+                    value={(file.progress || 0) * 100}
+                    className="absolute bottom-2 h-2 w-[90%]"
+                    progressClassName="bg-primary/50"
+                  />
                 </DropzoneImageCarouselCard>
               </DropzoneImageCarouselItem>
             )

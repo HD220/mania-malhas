@@ -1,6 +1,6 @@
 "use client";
 
-import { Search } from "@/components/search";
+import { Search } from "@/components/ui/search";
 import { Button } from "@/components/ui/button";
 import Link from "next/link";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";

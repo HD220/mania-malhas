@@ -1,6 +1,12 @@
 "use client";
 
-import { Form, FormField } from "@/components/ui/form";
+import {
+  Form,
+  FormControl,
+  FormField,
+  FormItem,
+  FormLabel,
+} from "@/components/ui/form";
 import {
   Card,
   CardContent,
@@ -10,18 +16,17 @@ import {
   CardTitle,
 } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import { DropzoneProvider } from "@/components/providers/dropzone-provider";
 import { InputField } from "@/components/ui/input-field";
-import { InputMoneyField } from "@/components/ui/input-money-field";
 import {
-  UseProductFormProps,
-  useProductForm,
-} from "@/components/forms/product-form/useProductForm";
-import { DropzoneImageCarousel } from "@/components/ui/dropzone-image-carousel";
+  UsePartnerFormProps,
+  usePartnerForm,
+} from "@/components/forms/partner-form/usePartnerForm";
 import { Checkbox } from "@/components/ui/checkbox";
+import { Textarea } from "@/components/ui/textarea";
+import { formatterPhoneNumber } from "@/utils";
 
-export function ProductForm({ initialValues, onSubmit }: UseProductFormProps) {
-  const { form, addImage, removeImage, submit } = useProductForm({
+export function PartnerForm({ initialValues, onSubmit }: UsePartnerFormProps) {
+  const { form, submit } = usePartnerForm({
     initialValues,
     onSubmit,
   });
@@ -31,9 +36,9 @@ export function ProductForm({ initialValues, onSubmit }: UseProductFormProps) {
       <form onSubmit={form.handleSubmit(submit)}>
         <Card>
           <CardHeader>
-            <CardTitle>Cadastrar produto</CardTitle>
+            <CardTitle>Cadastrar cliente</CardTitle>
             <CardDescription>
-              Informe os dados do produto e clique em salvar para finalizar
+              Informe os dados do cliente e clique em salvar para finalizar
             </CardDescription>
           </CardHeader>
           <CardContent className="flex flex-1 flex-col gap-2">
@@ -57,8 +62,29 @@ export function ProductForm({ initialValues, onSubmit }: UseProductFormProps) {
                 render={({ field }) => (
                   <InputField
                     label="Nome"
-                    placeholder="ex: Calça Jeans."
+                    placeholder="ex: Fulano de tal."
                     className="flex-1"
+                    {...field}
+                  />
+                )}
+              />
+              <FormField
+                name="phone"
+                control={form.control}
+                render={({ field: { value, onChange, ...field } }) => (
+                  <InputField
+                    label="Telefone"
+                    placeholder="(99) 9 9999-9999"
+                    // pattern="[0-9]{2} [0-9]{1} [0-9]{4}-[0-9]{4}"
+                    type="tel"
+                    className="basis-1/5"
+                    onChance={(ev) => {
+                      let value = ev.target.value.replace(/\D/g, "");
+                      if (value.length <= 11) form.setValue("phone", value);
+                    }}
+                    value={(() => {
+                      return formatterPhoneNumber(value || "");
+                    })()}
                     {...field}
                   />
                 )}
@@ -66,45 +92,24 @@ export function ProductForm({ initialValues, onSubmit }: UseProductFormProps) {
             </div>
             <div className="flex flex-1 gap-2 flex-col sm:flex-row">
               <FormField
-                name="description"
+                name="notes"
                 control={form.control}
-                render={({ field }) => (
-                  <InputField
-                    label="Descrição"
-                    placeholder="ex: Calça jeans estilo surrada."
-                    className="flex-1"
-                    {...field}
-                  />
-                )}
-              />
-              <FormField
-                name="price"
-                control={form.control}
-                render={({ field }) => (
-                  <InputMoneyField
-                    label="Preço"
-                    className="basis-1/5"
-                    {...field}
-                  />
+                render={({ field: { value = "", ...field } }) => (
+                  <FormItem className="flex flex-1 flex-col">
+                    <FormLabel htmlFor="notes">Anotações</FormLabel>
+                    <FormControl>
+                      <Textarea
+                        placeholder="ex: Informações sobre o cliente."
+                        className="px-3 py-2"
+                        rows={15}
+                        value={value === null ? "" : value}
+                        {...field}
+                      />
+                    </FormControl>
+                  </FormItem>
                 )}
               />
             </div>
-
-            <DropzoneProvider
-              options={{
-                noClick: true,
-                noKeyboard: true,
-                multiple: true,
-                accept: { "image/*": [] },
-                onDrop: addImage,
-              }}
-            >
-              <DropzoneImageCarousel
-                multiple={true}
-                onRemove={removeImage}
-                files={form.watch("images")}
-              />
-            </DropzoneProvider>
           </CardContent>
           <CardFooter className="flex justify-between items-end">
             <FormField

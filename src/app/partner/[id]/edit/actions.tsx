@@ -1,29 +1,29 @@
 "use server";
 
 import {
-  InsertProductWithImages,
-  insertProductWithImagesSchema,
-} from "@/db/repositories/schemas/productImageSchema";
-import alterProductUseCase from "@/usecases/product/alterProductUseCase";
-import getProductByIdUseCase from "@/usecases/product/getProductByIdUseCase";
+  InsertPartner,
+  insertPartnerSchema,
+} from "@/db/repositories/schemas/partnerSchema";
+import alterPartnerUseCase from "@/usecases/partner/alterPartnerUseCase";
+import getPartnerByIdUseCase from "@/usecases/partner/getPartnerByIdUseCase";
 import { revalidatePath, unstable_noStore as noStore } from "next/cache";
 import { redirect } from "next/navigation";
 
-export async function getProductWithImagesById(id: string) {
+export async function getPartnerById(id: string) {
   noStore();
 
-  return await getProductByIdUseCase({ id });
+  return await getPartnerByIdUseCase({ id });
 }
 
-export async function updateProduct({
+export async function updatePartner({
   id,
   ...data
-}: InsertProductWithImages): Promise<void> {
+}: InsertPartner): Promise<void> {
   if (!id) throw new Error("Id to be defined!");
-  const validation = insertProductWithImagesSchema.parse(data);
+  const validation = insertPartnerSchema.parse(data);
 
-  await alterProductUseCase(id, validation);
+  await alterPartnerUseCase(id, validation);
 
-  revalidatePath("/product/list");
-  redirect("/product/list");
+  revalidatePath("/partner/list");
+  redirect("/partner/list");
 }

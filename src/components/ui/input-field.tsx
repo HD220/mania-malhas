@@ -7,18 +7,32 @@ import {
   FormMessage,
 } from "@/components/ui/form";
 import { Input } from "@/components/ui/input";
-import { forwardRef } from "react";
+import { ChangeEventHandler, HTMLInputTypeAttribute, forwardRef } from "react";
 
 export type InputFieldProps = {
   label?: string;
   placeholder?: string;
   className?: string;
   disabled?: boolean;
+  pattern?: string;
+  type?: HTMLInputTypeAttribute;
+  value?: string;
+  onChance?: ChangeEventHandler<HTMLInputElement>;
 };
 
 const InputField = forwardRef<HTMLInputElement, InputFieldProps>(
   (
-    { className, label = "", placeholder = "", disabled = false, ...field },
+    {
+      className,
+      label = "",
+      placeholder = "",
+      disabled = false,
+      pattern,
+      type,
+      onChance,
+      value,
+      ...field
+    },
     ref
   ) => {
     return (
@@ -26,10 +40,14 @@ const InputField = forwardRef<HTMLInputElement, InputFieldProps>(
         <FormLabel>{label}</FormLabel>
         <FormControl>
           <Input
-            {...field}
             ref={ref}
             placeholder={placeholder}
             disabled={disabled}
+            pattern={pattern}
+            type={type || "text"}
+            onChange={onChance}
+            value={value}
+            {...field}
           />
         </FormControl>
         <FormMessage />

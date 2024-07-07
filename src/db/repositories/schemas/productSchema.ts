@@ -4,7 +4,7 @@ import { productTable } from "../../postgres/schema/product";
 
 export const insertProductSchema = createInsertSchema(productTable, {
   price: z.coerce.number().positive(),
-  // description: z.string().nullish(),
+  name: z.string().min(1),
 }).omit({ createdAt: true, updatedAt: true });
 export type InsertProduct = z.input<typeof insertProductSchema>;
 

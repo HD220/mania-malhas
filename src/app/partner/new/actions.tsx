@@ -1,18 +1,18 @@
 "use server";
 
 import {
-  InsertProductWithImages,
-  insertProductWithImagesSchema,
-} from "@/db/repositories/schemas/productImageSchema";
-import createProductUseCase from "@/usecases/product/createProductUseCase";
+  InsertPartner,
+  insertPartnerSchema,
+} from "@/db/repositories/schemas/partnerSchema";
+import createPartnerUseCase from "@/usecases/partner/createPartnerUseCase";
 import { revalidatePath } from "next/cache";
 import { redirect } from "next/navigation";
 
-export async function createProduct(data: InsertProductWithImages) {
-  const parsed = insertProductWithImagesSchema.parse(data);
+export async function createPartner(data: InsertPartner) {
+  const parsed = insertPartnerSchema.parse(data);
 
-  await createProductUseCase(parsed);
+  await createPartnerUseCase(parsed);
 
-  revalidatePath("/product/list");
-  redirect("/product/list");
+  revalidatePath("/partner/list");
+  redirect("/partner/list");
 }

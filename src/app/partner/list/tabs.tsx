@@ -1,12 +1,13 @@
 "use client";
 
-import { Search } from "@/components/search";
+import { Search } from "@/components/ui/search";
 import { Button } from "@/components/ui/button";
 import Link from "next/link";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { SelectPartner } from "@/db/repositories/schemas/partnerSchema";
 import { usePathname, useRouter, useSearchParams } from "next/navigation";
 import { ReactNode } from "react";
+import { ScrollArea, ScrollBar } from "@/components/ui/scroll-area";
 
 export default function Tab({
   status,
@@ -48,10 +49,20 @@ export default function Tab({
         </div>
       </div>
       <TabsContent value="active">
-        <div className="flex flex-1 rounded-md border">{actives}</div>
+        <div className="flex flex-1 rounded-md border">
+          <ScrollArea className="w-full inline-grid">
+            {actives}
+            <ScrollBar orientation={"horizontal"} />
+          </ScrollArea>
+        </div>
       </TabsContent>
       <TabsContent value="inactive">
-        <div className="flex flex-1 rounded-md border">{inactives}</div>
+        <div className="flex flex-1 rounded-md border">
+          <ScrollArea>
+            {inactives}
+            <ScrollBar orientation={"horizontal"} />
+          </ScrollArea>
+        </div>
       </TabsContent>
     </Tabs>
   );

@@ -13,26 +13,57 @@ import {
   DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
+import { formatterPhoneNumber } from "@/utils";
+import Link from "next/link";
 
 export const columns: ColumnDef<SelectPartner>[] = [
   {
     accessorKey: "name",
-    header: "Nome",
+    header: () => <span className="p-2">Nome</span>,
+    cell: ({ row }) => {
+      return (
+        <div className="flex flex-1 flex-col gap-1 p-2">
+          <span>{row.original.name}</span>
+          <span className="text-xs text-muted-foreground sm:hidden">
+            {formatterPhoneNumber(row.original.phone || "")}
+          </span>
+          <span className="text-md text-muted-foreground sm:hidden">
+            {row.original.notes}
+          </span>
+        </div>
+      );
+    },
   },
   {
     accessorKey: "phone",
-    header: "Telefone",
+    header: () => <span className="hidden sm:inline-block p-2">Telefone</span>,
+    cell: (field) => {
+      return (
+        <span className="hidden sm:inline-block p-2">
+          {formatterPhoneNumber(field.getValue() as string)}
+        </span>
+      );
+    },
   },
   {
     accessorKey: "notes",
-    header: "Anotações",
+    header: () => <span className="hidden sm:inline-block p-2">Anotações</span>,
+    cell: (field) => (
+      <span className="hidden sm:inline-block p-2">
+        {field.getValue() as string}
+      </span>
+    ),
   },
   {
     accessorKey: "active",
-    header: "Status",
+    header: () => <span className="hidden sm:inline-block p-2">Status</span>,
     cell: (field) => {
-      const value = field.getValue();
-      return value ? "Ativo" : "Inativo";
+      const value = field.getValue() as boolean;
+      return (
+        <span className="hidden sm:inline-block p-2">
+          {value ? "Ativo" : "Inativo"}
+        </span>
+      );
     },
   },
   {
@@ -51,16 +82,10 @@ export const columns: ColumnDef<SelectPartner>[] = [
           <DropdownMenuContent align="end">
             <DropdownMenuLabel>Ações</DropdownMenuLabel>
             <DropdownMenuSeparator />
-            <DropdownMenuItem
-              onClick={() => navigator.clipboard.writeText(partner.id)}
-            >
-              Editar
-            </DropdownMenuItem>
-            <DropdownMenuItem
-              className="text-red-500"
-              onClick={() => navigator.clipboard.writeText(partner.id)}
-            >
-              Inativar
+            <DropdownMenuItem className="cursor-pointer" asChild>
+              {/* <Button asChild size={"sm"}> */}
+              <Link href={`/partner/${partner.id}/edit`}>Editar</Link>
+              {/* </Button> */}
             </DropdownMenuItem>
           </DropdownMenuContent>
         </DropdownMenu>

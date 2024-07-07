@@ -40,3 +40,12 @@ export async function uploadS3(
     xhr.send(file);
   });
 }
+
+export function formatterPhoneNumber(value: string) {
+  let newValue = value;
+  newValue = newValue.replace(/\D/g, "");
+  newValue = newValue.replace(/(\d{2})(\d)/, "($1) $2");
+  newValue = newValue.replace(/(\d)(\d{4})$/, "$1-$2");
+
+  return newValue;
+}

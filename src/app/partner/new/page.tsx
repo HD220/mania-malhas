@@ -1,15 +1,15 @@
-import { ProductForm } from "@/components/forms/product-form";
-import { createProduct } from "./actions";
+import { PartnerForm } from "@/components/forms/partner-form";
+import { createPartner } from "./actions";
 
 export default function Page() {
   return (
     <div className="w-full mx-auto">
-      <ProductForm
-        onSubmit={createProduct}
+      <PartnerForm
+        onSubmit={createPartner}
         initialValues={{
-          description: "",
+          notes: "",
           name: "",
-          price: 0,
+          phone: "",
           active: true,
         }}
       />

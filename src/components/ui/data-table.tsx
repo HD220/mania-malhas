@@ -32,13 +32,13 @@ export function DataTable<TData, TValue>({
   });
 
   return (
-    <Table>
+    <Table className="relative w-full min-w-max table-auto">
       <TableHeader>
         {table.getHeaderGroups().map((headerGroup) => (
           <TableRow key={headerGroup.id}>
             {headerGroup.headers.map((header) => {
               return (
-                <TableHead key={header.id}>
+                <TableHead key={header.id} className="p-0">
                   {header.isPlaceholder
                     ? null
                     : flexRender(
@@ -59,7 +59,7 @@ export function DataTable<TData, TValue>({
               data-state={row.getIsSelected() && "selected"}
             >
               {row.getVisibleCells().map((cell) => (
-                <TableCell key={cell.id} className="py-2">
+                <TableCell key={cell.id} className="p-0">
                   {flexRender(cell.column.columnDef.cell, cell.getContext())}
                 </TableCell>
               ))}
