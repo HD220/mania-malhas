@@ -58,7 +58,7 @@ export default function Tab({
       </TabsContent>
       <TabsContent value="inactive">
         <div className="flex flex-1 rounded-md border">
-          <ScrollArea>
+          <ScrollArea className="w-full inline-grid">
             {inactives}
             <ScrollBar orientation={"horizontal"} />
           </ScrollArea>
