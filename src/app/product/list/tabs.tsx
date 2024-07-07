@@ -4,16 +4,17 @@ import { Search } from "@/components/search";
 import { Button } from "@/components/ui/button";
 import Link from "next/link";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { ProductCard } from "@/components/product-card";
-import { SelectProductWithImages } from "@/db/repositories/schemas/productImageSchema";
 import { usePathname, useRouter, useSearchParams } from "next/navigation";
+import { ReactNode } from "react";
 
 export default function Tab({
-  products,
   status,
+  actives,
+  inactives,
 }: {
-  products: SelectProductWithImages[];
   status?: string;
+  actives?: ReactNode;
+  inactives?: ReactNode;
 }) {
   const searchParams = useSearchParams();
   const pathname = usePathname();
@@ -45,11 +46,14 @@ export default function Tab({
           </Button>
         </div>
       </div>
-      <TabsContent value={status === "active" ? "active" : "inactive"}>
+      <TabsContent value="active">
         <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-2">
-          {products.map((product) => (
-            <ProductCard key={product.id} {...product} />
-          ))}
+          {actives}
+        </div>
+      </TabsContent>
+      <TabsContent value="inactive">
+        <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-2">
+          {inactives}
         </div>
       </TabsContent>
     </Tabs>

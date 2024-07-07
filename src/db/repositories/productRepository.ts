@@ -193,9 +193,7 @@ export const productRepository: ProductRepository = (db) => {
     const [{ id }] = await db
       .insert(productTable)
       .values({
-        name: data.name,
-        description: data.description,
-        price: data.price,
+        ...data,
       })
       .returning({ id: productTable.id });
     await Promise.all(

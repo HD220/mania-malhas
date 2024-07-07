@@ -4,16 +4,16 @@ import { Search } from "@/components/search";
 import { Button } from "@/components/ui/button";
 import Link from "next/link";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { ProductCard } from "@/components/product-card";
-import { SelectProductWithImages } from "@/db/repositories/schemas/productImageSchema";
+import { SelectPartner } from "@/db/repositories/schemas/partnerSchema";
 import { usePathname, useRouter, useSearchParams } from "next/navigation";
+import { ReactNode } from "react";
 
 export default function Tab({
-  partners,
   status,
+  children,
 }: {
-  partners: SelectProductWithImages[];
   status?: string;
+  children?: ReactNode;
 }) {
   const searchParams = useSearchParams();
   const pathname = usePathname();
@@ -41,15 +41,13 @@ export default function Tab({
         <div className="flex gap-2">
           <Search className="flex" />
           <Button asChild>
-            <Link href="/product/new">Novo</Link>
+            <Link href="/partner/new">Novo</Link>
           </Button>
         </div>
       </div>
       <TabsContent value={status === "active" ? "active" : "inactive"}>
         <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-2">
-          {partners.map((partner) => (
-            <ProductCard key={partner.id} {...partner} />
-          ))}
+          {children}
         </div>
       </TabsContent>
     </Tabs>

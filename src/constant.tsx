@@ -14,7 +14,7 @@ const menus: NavbarItemProps[] = [
   },
   {
     label: "Clientes",
-    href: "/parter/list",
+    href: "/partner/list",
     icon: <Users className="h-5 w-5" />,
   },
 ];
