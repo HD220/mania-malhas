@@ -17,7 +17,7 @@ import { AspectRatio } from "@/components/ui/aspect-ratio";
 import Link from "next/link";
 import { SelectProductWithImages } from "@/db/repositories/schemas/productImageSchema";
 
-export async function ProductCard({
+export function ProductCard({
   id,
   name,
   description,

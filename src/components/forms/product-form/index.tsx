@@ -116,7 +116,7 @@ export function ProductForm({ initialValues, onSubmit }: UseProductFormProps) {
                   <Checkbox
                     id="active"
                     checked={value === undefined ? true : value}
-                    onChange={rest.onChange}
+                    onCheckedChange={rest.onChange}
                   />
                   <label
                     htmlFor="active"

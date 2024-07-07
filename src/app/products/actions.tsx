@@ -1,10 +1,10 @@
 "use server";
 
-import getActiveProductsUseCase from "@/usecases/product/getActiveProductsUseCase";
+import getProductsUseCase from "@/usecases/product/getProductsUseCase";
 import { unstable_noStore as noCache } from "next/cache";
 
-export async function getProducts() {
+export async function getProducts(search: string, status: boolean) {
   noCache();
-
-  return await getActiveProductsUseCase();
+  console.log("status", status);
+  return await getProductsUseCase(search, status);
 }

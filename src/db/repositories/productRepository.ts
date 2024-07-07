@@ -1,12 +1,11 @@
 import { dbType } from "@/db/postgres";
-import { and, eq, inArray, asc, desc, sql } from "drizzle-orm";
+import { and, eq, desc, or, ilike, sql } from "drizzle-orm";
 import {
   selectProductWithImagesSchema,
   type InsertProductWithImages,
   type SelectProductImage,
   type SelectProductWithImages,
 } from "./schemas/productImageSchema";
-import { type SelectProduct } from "./schemas/productSchema";
 import { productTable } from "../postgres/schema/product";
 import { productImagesTable } from "../postgres/schema/productImage";
 
@@ -14,6 +13,10 @@ export type DBConnection = dbType["db"];
 
 export type ProductRepository = (db: DBConnection) => {
   findAll: (status?: boolean) => Promise<SelectProductWithImages[]>;
+  findBySearch: (
+    search: string,
+    status: boolean
+  ) => Promise<SelectProductWithImages[]>;
   findById: (id: string) => Promise<SelectProductWithImages>;
   findImageById: (
     productId: string,
@@ -68,6 +71,7 @@ export const productRepository: ProductRepository = (db) => {
 
     return reduced;
   };
+
   const findAll = async (status = true) => {
     const productsDb = await db
       .select()
@@ -80,6 +84,36 @@ export const productRepository: ProductRepository = (db) => {
         and(
           eq(productTable.active, status),
           eq(productImagesTable.active, true)
+        )
+      )
+      .orderBy(({ product, productImage }) => [
+        desc(product.createdAt),
+        desc(productImage.createdAt),
+      ]);
+
+    return convert(productsDb);
+  };
+
+  const findBySearch = async (search: string, status = true) => {
+    const productsDb = await db
+      .select()
+      .from(productTable)
+      .leftJoin(
+        productImagesTable,
+        eq(productImagesTable.productId, productTable.id)
+      )
+      .where(
+        and(
+          eq(productTable.active, status),
+          eq(productImagesTable.active, true),
+          or(
+            sql`unaccent(${
+              productTable.name
+            }) ilike unaccent(${`%${search}%`})`,
+            sql`unaccent(${
+              productTable.description
+            }) ilike unaccent(${`%${search}%`})`
+          )
         )
       )
       .orderBy(({ product, productImage }) => [
@@ -150,9 +184,7 @@ export const productRepository: ProductRepository = (db) => {
     await db
       .update(productTable)
       .set({
-        name: data.name,
-        description: data.description,
-        price: data.price,
+        ...data,
       })
       .where(eq(productTable.id, id));
   };
@@ -184,5 +216,6 @@ export const productRepository: ProductRepository = (db) => {
     findById,
     findImageById,
     findAll,
+    findBySearch,
   };
 };

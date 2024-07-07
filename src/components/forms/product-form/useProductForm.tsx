@@ -120,7 +120,6 @@ export function useProductForm({
       toast({
         title: "Info:",
         description: "Produto salvo com sucesso!",
-        duration: 5000,
       });
     } catch (error) {
       toast({

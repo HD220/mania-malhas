@@ -2,8 +2,12 @@ import { db } from "@/db/postgres";
 import { productRepository } from "@/db/repositories/productRepository";
 import { getPresignedUrlGetObject } from "@/services/minio";
 
-export default async function getActiveProductsUseCase() {
-  const products = await productRepository(db).findAll(true);
+export default async function getProductsUseCase(
+  search: string,
+  status: boolean
+) {
+  const products = await productRepository(db).findBySearch(search, status);
+  console.log("usecase status: ", status);
   const presigneds = await Promise.all(
     products.map(async (product) => {
       return {
