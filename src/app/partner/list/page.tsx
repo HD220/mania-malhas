@@ -1,4 +1,6 @@
+import { DataTable } from "@/components/ui/data-table";
 import { getPartners } from "./actions";
+import { columns } from "./columns";
 import Tab from "./tabs";
 
 export default async function Page({
@@ -6,13 +8,18 @@ export default async function Page({
 }: {
   searchParams: { search?: string; status?: string };
 }) {
-  const partners = await getPartners(search, status === "active");
+  const [actives, inactives] = await Promise.all([
+    getPartners(search, true),
+    getPartners(search, false),
+  ]);
 
   return (
     <div className="flex flex-col gap-2">
-      <Tab status={status}>
-        <p>TODO!</p>
-      </Tab>
+      <Tab
+        status={status}
+        actives={<DataTable columns={columns} data={actives} />}
+        inactives={<DataTable columns={columns} data={inactives} />}
+      />
     </div>
   );
 }

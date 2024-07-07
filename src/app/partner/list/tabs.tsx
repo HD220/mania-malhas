@@ -10,10 +10,12 @@ import { ReactNode } from "react";
 
 export default function Tab({
   status,
-  children,
+  actives,
+  inactives,
 }: {
   status?: string;
-  children?: ReactNode;
+  actives?: ReactNode;
+  inactives?: ReactNode;
 }) {
   const searchParams = useSearchParams();
   const pathname = usePathname();
@@ -45,10 +47,11 @@ export default function Tab({
           </Button>
         </div>
       </div>
-      <TabsContent value={status === "active" ? "active" : "inactive"}>
-        <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-2">
-          {children}
-        </div>
+      <TabsContent value="active">
+        <div className="flex flex-1 rounded-md border">{actives}</div>
+      </TabsContent>
+      <TabsContent value="inactive">
+        <div className="flex flex-1 rounded-md border">{inactives}</div>
       </TabsContent>
     </Tabs>
   );
