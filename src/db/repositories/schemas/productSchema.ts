@@ -10,6 +10,6 @@ export type InsertProduct = z.input<typeof insertProductSchema>;
 
 export const selectProductSchema = createSelectSchema(productTable, {
   price: z.coerce.number().positive(),
-  // description: z.string().nullish(),
+  description: z.string().optional(),
 });
 export type SelectProduct = z.input<typeof selectProductSchema>;

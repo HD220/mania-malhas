@@ -16,7 +16,7 @@ export type InputFieldProps = {
   disabled?: boolean;
   pattern?: string;
   type?: HTMLInputTypeAttribute;
-  value?: string;
+  value?: string | null;
   onChance?: ChangeEventHandler<HTMLInputElement>;
 };
 
@@ -46,7 +46,7 @@ const InputField = forwardRef<HTMLInputElement, InputFieldProps>(
             pattern={pattern}
             type={type || "text"}
             onChange={onChance}
-            value={value}
+            value={value ?? ""}
             {...field}
           />
         </FormControl>
