@@ -19,7 +19,6 @@ import {
 } from "@/components/forms/product-form/useProductForm";
 import { DropzoneImageCarousel } from "@/components/dropzone-image-carousel";
 import { Checkbox } from "@/components/ui/checkbox";
-import { Alert, AlertTitle } from "@/components/ui/alert";
 
 export function ProductForm({ initialValues, onSubmit }: UseProductFormProps) {
   const { form, addImage, removeImage, submit } = useProductForm({
@@ -127,7 +126,9 @@ export function ProductForm({ initialValues, onSubmit }: UseProductFormProps) {
                 </div>
               )}
             />
-            <Button type="submit">Salvar</Button>
+            <Button type="submit" disabled={form.formState.isSubmitting}>
+              Salvar
+            </Button>
           </CardFooter>
         </Card>
       </form>

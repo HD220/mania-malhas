@@ -20,9 +20,7 @@ export function NavbarItem({ href, label, icon }: NavbarItemProps) {
       href={href}
       className={cn(
         "flex items-center gap-3 rounded-lg px-3 py-2 text-muted-foreground transition-all hover:text-primary",
-        (pathname.includes(href) ||
-          pathname.includes(href.substring(0, href.length - 2))) &&
-          "text-primary"
+        pathname.split("/")[1] == href.split("/")[1] && "text-primary"
       )}
     >
       {icon}

@@ -9,12 +9,12 @@ const menus: NavbarItemProps[] = [
   },
   {
     label: "Produtos",
-    href: "/products",
+    href: "/product/list",
     icon: <Package className="h-5 w-5" />,
   },
   {
     label: "Clientes",
-    href: "/parters",
+    href: "/parter/list",
     icon: <Users className="h-5 w-5" />,
   },
 ];

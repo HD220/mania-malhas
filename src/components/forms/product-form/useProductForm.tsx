@@ -4,7 +4,7 @@ import { useFieldArray, useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { uploadS3 } from "@/utils";
 import { getUrlUpload } from "./actions";
-import { z } from "zod";
+import { unknown, z } from "zod";
 import { InsertProductWithImages } from "@/db/repositories/schemas/productImageSchema";
 import { useToast } from "@/components/ui/use-toast";
 
@@ -88,21 +88,19 @@ export function useProductForm({
 
   const submit = async (formData: FormProduct) => {
     try {
-      formData.images?.forEach((image, index) => {
-        if (image.active && image.progress !== 1)
-          uploadS3(image.uploadUrl!, image.file!, async (progress) => {
-            await new Promise((resolve) =>
-              setTimeout(() => resolve(null), 500)
-            );
-            form.setValue(`images.${index}.progress`, progress);
-          })
-            .then(() => {
-              console.log("file index", index, " uploaded");
-            })
-            .catch((err) => {
-              console.error("não foi possivel realizar o upload", err);
+      const sendImages = formData.images?.map(async (image, index) => {
+        if (image.active && image.progress !== 1) {
+          try {
+            await uploadS3(image.uploadUrl!, image.file!, (progress) => {
+              form.setValue(`images.${index}.progress`, progress);
             });
+          } catch (error: any) {
+            throw new Error(error);
+          }
+        }
       });
+
+      await Promise.all(sendImages || []);
 
       const data: InsertProductWithImages = {
         ...formData,
@@ -121,11 +119,11 @@ export function useProductForm({
         title: "Info:",
         description: "Produto salvo com sucesso!",
       });
-    } catch (error) {
+    } catch (error: any) {
       toast({
         variant: "destructive",
-        title: "Erro:",
-        description: "Algo errado ocorreu, tente novamente!",
+        title: "Ops!",
+        description: error.message,
       });
     }
   };

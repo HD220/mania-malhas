@@ -7,7 +7,6 @@ export default async function getProductsUseCase(
   status: boolean
 ) {
   const products = await productRepository(db).findBySearch(search, status);
-  console.log("usecase status: ", status);
   const presigneds = await Promise.all(
     products.map(async (product) => {
       return {

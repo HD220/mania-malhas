@@ -23,7 +23,6 @@ export default function Tab({
     <Tabs
       defaultValue={status === "active" ? "active" : "inactive"}
       onValueChange={(value) => {
-        console.log(value);
         const params = new URLSearchParams(searchParams);
         if (value !== "active") {
           params.set("status", value);
