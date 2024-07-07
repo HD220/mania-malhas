@@ -27,7 +27,7 @@ export const columns: ColumnDef<SelectPartner>[] = [
           <span className="text-xs text-muted-foreground sm:hidden">
             {formatterPhoneNumber(row.original.phone || "")}
           </span>
-          <span className="text-md text-muted-foreground sm:hidden">
+          <span className="text-md text-muted-foreground sm:hidden max-w-[80vw] text-ellipsis truncate">
             {row.original.notes}
           </span>
         </div>
@@ -47,9 +47,9 @@ export const columns: ColumnDef<SelectPartner>[] = [
   },
   {
     accessorKey: "notes",
-    header: () => <span className="hidden sm:inline-block p-2">Anotações</span>,
+    header: () => <span className="hidden sm:block p-2">Anotações</span>,
     cell: (field) => (
-      <span className="hidden sm:inline-block p-2">
+      <span className="hidden sm:inline-block p-2 max-w-[50vw] md:max-w-[30vw] lg:max-w-[40vw] xl:max-w-[50vw] text-ellipsis truncate">
         {field.getValue() as string}
       </span>
     ),

@@ -58,7 +58,7 @@ export const partnerRepository: PartnerRepository = (db) => {
     const partnersDb = await db
       .select()
       .from(partnerTable)
-      .where(and(eq(partnerTable.active, true), eq(partnerTable.id, id)));
+      .where(eq(partnerTable.id, id));
 
     const [result] = partnersDb;
 
