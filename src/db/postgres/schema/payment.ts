@@ -7,7 +7,7 @@ export const paymentTable = pgTable(
     id: uuid("id").defaultRandom().primaryKey(),
     transactionId: uuid("transactionId").notNull(),
     // description: varchar("description", { length: 100 }),
-    value: decimal("amount", { precision: 16, scale: 7 })
+    value: decimal("value", { precision: 16, scale: 7 })
       .notNull()
       .$type<number>(),
     date: timestamp("date", { mode: "date", withTimezone: true })
