@@ -1,4 +1,5 @@
 import {
+  char,
   decimal,
   pgTable,
   timestamp,
@@ -13,6 +14,7 @@ export const transactionTable = pgTable(
     id: uuid("id").defaultRandom().primaryKey(),
     partnerId: uuid("partnerId").notNull(),
     description: varchar("description", { length: 100 }),
+    type: char("type", ["E", "S"]).notNull(),
     value: decimal("value", { precision: 16, scale: 7 })
       .notNull()
       .$type<number>(),
