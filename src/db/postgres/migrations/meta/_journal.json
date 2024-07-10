@@ -43,6 +43,48 @@
       "when": 1720479650731,
       "tag": "0005_faithful_vulcan",
       "breakpoints": true
+    },
+    {
+      "idx": 6,
+      "version": "7",
+      "when": 1720565491095,
+      "tag": "0006_dashing_psylocke",
+      "breakpoints": true
+    },
+    {
+      "idx": 7,
+      "version": "7",
+      "when": 1720566530780,
+      "tag": "0007_talented_the_fury",
+      "breakpoints": true
+    },
+    {
+      "idx": 8,
+      "version": "7",
+      "when": 1720566714015,
+      "tag": "0008_same_ink",
+      "breakpoints": true
+    },
+    {
+      "idx": 9,
+      "version": "7",
+      "when": 1720566821754,
+      "tag": "0009_dizzy_the_captain",
+      "breakpoints": true
+    },
+    {
+      "idx": 10,
+      "version": "7",
+      "when": 1720568320106,
+      "tag": "0010_watery_aaron_stack",
+      "breakpoints": true
+    },
+    {
+      "idx": 11,
+      "version": "7",
+      "when": 1720569166297,
+      "tag": "0011_nifty_namora",
+      "breakpoints": true
     }
   ]
 }
