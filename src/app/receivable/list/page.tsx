@@ -21,8 +21,8 @@ import {
 export default function Page() {
   return (
     <div className="flex flex-col gap-2">
-      <div className="flex gap-2">
-        <Card className="flex flex-col flex-1">
+      <div className="grid sm:grid-cols-2 gap-2">
+        <Card className="">
           <CardHeader>
             <CardTitle>Nicolas Fraga Faust</CardTitle>
           </CardHeader>
@@ -59,7 +59,7 @@ export default function Page() {
             <Button className="w-full">Novo Pagamento</Button>
           </CardFooter>
         </Card>
-        <Card className="flex flex-col flex-1">
+        <Card className="">
           <CardHeader className="px-2">
             <CardTitle>Nicolas Fraga Faust</CardTitle>
           </CardHeader>
