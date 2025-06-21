@@ -19,8 +19,9 @@ export type UpdatePartnerServerResponse = {
 
 export async function getPartnerById(id: string) {
   noStore();
-  // TODO: Handle partner not found, similar to getProductById
-  return await getPartnerByIdUseCase({ id });
+  // TODO: Handle partner not found, similar to getProductById.
+  // getPartnerByIdUseCase now returns null if not found or id is invalid.
+  return await getPartnerByIdUseCase(id); // Chamada simplificada
 }
 
 export async function updatePartner({

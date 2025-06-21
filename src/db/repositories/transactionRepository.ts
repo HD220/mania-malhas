@@ -1,29 +1,65 @@
-import { dbType, db as defaultDb } from "@/db/postgres"; // Import defaultDb
+import { dbType, db as defaultDb } from "@/db/postgres";
 import { eq, desc } from "drizzle-orm";
-import { InsertTransaction, SelectTransaction, selectTransactionSchema } from "./schemas/transactionSchema";
+import {
+  InsertTransaction,
+  SelectTransaction,
+  selectTransactionSchema,
+  SelectTransactionWithPartner, // Import new type
+  selectTransactionWithPartnerSchema // Import new schema
+} from "./schemas/transactionSchema";
 import { transactionTable } from "../postgres/schema/transaction";
+import { partnerTable } from "../postgres/schema/partner"; // Import partnerTable for JOIN
 
 export type DBConnection = dbType["db"];
 
+import { and } from "drizzle-orm"; // Import 'and'
+// Define a more specific return type for findAll when partner name is included
+export type TransactionWithPartner = SelectTransaction & { partnerName?: string | null };
+
+// Interface para os filtros no repositório
+export interface TransactionFiltersForRepo {
+  type?: "E" | "S";
+  status?: string;
+  // Adicionar outros filtros conforme necessário (partnerId, date range, etc.)
+}
+
 export type TransactionRepositoryFactory = (dbInstance?: DBConnection) => {
-  findAll: () => Promise<SelectTransaction[]>;
-  findById: (id: string) => Promise<SelectTransaction | null>; // Allow null if not found
-  update: (id: string, data: Partial<InsertTransaction>) => Promise<void>; // Partial for update
+  findAll: (filters?: TransactionFiltersForRepo) => Promise<TransactionWithPartner[]>; // Aceita filtros
+  findById: (id: string) => Promise<SelectTransaction | null>;
+  update: (id: string, data: Partial<InsertTransaction>) => Promise<void>;
   insert: (data: InsertTransaction) => Promise<{ id: string }>;
-  // Add other methods like findByPartnerId, findByType, etc. as needed
 };
 
 export const transactionRepository: TransactionRepositoryFactory = (dbInstance) => {
   const db = dbInstance || defaultDb;
 
-  const findAll = async (): Promise<SelectTransaction[]> => {
-    const data = await db
-      .select()
-      .from(transactionTable)
-      .orderBy(desc(transactionTable.createdAt)); // Assuming direct use of table field
+  const findAll = async (filters?: TransactionFiltersForRepo): Promise<TransactionWithPartner[]> => {
+    const conditions = [];
+    if (filters?.type) {
+      conditions.push(eq(transactionTable.type, filters.type));
+    }
+    if (filters?.status) {
+      conditions.push(eq(transactionTable.status, filters.status));
+    }
+    // Adicionar mais condições de filtro aqui
 
-    // It's good practice to parse results, especially if there are coercions in select schema
-    return data.map(row => selectTransactionSchema.parse(row));
+    const query = db
+      .select({
+        // Select all fields from transactionTable
+        ...transactionTable,
+        // Select partner's name and alias it as partnerName
+        partnerName: partnerTable.name,
+      })
+      .from(transactionTable)
+      .leftJoin(partnerTable, eq(transactionTable.partnerId, partnerTable.id))
+      // Aplicar condições de filtro se houver alguma
+      .where(conditions.length > 0 ? and(...conditions) : undefined)
+      .orderBy(desc(transactionTable.createdAt));
+
+    const results = await query.execute(); // Executar a query
+
+    // Parse results with the schema that includes partnerName
+    return results.map(row => selectTransactionWithPartnerSchema.parse(row) as TransactionWithPartner);
   };
 
   const findById = async (id: string): Promise<SelectTransaction | null> => {

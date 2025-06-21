@@ -27,3 +27,9 @@ export const selectTransactionSchema = createSelectSchema(transactionTable, {
   // partnerId, etc., will be inferred as string (uuid)
 });
 export type SelectTransaction = z.infer<typeof selectTransactionSchema>;
+
+// Schema for transactions that include the partner's name
+export const selectTransactionWithPartnerSchema = selectTransactionSchema.extend({
+  partnerName: z.string().optional(), // Partner name might be null if partner is deleted or not found
+});
+export type SelectTransactionWithPartner = z.infer<typeof selectTransactionWithPartnerSchema>;

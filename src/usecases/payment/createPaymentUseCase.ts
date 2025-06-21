@@ -5,25 +5,45 @@ import { transactionTable } from "@/db/postgres/schema/transaction";
 import { eq, sum, desc } from "drizzle-orm";
 import { ZodError } from "zod";
 
+/**
+ * Creates a new payment for a given transaction.
+ *
+ * This use case performs several steps:
+ * 1. Validates the input payment data using `insertPaymentSchema`.
+ * 2. Retrieves details of the associated transaction (e.g., total value).
+ * 3. Validates if the transaction exists.
+ * 4. Calculates the sum of existing payments for the transaction.
+ * 5. Validates if the new payment amount would exceed the transaction's total value (with a small tolerance for floating point issues).
+ * 6. Inserts the new payment using the payment repository.
+ *
+ * Note: This use case currently performs direct database queries for transaction details and existing payments.
+ * In a more layered architecture, this logic might be encapsulated within a `transactionRepository` or other use cases.
+ * Updating the transaction status (e.g., to "Pago") after a payment is made is mentioned as an optional future step.
+ *
+ * @param {InsertPayment} input - The payment data to be created.
+ *   - `transactionId`: ID of the transaction this payment belongs to.
+ *   - `value`: Amount of the payment.
+ *   - `date` (optional): Date of the payment (defaults to current date if not provided by schema/db).
+ * @returns {Promise<{ id: string }>} A promise that resolves to an object containing the ID of the newly created payment.
+ * @throws {ZodError} If the input payment data fails validation.
+ * @throws {Error} If the associated transaction is not found.
+ * @throws {Error} If the payment value exceeds the remaining balance of the transaction.
+ * @throws {Error} If there's an issue with the repository during data persistence.
+ */
 export default async function createPaymentUseCase(
   input: InsertPayment
 ): Promise<{ id: string }> {
-  // 1. Validate input data
-  const parsedInput = insertPaymentSchema.parse(input); // Throws ZodError on failure
-
-  // 2. Verify the transaction exists and is not fully paid (optional, but good practice)
-  // This requires access to transaction data, could be done via transactionRepository if it existed
-  // For now, let's assume the transaction ID is valid.
-  // More complex validation: check if sum of existing payments for this transactionId + new payment value > transaction.value
+  // 1. Validate input payment data
+  const parsedInput = insertPaymentSchema.parse(input);
 
   const { transactionId, value: paymentValue } = parsedInput;
 
-  // Example of more complex validation (requires transactionRepository or direct db access here)
-  // This is a simplified check. A real scenario might involve a transactionRepository.
+  // 2. Retrieve transaction details
+  // This is a direct DB access. Ideally, this could go through a transactionRepository.
   const [transactionDetails] = await db
     .select({
       totalValue: transactionTable.value,
-      type: transactionTable.type,
+      type: transactionTable.type, // Type might be used for different payment rules in future
     })
     .from(transactionTable)
     .where(eq(transactionTable.id, transactionId));
@@ -32,26 +52,25 @@ export default async function createPaymentUseCase(
     throw new Error("Transação não encontrada.");
   }
 
-  // Optional: Check if payment would exceed transaction value for "Saída" (Expense)
-  // Or if it's an "Entrada" (Income), this logic might differ or not be needed.
-  // For now, this check is basic and might need refinement based on business rules.
+  // 3. Calculate sum of existing payments and validate new payment
+  const paymentRepo = paymentRepository(db);
+  const existingPayments = await paymentRepo.findByTransactionId(transactionId);
+  const totalPaidSoFar = existingPayments.reduce((acc, p) => acc + Number(p.value), 0);
 
-  // Fetch existing payments for the transaction
-  const existingPayments = await paymentRepository(db).findByTransactionId(transactionId);
-  const totalPaid = existingPayments.reduce((acc, p) => acc + Number(p.value), 0);
-
-  if (Number(totalPaid) + Number(paymentValue) > Number(transactionDetails.totalValue) + 0.001) { // Add small tolerance for float issues
-     throw new Error(`O valor do pagamento (R$ ${paymentValue.toFixed(2)}) excede o saldo devedor da transação (R$ ${(Number(transactionDetails.totalValue) - totalPaid).toFixed(2)}).`);
+  // Check if the new payment exceeds the transaction's total value.
+  // A small tolerance (0.001) is added to handle potential floating-point inaccuracies.
+  if (Number(totalPaidSoFar) + Number(paymentValue) > Number(transactionDetails.totalValue) + 0.001) {
+     throw new Error(
+       `O valor do pagamento (R$ ${Number(paymentValue).toFixed(2)}) excede o saldo devedor da transação (R$ ${(Number(transactionDetails.totalValue) - totalPaidSoFar).toFixed(2)}).`
+     );
   }
 
+  // 4. Insert the new payment
+  const result = await paymentRepo.insert(parsedInput);
 
-  // 3. Insert the payment
-  const repo = paymentRepository(db); // Using the main db instance for now
-  const result = await repo.insert(parsedInput);
-
-  // 4. Optional: Update transaction status if fully paid (e.g., add a 'status' field to transactionTable)
-  // This would typically happen within a transaction that includes inserting the payment.
-  // For now, this step is omitted.
+  // 5. Optional future step: Update transaction status
+  // e.g., if (Number(totalPaidSoFar) + Number(paymentValue) >= Number(transactionDetails.totalValue)) { /* update transaction status to 'Pago' */ }
+  // This should ideally be part of a database transaction with the payment insertion.
 
   return result;
 }

@@ -1,17 +1,33 @@
 import { db } from "@/db/postgres";
 import { productRepository } from "@/db/repositories/productRepository";
+import { SelectProductWithImages } from "@/db/repositories/schemas/productImageSchema";
 
-export default async function getProductByIdUseCase({ id }: { id: string }) {
-  // The repository's findById method should return the product with image URLs
-  // already being the public, permanent URLs.
-  const product = await productRepository(db).findById(id);
+/**
+ * Fetches a specific product by its ID, including its images.
+ *
+ * This use case interacts with the product repository to retrieve a product.
+ * The repository's `findById` method is expected to return the product data
+ * with image URLs already being public, permanent URLs.
+ * It returns `null` if the product is not found or if the ID is invalid.
+ *
+ * @param {string} id - The ID of the product to fetch.
+ * @returns {Promise<SelectProductWithImages | null>} A promise that resolves to the product data
+ *                                                   (including images) or `null` if not found.
+ * @throws {Error} If there's an issue with the repository during data retrieval,
+ *                 other than not finding the product.
+ */
+export default async function getProductByIdUseCase(
+  id: string
+): Promise<SelectProductWithImages | null> {
+  if (!id || typeof id !== 'string') {
+    console.error("getProductByIdUseCase: ID inválido fornecido.");
+    return null;
+  }
 
-  // No need to iterate and generate presigned URLs for images if they are public.
-  // The product object from the repository should be ready to use.
-  // Ensure that the 'images' array within the product object (if it exists)
-  // has the correct public URLs.
+  const repo = productRepository(db);
+  const product = await repo.findById(id);
 
-  // If product is null (not found), it will be returned as such.
-  // If product.images is null or empty, it will also be returned as is.
+  // The repository's findById method now returns null if not found or on parse error.
+  // The product object, if found, should have its images (if any) with public URLs.
   return product;
 }

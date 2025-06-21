@@ -23,10 +23,9 @@ export type UpdateProductServerResponse = {
 
 export async function getProductWithImagesById(id: string) {
   noStore();
-  // TODO: Handle case where product is not found.
-  // Consider returning null or throwing a custom NotFoundError
-  // which can be handled by the page component.
-  return await getProductByIdUseCase({ id });
+  // getProductByIdUseCase now returns null if product not found or id is invalid.
+  // The page component calling this should handle the null case (e.g., show notFound()).
+  return await getProductByIdUseCase(id); // Chamada simplificada
 }
 
 export async function updateProduct({

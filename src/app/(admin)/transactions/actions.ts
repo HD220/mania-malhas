@@ -1,8 +1,11 @@
 "use server";
 
+// SelectTransaction não é mais o tipo primário aqui, mas TransactionWithPartner é.
+// Manter SelectTransaction se for usado em outros lugares ou para tipos base.
 import { SelectTransaction } from "@/db/repositories/schemas/transactionSchema";
 import getTransactionsUseCase, { GetTransactionsFilters } from "@/usecases/transaction/getTransactionsUseCase";
 import { unstable_noStore as noStore } from "next/cache";
+import { TransactionWithPartner } from "@/db/repositories/transactionRepository"; // Importar o tipo correto
 
 // Definindo um tipo de resposta para consistência, similar a outras actions
 export type TransactionServerResponse<T> = {
@@ -14,7 +17,7 @@ export type TransactionServerResponse<T> = {
 
 export async function listTransactionsAction(
   filters?: GetTransactionsFilters
-): Promise<TransactionServerResponse<SelectTransaction[]>> {
+): Promise<TransactionServerResponse<TransactionWithPartner[]>> { // Atualizado tipo de retorno
   noStore(); // Impede o cache da resposta desta action
 
   try {

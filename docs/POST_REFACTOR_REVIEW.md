@@ -110,3 +110,31 @@ As seguintes tarefas principais do `ACTION_PLAN.md` foram abordadas:
 ## 5. Conclusão da Revisão
 
 Um progresso significativo foi feito na implementação de funcionalidades e na melhoria da qualidade do código. As bases para tratamento de erros, gerenciamento de dados financeiros e testes estão mais sólidas. As oportunidades de melhoria identificadas acima devem guiar os próximos ciclos de desenvolvimento para aumentar ainda mais a robustez, desempenho e manutenibilidade do sistema.
+
+## 6. Atualizações da Fase 2
+
+Durante a Fase 2, as seguintes tarefas e melhorias foram realizadas, complementando o trabalho da Fase 1:
+
+*   **Melhorias na UI de Transações (F03 - restante):**
+    *   Integrada a busca e exibição do nome do parceiro na lista de transações (via JOIN no `transactionRepository` e ajustes nos casos de uso e componentes).
+    *   Implementados filtros básicos por "Tipo" (Entrada/Saída) e "Status" na página de listagem de transações. A lógica de filtro foi adicionada à UI, estado do componente, e propagada para `getTransactionsUseCase` e `transactionRepository` (filtros de tipo/status agora ocorrem no DB).
+    *   Filtros de data e `partnerId` no `getTransactionsUseCase` ainda são aplicados no lado da aplicação, com TODOs para movê-los para o repositório. Paginação não foi implementada.
+
+*   **Expansão da Cobertura de Testes (T01 - continuação):**
+    *   Adicionados testes unitários/integração para `alterProductUseCase` e `createPartnerUseCase`, cobrindo cenários de sucesso, validação e falhas de repositório. Todos os 17 testes nos 3 arquivos de teste de caso de uso estão passando.
+
+*   **Adição de Comentários (G01 - continuação):**
+    *   Adicionados comentários JSDoc/TSDoc detalhados aos casos de uso de `Partner` (`alter`, `create`, `getById`, `search`, `listActive`), casos de uso de `Payment` (`create`, `getPaymentsByTransactionId`), e às principais funções de manipulação de estado e eventos na página `TransactionsListPage`.
+
+*   **Revisão de Itens de Baixa Prioridade Selecionados:**
+    *   **G02 (Erros de digitação):** Corrigido `getInativeProductsUseCase` para `getInactiveProductsUseCase` na declaração da função.
+    *   **G03 (Simplificar parâmetros):** Refatorados `getPartnerByIdUseCase` e `getProductByIdUseCase` para aceitar ID diretamente (ex: `(id: string)`) em vez de um objeto `{ id }`, e os locais de chamada foram atualizados.
+    *   **C06 (Padronizar `unstable_noStore`):** Verificado e corrigido o uso de `noCache` para `noStore` em `product/list/actions.tsx`.
+
+### 6.1. Observações Adicionais da Fase 2
+
+*   A implementação de filtros na UI de transações melhorou significativamente a usabilidade da listagem. Mover todos os filtros para o nível do banco de dados continua sendo uma otimização importante.
+*   A expansão dos testes aumenta a confiança nas funcionalidades principais de produto e parceiro.
+*   A adição de comentários melhora a legibilidade e manutenibilidade do código.
+*   As correções de baixa prioridade contribuem para a qualidade geral e consistência do código.
+*   O ambiente de teste com Vitest demonstrou ser estável após a configuração inicial e reinstalação de uma dependência.
