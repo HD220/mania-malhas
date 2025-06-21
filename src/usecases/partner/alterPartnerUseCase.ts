@@ -4,15 +4,19 @@ import {
   InsertPartner,
   insertPartnerSchema,
 } from "@/db/repositories/schemas/partnerSchema";
+import { ZodError } from "zod"; // Import ZodError
 
 export default async function alterPartnerUseCase(
   id: string,
   input: InsertPartner
 ) {
-  const parsed = insertPartnerSchema.safeParse(input);
-  if (parsed.success) {
-    const repo = partnerRepository(db);
-    return await repo.update(id, parsed.data);
+  // Use parse() which throws ZodError on failure
+  // Or, keep safeParse and throw explicitly:
+  const validationResult = insertPartnerSchema.safeParse(input);
+  if (!validationResult.success) {
+    throw validationResult.error; // Throw the ZodError directly
   }
-  return { errors: parsed.error.issues.map((err) => err.message) };
+
+  const repo = partnerRepository(db);
+  return await repo.update(id, validationResult.data);
 }

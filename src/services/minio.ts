@@ -25,21 +25,6 @@ export async function getPresignedUrlPutObject(
   );
 }
 
-export async function deleteObject(
-  bucketName: string,
-  objectName: string
-): Promise<void> {
-  try {
-    await minioClient.removeObject(bucketName, objectName);
-    console.log(`Successfully deleted ${objectName} from bucket ${bucketName}`);
-  } catch (err) {
-    console.error(`Error deleting object ${objectName} from bucket ${bucketName}:`, err);
-    // Decide if you want to re-throw the error or handle it (e.g., if object not found is not critical)
-    // For now, let's re-throw to make the caller aware.
-    throw err;
-  }
-}
-
 export async function getPresignedUrlGetObject(
   bucketName: string,
   objectName: string,
