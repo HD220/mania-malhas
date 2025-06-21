@@ -3,15 +3,13 @@ import { Inter } from "next/font/google";
 import type { Metadata } from "next";
 import { cn } from "@/utils";
 import { ThemeProvider } from "@/components/providers/theme-provider";
-import { Header } from "@/components/header";
-import AsideBar from "@/components/aside-bar";
 import { Toaster } from "@/components/ui/toaster";
 
 const inter = Inter({ subsets: ["latin"], variable: "--font-sans" });
 
 export const metadata: Metadata = {
-  title: "Mania Malhas",
-  description: "",
+  title: "Mania Malhas", // Título base, pode ser sobrescrito
+  description: "Sistema de gestão para Mania Malhas.", // Descrição padrão
 };
 
 export default function RootLayout({
@@ -20,13 +18,13 @@ export default function RootLayout({
   children: React.ReactNode;
 }>) {
   return (
-    <html lang="pt-BR">
+    <html lang="pt-BR" suppressHydrationWarning>
+      {/* suppressHydrationWarning é útil com next-themes */}
       <body
         className={cn(
           "min-h-screen bg-background font-sans antialiased",
           inter.variable
         )}
-        suppressHydrationWarning={true}
       >
         <ThemeProvider
           attribute="class"
@@ -34,13 +32,8 @@ export default function RootLayout({
           enableSystem
           disableTransitionOnChange
         >
-          <div className="grid min-h-screen w-full md:grid-cols-[220px_1fr] lg:grid-cols-[280px_1fr]">
-            <AsideBar />
-            <div className="flex flex-col">
-              <Header />
-              <main className="p-2">{children}</main>
-            </div>
-          </div>
+          {children}
+          {/* O conteúdo da página (incluindo outros layouts aninhados) será renderizado aqui */}
         </ThemeProvider>
         <Toaster />
       </body>
