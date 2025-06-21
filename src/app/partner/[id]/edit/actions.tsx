@@ -51,13 +51,15 @@ export async function updatePartner({
       return {
         success: false,
         errors: error.flatten().fieldErrors,
-        message: "Erro de validação.",
+        message: "Erro de validação nos dados fornecidos.",
       };
     }
-    console.error("updatePartner Error:", error);
-    return {
-      success: false,
-      message: "Erro ao atualizar parceiro. Tente novamente.",
-    };
+    let errorMessage = "Erro ao atualizar parceiro. Tente novamente.";
+    if (error instanceof Error) {
+      console.error("updatePartner Server Action Error:", error.message);
+    } else {
+      console.error("updatePartner Server Action Unexpected Error:", error);
+    }
+    return { success: false, message: errorMessage };
   }
 }

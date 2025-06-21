@@ -62,14 +62,16 @@ export async function updateProduct({
       return {
         success: false,
         errors: error.flatten().fieldErrors,
-        message: "Erro de validação.",
+        message: "Erro de validação nos dados fornecidos.",
       };
     }
-    console.error("updateProduct Error:", error);
-    // For other types of errors, return a generic error message
-    return {
-      success: false,
-      message: "Erro ao atualizar produto. Tente novamente.",
-    };
+    let errorMessage = "Erro ao atualizar produto. Tente novamente.";
+    if (error instanceof Error) {
+      console.error("updateProduct Server Action Error:", error.message);
+      // Potentially use error.message if it's a known, safe error type
+    } else {
+      console.error("updateProduct Server Action Unexpected Error:", error);
+    }
+    return { success: false, message: errorMessage };
   }
 }

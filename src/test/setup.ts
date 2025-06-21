@@ -33,6 +33,8 @@ import path from 'path';
 // console.log("DB_HOST (before env.ts mock attempt):", process.env.DB_HOST);
 
 // Este arquivo de setup pode ser usado para outras configurações globais de teste no futuro.
+import '@testing-library/jest-dom/vitest'; // Para estender expect com matchers do jest-dom para Vitest
+
 // Por agora, a principal questão é a carga/validação do env.ts.
 // Se o carregamento automático do Vitest para .env não for suficiente,
 // precisaremos mockar '@/db/postgres/env'.
@@ -40,6 +42,7 @@ import path from 'path';
 // Tentativa de definir valores mínimos para process.env ANTES da importação de env.ts
 // Isto é uma tentativa, pode não funcionar devido à ordem de importação/execução dos módulos.
 if (process.env.NODE_ENV === 'test') {
+    // console.log("Setting up mock env vars for test environment in setup.ts");
     process.env.DB_HOST = 'test_db_host';
     process.env.DB_USER = 'test_db_user';
     process.env.DB_PASSWORD = 'test_db_password';

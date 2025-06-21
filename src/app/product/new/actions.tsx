@@ -34,9 +34,20 @@ export async function createProduct(
     return { success: true, message: "Produto criado com sucesso!" };
   } catch (error) {
     if (error instanceof ZodError) {
-      return { success: false, errors: error.flatten().fieldErrors };
+      return { success: false, errors: error.flatten().fieldErrors, message: "Erro de validação nos dados fornecidos." };
     }
-    console.error("createProduct Error:", error);
-    return { success: false, message: "Erro ao criar produto. Tente novamente." };
+    // Para outros tipos de erro, logar e retornar mensagem genérica
+    // Idealmente, erros específicos do use case (ex: falha no DB) poderiam ser tratados diferentemente
+    let errorMessage = "Erro ao criar produto. Tente novamente.";
+    if (error instanceof Error) {
+      // Poderia logar error.message para o servidor, mas não expor diretamente ao cliente por segurança
+      console.error("createProduct Server Action Error:", error.message);
+      // Em alguns casos, você pode querer expor mensagens de erro específicas se forem seguras
+      // errorMessage = error.message;
+    } else {
+      // Lidar com erros que não são instâncias de Error
+      console.error("createProduct Server Action Unexpected Error:", error);
+    }
+    return { success: false, message: errorMessage };
   }
 }

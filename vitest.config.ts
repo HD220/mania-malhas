@@ -1,10 +1,14 @@
 import { defineConfig } from 'vitest/config';
-import tsconfigPaths from 'vite-tsconfig-paths'; // Para resolver aliases do tsconfig.json
+import tsconfigPaths from 'vite-tsconfig-paths';
+import react from '@vitejs/plugin-react'; // Importar o plugin React
 
 export default defineConfig({
-  plugins: [tsconfigPaths()],
+  plugins: [
+    react(), // Adicionar o plugin React
+    tsconfigPaths()
+  ],
   test: {
-    globals: true, // Permite usar APIs do Vitest (describe, it, expect) globalmente sem importação
+    globals: true,
     environment: 'jsdom', // Ambiente para simular o DOM, útil para testes de UI ou hooks que dependem do DOM
     setupFiles: ['./src/test/setup.ts'], // Arquivos para executar antes dos testes
     include: ['src/**/*.test.{ts,tsx}'], // Padrão para encontrar arquivos de teste

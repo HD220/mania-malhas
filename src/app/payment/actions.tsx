@@ -26,13 +26,18 @@ export async function addPaymentAction(
     return { success: true, data: newPayment, message: "Pagamento adicionado com sucesso!" };
   } catch (error) {
     if (error instanceof ZodError) {
-      return { success: false, errors: error.flatten().fieldErrors, message: "Erro de validação." };
+      return { success: false, errors: error.flatten().fieldErrors, message: "Erro de validação nos dados do pagamento." };
     }
+    let errorMessage = "Erro ao adicionar pagamento. Tente novamente.";
     if (error instanceof Error) {
-        return { success: false, message: error.message };
+      // Mensagens de erro do createPaymentUseCase (ex: "Transação não encontrada", valor excedido) são passadas aqui.
+      // Elas são consideradas "seguras" para serem exibidas ao cliente.
+      errorMessage = error.message;
+      console.error("addPaymentAction Server Action Error:", error.message);
+    } else {
+      console.error("addPaymentAction Server Action Unexpected Error:", error);
     }
-    console.error("addPaymentAction Error:", error);
-    return { success: false, message: "Erro ao adicionar pagamento. Tente novamente." };
+    return { success: false, message: errorMessage };
   }
 }
 

@@ -6,18 +6,36 @@ import { SelectTransaction } from "@/db/repositories/schemas/transactionSchema";
 export interface GetTransactionsFilters {
   status?: string;
   type?: "E" | "S";
-  partnerId?: string; // Filtro por partnerId ainda pode ser útil
+  partnerId?: string;
   dateFrom?: Date;
   dateTo?: Date;
-  // TODO: Adicionar paginação e ordenação
+}
+
+// Interface para os parâmetros de paginação do caso de uso
+export interface UseCasePaginationParams {
+  page?: number;
+  pageSize?: number;
+}
+
+// Interface para o resultado paginado
+export interface PaginatedTransactionsResult {
+  data: TransactionWithPartner[];
+  totalItems: number;
+  totalPages: number;
+  currentPage: number;
+  pageSize: number;
 }
 
 export default async function getTransactionsUseCase(
-  filters?: GetTransactionsFilters // GetTransactionsFilters da UI pode ser diferente de TransactionFiltersForRepo
-): Promise<TransactionWithPartner[]> {
+  filters?: GetTransactionsFilters,
+  pagination?: UseCasePaginationParams
+): Promise<PaginatedTransactionsResult> {
   const transactionRepo = createTransactionRepository(db);
+  const page = pagination?.page ?? 1;
+  const pageSize = pagination?.pageSize ?? 10; // Default pageSize
+  const offset = (page - 1) * pageSize;
 
-  // Mapear filtros da UI para filtros do repositório, se necessário.
+  // Mapear filtros da UI para filtros do repositório.
   // Por enquanto, os nomes (type, status) coincidem.
   // Outros filtros como dateFrom, dateTo, partnerId ainda não estão implementados no repositório.
   const repoFilters: import("@/db/repositories/transactionRepository").TransactionFiltersForRepo = {};
@@ -29,25 +47,42 @@ export default async function getTransactionsUseCase(
   }
   // TODO: Implementar filtros de data e partnerId no repositório e mapeá-los aqui.
 
-  const transactions = await transactionRepo.findAll(repoFilters);
+  // Aplicar filtros que o repositório ainda não suporta (se houver)
+  // Esta lógica de filtro no lado da aplicação deve ser minimizada ou eliminada
+  // movendo toda a filtragem para o repositório.
+  const applyApplicationLevelFilters = (data: TransactionWithPartner[], appFilters?: GetTransactionsFilters) => {
+    if (!appFilters) return data;
+    return data.filter(t => {
+      let matches = true;
+      if (appFilters.partnerId && t.partnerId !== appFilters.partnerId) matches = false;
+      if (appFilters.dateFrom && new Date(t.date) < new Date(appFilters.dateFrom)) matches = false;
+      if (appFilters.dateTo && new Date(t.date) > new Date(appFilters.dateTo)) matches = false;
+      return matches;
+    });
+  };
 
-  // A filtragem agora é (parcialmente) feita no repositório.
-  // Se houver filtros que o repositório ainda não suporta (ex: dateFrom, dateTo, partnerId),
-  // eles ainda seriam aplicados aqui, mas o ideal é mover tudo para o repositório.
+  // 1. Obter a contagem total de itens com os filtros aplicados (os que o repo suporta)
+  // Para uma contagem precisa que reflita os filtros do lado da aplicação,
+  // a filtragem do lado da aplicação teria que ser feita antes da contagem, o que é ineficiente.
+  // Idealmente, TODOS os filtros são passados para countAll e findAll.
+  // Por agora, countAll reflete apenas os filtros que o repo suporta.
+  const totalItems = await transactionRepo.countAll(repoFilters);
 
-  let filteredTransactions = transactions;
-  if (filters) {
-    // Exemplo de como filtros adicionais (não no repo ainda) poderiam ser tratados:
-    if (filters.partnerId) {
-      filteredTransactions = filteredTransactions.filter(t => t.partnerId === filters.partnerId);
-    }
-    if (filters.dateFrom) {
-      filteredTransactions = filteredTransactions.filter(t => new Date(t.date) >= new Date(filters.dateFrom!));
-    }
-    if (filters.dateTo) {
-      filteredTransactions = filteredTransactions.filter(t => new Date(t.date) <= new Date(filters.dateTo!));
-    }
-  }
+  // 2. Obter os dados paginados com os filtros que o repo suporta
+  const paginatedDataFromRepo = await transactionRepo.findAll(repoFilters, { offset, limit: pageSize });
 
-  return filteredTransactions;
+  // 3. Aplicar filtros restantes no lado da aplicação (se houver)
+  // Nota: Isso afeta apenas os dados da página atual, não a contagem total de forma precisa
+  // se os filtros de aplicação fossem muito restritivos.
+  const finalData = applyApplicationLevelFilters(paginatedDataFromRepo, filters);
+
+  const totalPages = Math.ceil(totalItems / pageSize);
+
+  return {
+    data: finalData,
+    totalItems,
+    totalPages,
+    currentPage: page,
+    pageSize,
+  };
 }

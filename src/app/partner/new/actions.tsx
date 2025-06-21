@@ -36,13 +36,15 @@ export async function createPartner(
       return {
         success: false,
         errors: error.flatten().fieldErrors,
-        message: "Erro de validação.",
+        message: "Erro de validação nos dados fornecidos.",
       };
     }
-    console.error("createPartner Error:", error);
-    return {
-      success: false,
-      message: "Erro ao criar parceiro. Tente novamente.",
-    };
+    let errorMessage = "Erro ao criar parceiro. Tente novamente.";
+    if (error instanceof Error) {
+      console.error("createPartner Server Action Error:", error.message);
+    } else {
+      console.error("createPartner Server Action Unexpected Error:", error);
+    }
+    return { success: false, message: errorMessage };
   }
 }

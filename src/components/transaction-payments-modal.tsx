@@ -87,7 +87,10 @@ export function TransactionPaymentsModal({
             ID da Transação: {transactionId || "N/A"} <br />
             Valor Total: {new Intl.NumberFormat("pt-BR", { style: "currency", currency: "BRL" }).format(transactionValue)} <br />
             Total Pago: {new Intl.NumberFormat("pt-BR", { style: "currency", currency: "BRL" }).format(totalPaid)} <br />
-            Saldo Devedor: <span className={remainingBalance <= 0.001 ? "text-green-600" : "text-red-600"}>
+            Saldo Devedor: <span
+              data-testid="remaining-balance"
+              className={remainingBalance <= 0.001 ? "text-green-600" : "text-red-600"}
+            >
               {new Intl.NumberFormat("pt-BR", { style: "currency", currency: "BRL" }).format(remainingBalance)}
             </span>
           </DialogDescription>

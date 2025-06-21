@@ -18,12 +18,16 @@ import { ThemeToggle } from "@/components/theme-toggle";
 import { Navbar } from "@/components/navbar/navbar";
 import menus from "@/constant";
 import { Bell, CircleUser, Menu, Package2 } from "lucide-react";
+import { useState } from "react"; // Import useState
+import { NotificationsPanel } from "./notifications/NotificationsPanel"; // Import NotificationsPanel
 
 export function Header() {
-  const router = useRouter(); // For client-side redirect fallback if needed
-  const [isPending, startTransition] = useTransition(); // For pending UI state
+  const router = useRouter();
+  const [isPending, startTransition] = useTransition();
+  const [isNotificationsOpen, setIsNotificationsOpen] = useState(false); // Estado para o painel
 
   return (
+    <>
     <header className="flex h-14 items-center gap-4 border-b bg-muted/40 px-4 lg:h-[60px] lg:px-6">
       <Sheet>
         <SheetTrigger asChild>
@@ -38,10 +42,11 @@ export function Header() {
               <Package2 className="h-6 w-6" />
               <span className="">Mania Malhas</span>
             </Link>
-            <Button variant="outline" size="icon" className="ml-auto h-8 w-8">
+            {/* Removido o sino de dentro do menu sheet mobile para evitar duplicidade se houver um no header principal */}
+            {/* <Button variant="outline" size="icon" className="ml-auto h-8 w-8" onClick={() => setIsNotificationsOpen(true)}>
               <Bell className="h-5 w-5" />
               <span className="sr-only">Toggle notifications</span>
-            </Button>
+            </Button> */}
           </div>
           <Navbar
             menus={menus.slice(1, menus.length)}
@@ -49,7 +54,16 @@ export function Header() {
           />
         </SheetContent>
       </Sheet>
-      <div className="w-full flex-1">{/* TO-DO: breadcrumb */}</div>
+      <div className="w-full flex-1">{/* TO-DO: breadcrumb - já implementado no layout */}</div>
+
+      {/* Botão de Notificações no Header Principal */}
+      <Button variant="outline" size="icon" className="rounded-full relative" onClick={() => setIsNotificationsOpen(true)}>
+        <Bell className="h-5 w-5" />
+        {/* TODO: Adicionar contador de notificações não lidas aqui, se necessário */}
+        {/* <span className="absolute top-0 right-0 inline-flex items-center justify-center px-2 py-1 text-xs font-bold leading-none text-red-100 transform translate-x-1/2 -translate-y-1/2 bg-red-600 rounded-full">3</span> */}
+        <span className="sr-only">Abrir notificações</span>
+      </Button>
+
       <DropdownMenu>
         <DropdownMenuTrigger asChild>
           <Button variant="secondary" size="icon" className="rounded-full">
@@ -106,6 +120,11 @@ export function Header() {
         </DropdownMenuContent>
       </DropdownMenu>
     </header>
+    <NotificationsPanel
+      open={isNotificationsOpen}
+      onOpenChange={setIsNotificationsOpen}
+    />
+    </>
   );
 }
 

@@ -82,59 +82,65 @@ export default function TransactionsListPage() {
   const [isModalOpen, setIsModalOpen] = useState(false);
 
   const [filters, setFilters] = useState<TransactionFilters>({ type: "all", status: "all" });
+  const [currentPage, setCurrentPage] = useState(1);
+  const [totalPages, setTotalPages] = useState(0);
+  // const [totalItems, setTotalItems] = useState(0); // totalItems é usado para calcular totalPages, mas não precisa ser estado separado se totalPages for o principal
+  const pageSize = 10; // Itens por página
 
   /**
    * Handles changes in filter selection.
+   * Resets to page 1 when filters change.
    * Updates the `filters` state, setting a filter to `undefined` if "all" is selected.
    * @param filterName The name of the filter being changed (e.g., "type", "status").
    * @param value The new value of the filter.
    */
   const handleFilterChange = (filterName: keyof TransactionFilters, value: string) => {
+    setCurrentPage(1); // Reset page to 1 when filters change
     setFilters(prev => ({ ...prev, [filterName]: value === "all" ? undefined : value }));
   };
 
   /**
-   * Fetches transactions from the server based on the current filter state.
-   * Updates component state for transactions, loading status, and errors.
+   * Fetches transactions from the server based on the current filter and pagination state.
+   * Updates component state for transactions, loading status, errors, and pagination info.
    */
   const loadTransactions = useCallback(async () => {
     setIsLoading(true);
     setError(null);
     try {
-      // Preparar filtros para a action, removendo 'all' que significa sem filtro para aquele campo
       const activeFilters: Partial<TransactionFilters> = {};
       if (filters.type && filters.type !== "all") activeFilters.type = filters.type;
       if (filters.status && filters.status !== "all") activeFilters.status = filters.status;
 
-      const response = await listTransactionsAction(activeFilters);
+      const response = await listTransactionsAction(activeFilters, { page: currentPage, pageSize });
+
       if (response.success && response.data) {
-        setTransactions(response.data);
+        setTransactions(response.data.data);
+        // setTotalItems(response.data.totalItems);
+        setTotalPages(response.data.totalPages);
+        // Não definir currentPage aqui, pois ele é a fonte da verdade para a chamada da action
       } else {
         setError(response.message || "Falha ao carregar transações.");
         toast({ variant: "destructive", title: "Erro", description: response.message });
+        setTransactions([]);
+        // setTotalItems(0);
+        setTotalPages(0);
       }
     } catch (e: any) {
       const errorMessage = e.message || "Erro desconhecido ao carregar transações.";
       setError(errorMessage);
       toast({ variant: "destructive", title: "Erro de Conexão", description: errorMessage });
+      setTransactions([]);
+      // setTotalItems(0);
+      setTotalPages(0);
     } finally {
       setIsLoading(false);
     }
-  }, [toast]);
+  }, [toast, filters, currentPage, pageSize]); // `filters` e `currentPage` são dependências chave
 
+  // useEffect para carregar transações na montagem inicial e quando filtros ou página atual mudam.
   useEffect(() => {
     loadTransactions();
-  }, [loadTransactions]); // Chamada inicial
-
-  // Recarregar transações quando os filtros mudarem
-  useEffect(() => {
-    // Não recarregar na montagem inicial se loadTransactions já foi chamado pelo useEffect acima
-    // (embora o useCallback deva prevenir chamadas excessivas se loadTransactions for estável)
-    // Uma forma simples é verificar se não está carregando para evitar múltiplas chamadas se filtros mudarem rápido
-    if (!isLoading) {
-      loadTransactions();
-    }
-  }, [filters, isLoading, loadTransactions]); // Adicionado isLoading e loadTransactions para estabilidade
+  }, [loadTransactions]); // loadTransactions já tem `filters` e `currentPage` como dependências no seu useCallback
 
   /**
    * Sets the selected transaction and opens the payments modal.
@@ -221,9 +227,28 @@ export default function TransactionsListPage() {
             <TransactionsTable transactions={transactions} onViewPaymentsClick={handleViewPayments} />
           )}
         </CardContent>
-        <CardFooter>
-          {/* TODO: Adicionar Paginação aqui */}
-          <div>Paginação: (Em breve)</div>
+        <CardFooter className="flex items-center justify-between">
+          <div className="text-xs text-muted-foreground">
+            Página {currentPage} de {totalPages}
+          </div>
+          <div className="flex items-center gap-2">
+            <Button
+              variant="outline"
+              size="sm"
+              onClick={() => setCurrentPage(prev => Math.max(1, prev - 1))}
+              disabled={currentPage <= 1 || isLoading}
+            >
+              Anterior
+            </Button>
+            <Button
+              variant="outline"
+              size="sm"
+              onClick={() => setCurrentPage(prev => Math.min(totalPages, prev + 1))}
+              disabled={currentPage >= totalPages || isLoading}
+            >
+              Próxima
+            </Button>
+          </div>
         </CardFooter>
       </Card>
 

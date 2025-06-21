@@ -1,10 +1,13 @@
 import { getProductWithImagesById, updateProduct } from "./actions";
 import { ProductForm } from "@/components/forms/product-form";
+import { notFound } from "next/navigation"; // Importar notFound
 
 export default async function Page({ params }: { params: { id: string } }) {
   const product = await getProductWithImagesById(params.id);
 
-  if (!product) throw new Error("Produto não encontado!");
+  if (!product) {
+    notFound(); // Chamar notFound se o produto não existir
+  }
 
   return (
     <div className="w-full mx-auto">

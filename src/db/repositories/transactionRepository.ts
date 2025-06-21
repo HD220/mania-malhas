@@ -16,6 +16,7 @@ import { and } from "drizzle-orm"; // Import 'and'
 // Define a more specific return type for findAll when partner name is included
 export type TransactionWithPartner = SelectTransaction & { partnerName?: string | null };
 
+import { count } from "drizzle-orm"; // Import count
 // Interface para os filtros no repositório
 export interface TransactionFiltersForRepo {
   type?: "E" | "S";
@@ -23,8 +24,15 @@ export interface TransactionFiltersForRepo {
   // Adicionar outros filtros conforme necessário (partnerId, date range, etc.)
 }
 
+// Interface para parâmetros de paginação
+export interface PaginationParams {
+  offset?: number;
+  limit?: number;
+}
+
 export type TransactionRepositoryFactory = (dbInstance?: DBConnection) => {
-  findAll: (filters?: TransactionFiltersForRepo) => Promise<TransactionWithPartner[]>; // Aceita filtros
+  findAll: (filters?: TransactionFiltersForRepo, pagination?: PaginationParams) => Promise<TransactionWithPartner[]>;
+  countAll: (filters?: TransactionFiltersForRepo) => Promise<number>;
   findById: (id: string) => Promise<SelectTransaction | null>;
   update: (id: string, data: Partial<InsertTransaction>) => Promise<void>;
   insert: (data: InsertTransaction) => Promise<{ id: string }>;
@@ -33,7 +41,13 @@ export type TransactionRepositoryFactory = (dbInstance?: DBConnection) => {
 export const transactionRepository: TransactionRepositoryFactory = (dbInstance) => {
   const db = dbInstance || defaultDb;
 
-  const findAll = async (filters?: TransactionFiltersForRepo): Promise<TransactionWithPartner[]> => {
+  /**
+   * Helper function to build an array of Drizzle filter conditions
+   * based on the provided filter criteria.
+   * @param {TransactionFiltersForRepo} [filters] - The filters to apply.
+   * @returns {SQL<unknown>[]} An array of Drizzle conditions.
+   */
+  const buildFilterConditions = (filters?: TransactionFiltersForRepo) => {
     const conditions = [];
     if (filters?.type) {
       conditions.push(eq(transactionTable.type, filters.type));
@@ -42,8 +56,19 @@ export const transactionRepository: TransactionRepositoryFactory = (dbInstance) 
       conditions.push(eq(transactionTable.status, filters.status));
     }
     // Adicionar mais condições de filtro aqui
+    return conditions;
+  };
 
-    const query = db
+  /**
+   * Finds all transactions, optionally filtered and paginated, including the partner's name.
+   * @param {TransactionFiltersForRepo} [filters] - Optional filters to apply.
+   * @param {PaginationParams} [pagination] - Optional pagination parameters (offset, limit).
+   * @returns {Promise<TransactionWithPartner[]>} A list of transactions with partner names.
+   */
+  const findAll = async (filters?: TransactionFiltersForRepo, pagination?: PaginationParams): Promise<TransactionWithPartner[]> => {
+    const conditions = buildFilterConditions(filters);
+
+    let queryBuilder = db
       .select({
         // Select all fields from transactionTable
         ...transactionTable,
@@ -52,14 +77,35 @@ export const transactionRepository: TransactionRepositoryFactory = (dbInstance) 
       })
       .from(transactionTable)
       .leftJoin(partnerTable, eq(transactionTable.partnerId, partnerTable.id))
-      // Aplicar condições de filtro se houver alguma
       .where(conditions.length > 0 ? and(...conditions) : undefined)
       .orderBy(desc(transactionTable.createdAt));
 
-    const results = await query.execute(); // Executar a query
+    if (pagination?.limit) {
+      queryBuilder = queryBuilder.limit(pagination.limit);
+    }
+    if (pagination?.offset) {
+      queryBuilder = queryBuilder.offset(pagination.offset);
+    }
 
-    // Parse results with the schema that includes partnerName
+    const results = await queryBuilder.execute();
+
     return results.map(row => selectTransactionWithPartnerSchema.parse(row) as TransactionWithPartner);
+  };
+
+  /**
+   * Counts all transactions, optionally applying filters.
+   * @param {TransactionFiltersForRepo} [filters] - Optional filters to apply.
+   * @returns {Promise<number>} The total count of matching transactions.
+   */
+  const countAll = async (filters?: TransactionFiltersForRepo): Promise<number> => {
+    const conditions = buildFilterConditions(filters);
+
+    const result = await db
+      .select({ value: count() }) // count() or count(transactionTable.id)
+      .from(transactionTable)
+      .where(conditions.length > 0 ? and(...conditions) : undefined);
+
+    return result[0]?.value ?? 0;
   };
 
   const findById = async (id: string): Promise<SelectTransaction | null> => {
@@ -115,5 +161,6 @@ export const transactionRepository: TransactionRepositoryFactory = (dbInstance) 
     update,
     findById,
     findAll,
+    countAll, // Adicionar countAll ao objeto retornado
   };
 };
