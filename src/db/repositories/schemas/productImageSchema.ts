@@ -4,9 +4,13 @@ import { z } from "zod";
 import { productImagesTable } from "../../postgres/schema/productImage";
 
 //Default for table
-export const insertProductImagesSchema = createInsertSchema(
+const baseInsertProductImagesSchema = createInsertSchema(
   productImagesTable
 ).omit({ createdAt: true, updatedAt: true });
+
+export const insertProductImagesSchema = baseInsertProductImagesSchema.extend({
+  url: z.string().url({ message: "URL da imagem inválida." })
+});
 export type InsertProductImage = z.input<typeof insertProductImagesSchema>;
 
 //Default for table

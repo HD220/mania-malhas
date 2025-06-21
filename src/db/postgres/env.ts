@@ -12,7 +12,11 @@ const stringBoolean = z.coerce
 
 const EnvSchema = z.object({
   NODE_ENV: z
-    .union([z.literal("production"), z.literal("development")])
+    .union([
+      z.literal("production"),
+      z.literal("development"),
+      z.literal("test"), // Adicionar 'test' como valor válido
+    ])
     .default("development"),
   DB_HOST: z.string(),
   DB_USER: z.string(),
@@ -25,6 +29,7 @@ const EnvSchema = z.object({
   MINIO_URL: z.string(),
   MINIO_ACCESSKEY: z.string(),
   MINIO_SECRETKEY: z.string(),
+  MINIO_BUCKET_PRODUCTS: z.string().default("products"), // Default to "products" but can be overridden
 });
 
 export type EnvSchema = z.infer<typeof EnvSchema>;

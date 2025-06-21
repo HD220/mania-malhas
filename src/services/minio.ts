@@ -25,14 +25,18 @@ export async function getPresignedUrlPutObject(
   );
 }
 
-export async function getPresignedUrlGetObject(
-  bucketName: string,
-  objectName: string,
-  expiration: number
-) {
-  return await minioClient.presignedGetObject(
-    bucketName,
-    objectName,
-    expiration
-  );
-}
+// This function is no longer needed if product images are served via public URLs
+// from a public bucket. Keeping it commented out for now in case other functionalities
+// might require it in the future for non-public objects.
+// If confirmed to be unused across the entire application, it can be deleted.
+// export async function getPresignedUrlGetObject(
+//   bucketName: string,
+//   objectName: string,
+//   expiration: number
+// ) {
+//   return await minioClient.presignedGetObject(
+//     bucketName,
+//     objectName,
+//     expiration
+//   );
+// }

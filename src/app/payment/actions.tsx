@@ -36,9 +36,11 @@ export async function addPaymentAction(
   }
 }
 
+import { SelectPayment } from "@/db/repositories/schemas/paymentSchema"; // Import SelectPayment
+
 export async function listPaymentsByTransactionAction(
   transactionId: string
-): Promise<PaymentServerResponse<any[]>> { // Replace any[] with SelectPayment[]
+): Promise<PaymentServerResponse<SelectPayment[]>> { // Use SelectPayment[]
   try {
     if (!transactionId) {
       return { success: false, message: "ID da Transação é obrigatório." };

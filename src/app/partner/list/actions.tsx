@@ -1,9 +1,10 @@
 "use server";
 
-import getPartnersUseCase from "@/usecases/partner/getPartnersUseCase";
-import { unstable_noStore as noCache } from "next/cache";
+import searchPartnersUseCase from "@/usecases/partner/searchPartnersUseCase"; // Updated import
+import { unstable_noStore as noStore } from "next/cache"; // Corrected alias
 
 export async function getPartners(search: string, status: boolean) {
-  noCache();
-  return await getPartnersUseCase(search, status);
+  noStore(); // Corrected usage
+  // The use case now defaults status to true, but we can still pass it explicitly from here
+  return await searchPartnersUseCase(search, status);
 }

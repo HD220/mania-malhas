@@ -18,7 +18,7 @@ export const transactionTable = pgTable("transaction", {
     .notNull(),
   description: varchar("description", { length: 100 }),
   type: char("type", ["E", "S"]).notNull(),
-  value: decimal("value", { precision: 16, scale: 7 })
+  value: decimal("value", { precision: 10, scale: 2 }) // Ajustado para 10,2
     .notNull()
     .$type<number>(),
   date: timestamp("date", { mode: "date", withTimezone: true })

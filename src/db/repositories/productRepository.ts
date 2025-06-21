@@ -125,25 +125,51 @@ export const productRepository: ProductRepository = (db) => {
   };
 
   const findById = async (id: string) => {
+    // Query principal busca pelo ID do produto.
+    // O LEFT JOIN agora filtra as imagens ativas na própria condição do JOIN.
     const productsDb = await db
       .select()
       .from(productTable)
       .leftJoin(
         productImagesTable,
-        eq(productImagesTable.productId, productTable.id)
+        and(
+          eq(productImagesTable.productId, productTable.id),
+          eq(productImagesTable.active, true) // Imagens ativas apenas
+        )
       )
-      .where(and(eq(productImagesTable.active, true), eq(productTable.id, id)))
-      .orderBy(({ product, productImage }) => [
-        desc(product.createdAt),
-        desc(productImage.createdAt),
-      ]);
+      .where(eq(productTable.id, id)) // Filtra pelo ID do produto
+      .orderBy(desc(productTable.createdAt), desc(productImagesTable.createdAt));
 
-    const [result] = convert(productsDb);
+    if (productsDb.length === 0) {
+      return null; // Produto não encontrado pelo ID
+    }
+
+    const [result] = convert(productsDb); // convert() deve lidar com múltiplas linhas de imagem para um produto
+
+    if (!result) {
+      // Isso pode acontecer se convert() retornar vazio por algum motivo inesperado
+      // ou se productsDb continha apenas linhas onde product era null (não deveria acontecer com a query atual)
+      return null;
+    }
 
     const parsed = selectProductWithImagesSchema.safeParse(result);
-    if (parsed.success) return parsed.data;
+    if (parsed.success) {
+      return parsed.data;
+    }
 
-    throw parsed.error;
+    // Se o produto foi encontrado mas a estrutura é inválida (raro se os tipos do DB estiverem corretos)
+    console.error(
+      `Erro de parsing Zod para produto ID ${id}:`,
+      parsed.error.flatten()
+    );
+    // Lançar um erro genérico ou um erro de validação específico aqui.
+    // Por enquanto, para não quebrar chamadores que não esperam um NotFoundError específico,
+    // vamos manter o comportamento de lançar o erro do Zod, mas idealmente seria um erro customizado.
+    // Ou, mais simples, retornar null também neste caso, indicando que o dado não está como esperado.
+    // Decidindo por retornar null também se o parse falhar, para simplificar o tratamento de erro no chamador.
+    // Considerar logar este erro de forma mais robusta.
+    console.warn(`Produto com ID ${id} encontrado mas falhou na validação Zod. Retornando null.`);
+    return null;
   };
 
   const findImageById = async (productId: string, imageId: string) => {
@@ -154,10 +180,11 @@ export const productRepository: ProductRepository = (db) => {
         and(
           eq(productImagesTable.id, imageId),
           eq(productImagesTable.productId, productId)
+          // eq(productImagesTable.active, true) // Opcional: considerar se deve retornar apenas imagens ativas aqui
         )
       );
 
-    return image;
+    return image || null; // Retorna a imagem ou null se não encontrada
   };
 
   const update = async (

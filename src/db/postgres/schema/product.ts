@@ -13,7 +13,7 @@ export const productTable = pgTable("product", {
   id: uuid("id").defaultRandom().primaryKey(),
   name: varchar("name", { length: 100 }).notNull(),
   description: text("description"),
-  price: decimal("price", { precision: 16, scale: 7 })
+  price: decimal("price", { precision: 10, scale: 2 }) // Ajustado para 10,2
     .notNull()
     .$type<number>(),
   active: boolean("active").default(true).notNull(),

@@ -2,6 +2,7 @@
 // import "@/styles/globals.css";
 import { Header } from "@/components/header";
 import AsideBar from "@/components/aside-bar";
+import { Breadcrumbs } from "@/components/navigation/breadcrumbs"; // Importar Breadcrumbs aqui
 // cn pode não ser necessário aqui se não houver classes condicionais específicas para este layout
 // import { cn } from "@/utils";
 
@@ -21,7 +22,11 @@ export default function AdminLayout({
       <AsideBar />
       <div className="flex flex-col">
         <Header />
-        <main className="p-2">{children}</main>
+        {/* Envolver Breadcrumbs e main em um container para padding consistente */}
+        <div className="flex-1 overflow-y-auto p-4 md:p-6">
+          <Breadcrumbs />
+          <main className="mt-4">{children}</main> {/* Adiciona margem acima do conteúdo principal se breadcrumbs estiverem presentes */}
+        </div>
       </div>
     </div>
   );

@@ -1,6 +1,5 @@
 import { db } from "@/db/postgres";
 import { productRepository } from "@/db/repositories/productRepository";
-// import { getPresignedUrlGetObject } from "@/services/minio"; // No longer needed if URLs are public
 
 export default async function getProductByIdUseCase({ id }: { id: string }) {
   // The repository's findById method should return the product with image URLs

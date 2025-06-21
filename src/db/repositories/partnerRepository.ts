@@ -60,12 +60,30 @@ export const partnerRepository: PartnerRepository = (db) => {
       .from(partnerTable)
       .where(eq(partnerTable.id, id));
 
-    const [result] = partnersDb;
+    if (partnersDb.length === 0) {
+      return null; // Parceiro não encontrado
+    }
+
+    const [result] = partnersDb; // Agora sabemos que partnersDb tem pelo menos um item
+
+    // Não é estritamente necessário verificar !result aqui se partnersDb.length > 0 já foi checado,
+    // mas por segurança, caso a query retorne [null] ou [undefined] por algum motivo exótico.
+    if (!result) {
+      return null;
+    }
 
     const parsed = selectPartnerSchema.safeParse(result);
-    if (parsed.success) return parsed.data;
+    if (parsed.success) {
+      return parsed.data;
+    }
 
-    throw parsed.error;
+    // Se o parceiro foi encontrado mas a estrutura é inválida
+    console.error(
+      `Erro de parsing Zod para parceiro ID ${id}:`,
+      parsed.error.flatten()
+    );
+    console.warn(`Parceiro com ID ${id} encontrado mas falhou na validação Zod. Retornando null.`);
+    return null;
   };
 
   const update = async (id: string, { ...data }: InsertPartner) => {

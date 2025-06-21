@@ -11,6 +11,9 @@
     "build": "next build",
     "start": "next start",
     "lint": "next lint",
+    "test": "vitest",
+    "test:ui": "vitest --ui",
+    "coverage": "vitest run --coverage",
     "pg:generate": "drizzle-kit generate --config=./src/db/postgres/drizzle.config.ts",
     "pg:drop": "drizzle-kit drop --config=./src/db/postgres/drizzle.config.ts",
     "pg:migrate": "cross-env DB_MIGRATING=true tsx ./src/db/postgres/migrate.ts",
@@ -53,7 +56,6 @@
     "clsx": "^2.1.1",
     "cmdk": "^1.0.0",
     "date-fns": "^3.6.0",
-    "dotenv": "^16.4.5",
     "dotenv-expand": "^11.0.6",
     "drizzle-orm": "^0.31.2",
     "drizzle-zod": "^0.5.1",
@@ -83,14 +85,19 @@
     "@types/node": "^20.14.2",
     "@types/react": "^18.3.3",
     "@types/react-dom": "^18.3.0",
+    "@vitest/ui": "^3.2.4",
     "autoprefixer": "^10.4.19",
     "cross-env": "^7.0.3",
+    "dotenv": "^16.5.0",
     "drizzle-kit": "^0.22.7",
     "eslint": "^8.57.0",
     "eslint-config-next": "14.2.3",
+    "jsdom": "^26.1.0",
     "postcss": "^8.4.38",
     "tailwindcss": "^3.4.4",
     "tsx": "^4.15.2",
-    "typescript": "^5.4.5"
+    "typescript": "^5.4.5",
+    "vite-tsconfig-paths": "^5.1.4",
+    "vitest": "^3.2.4"
   }
 }

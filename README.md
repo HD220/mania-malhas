@@ -34,3 +34,28 @@ You can check out [the Next.js GitHub repository](https://github.com/vercel/next
 The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
 
 Check out our [Next.js deployment documentation](https://nextjs.org/docs/deployment) for more details.
+
+## Running Tests
+
+This project uses [Vitest](https://vitest.dev/) for unit and integration testing.
+
+To run all tests:
+```bash
+npm test
+```
+
+To run tests in watch mode:
+```bash
+npm test -- --watch
+```
+(Or `vitest` directly if installed globally or via npx)
+
+To run tests with a UI (opens in browser):
+```bash
+npm run test:ui
+```
+
+To generate a coverage report (output in `./coverage` directory):
+```bash
+npm run coverage
+```

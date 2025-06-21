@@ -1,6 +1,5 @@
 import { db } from "@/db/postgres";
 import { productRepository } from "@/db/repositories/productRepository";
-// import { getPresignedUrlGetObject } from "@/services/minio"; // No longer needed
 
 export default async function getProductsUseCase(
   search: string,

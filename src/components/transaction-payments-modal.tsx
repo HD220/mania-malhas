@@ -36,20 +36,24 @@ export function TransactionPaymentsModal({
     setIsLoading(true);
     setError(null);
     try {
+      // listPaymentsByTransactionAction now correctly typed to return PaymentServerResponse<SelectPayment[]>
       const response = await listPaymentsByTransactionAction(transactionId);
       if (response.success && response.data) {
-        setPayments(response.data as SelectPayment[]);
+        setPayments(response.data); // No need for 'as SelectPayment[]' if action is correctly typed
       } else {
         setError(response.message || "Falha ao buscar pagamentos.");
         setPayments([]);
+        toast({ variant: "destructive", title: "Erro ao buscar pagamentos", description: response.message });
       }
-    } catch (e) {
-      setError((e as Error).message || "Erro ao conectar.");
+    } catch (e: any) {
+      const errorMessage = (e instanceof Error ? e.message : String(e)) || "Erro ao conectar.";
+      setError(errorMessage);
       setPayments([]);
+      toast({ variant: "destructive", title: "Erro de Conexão", description: errorMessage });
     } finally {
       setIsLoading(false);
     }
-  }, [transactionId]);
+  }, [transactionId, toast]); // Added toast to dependency array
 
   useEffect(() => {
     if (open && transactionId) {
@@ -63,12 +67,16 @@ export function TransactionPaymentsModal({
       fetchPayments(); // Refresh list
       if (onPaymentAdded) onPaymentAdded(); // Notify parent to refresh
     }
-    return result; // Return result for PaymentForm to handle specific error messages
+    // PaymentForm will show specific toasts based on the result
+    return result;
   };
 
-  const totalPaid = payments.reduce((sum, p) => sum + Number(p.value), 0);
-  const remainingBalance = Number(transactionValue) - totalPaid;
-  const canAddMorePayments = remainingBalance > 0.001 || transactionType === 'E'; // Allow overpayment for Entries if desired, for now, same logic.
+  const totalPaid = payments.reduce((sum, p) => sum + parseFloat(p.value as unknown as string), 0); // Ensure p.value is treated as number
+  const remainingBalance = parseFloat(transactionValue as unknown as string) - totalPaid;
+
+  // Do not allow adding more payments if the transaction is fully paid or overpaid.
+  // A small tolerance (e.g., 0.001) can be used for floating point comparisons.
+  const canAddMorePayments = remainingBalance > 0.001;
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>

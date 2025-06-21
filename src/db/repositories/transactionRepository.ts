@@ -42,9 +42,13 @@ export const transactionRepository: TransactionRepositoryFactory = (dbInstance) 
     if (parsed.success) {
       return parsed.data;
     } else {
-      console.error("findById parsing error in transactionRepository:", parsed.error);
-      // Decide on error handling: throw, or return null if parsing fails (might hide issues)
-      throw new Error("Failed to parse transaction data.");
+      // Se a transação foi encontrada mas a estrutura é inválida
+      console.error(
+        `Erro de parsing Zod para transação ID ${id}:`,
+        parsed.error.flatten()
+      );
+      console.warn(`Transação com ID ${id} encontrada mas falhou na validação Zod. Retornando null.`);
+      return null;
     }
   };
 

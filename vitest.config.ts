@@ -1,0 +1,29 @@
+import { defineConfig } from 'vitest/config';
+import tsconfigPaths from 'vite-tsconfig-paths'; // Para resolver aliases do tsconfig.json
+
+export default defineConfig({
+  plugins: [tsconfigPaths()],
+  test: {
+    globals: true, // Permite usar APIs do Vitest (describe, it, expect) globalmente sem importação
+    environment: 'jsdom', // Ambiente para simular o DOM, útil para testes de UI ou hooks que dependem do DOM
+    setupFiles: ['./src/test/setup.ts'], // Arquivos para executar antes dos testes
+    include: ['src/**/*.test.{ts,tsx}'], // Padrão para encontrar arquivos de teste
+    coverage: {
+      provider: 'v8', // ou 'istanbul'
+      reporter: ['text', 'json', 'html'],
+      reportsDirectory: './coverage',
+      include: ['src/usecases/**/*.{ts,tsx}', 'src/components/**/*.{ts,tsx}'], // Ajuste para incluir o que você quer cobrir
+      exclude: [ // Excluir arquivos de configuração, tipos, etc.
+        'src/**/index.ts',
+        'src/**/index.tsx',
+        'src/**/*.d.ts',
+        'src/**/*.config.{ts,js}',
+        'src/**/*.schema.{ts,tsx}', // Excluir schemas Zod da cobertura direta, pois são testados pelo uso
+        'src/db/postgres/env.ts',
+        'src/db/postgres/migrate.ts',
+        'src/lib/errors/domainErrors.ts', // Classes de erro simples
+        // Adicione outros padrões para excluir
+      ],
+    },
+  },
+});

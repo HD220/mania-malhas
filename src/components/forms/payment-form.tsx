@@ -25,9 +25,12 @@ export const paymentFormSchema = z.object({
 
 export type PaymentFormData = z.infer<typeof paymentFormSchema>;
 
+// Import the server response type
+import { PaymentServerResponse } from "@/app/payment/actions";
+
 interface PaymentFormProps {
   transactionId: string; // Needed to associate the payment
-  onSubmit: (data: PaymentFormData & { transactionId: string }) => Promise<any>; // Server action
+  onSubmit: (data: PaymentFormData & { transactionId: string }) => Promise<PaymentServerResponse<{ id: string }>>; // Use specific type
   onSuccess?: () => void; // Callback on successful submission
   disabled?: boolean;
 }
