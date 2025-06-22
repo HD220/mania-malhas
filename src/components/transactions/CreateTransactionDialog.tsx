@@ -1,7 +1,7 @@
 "use client";
 
 import * as React from "react";
-import { useState } from "react";
+import { useState, useEffect } from "react"; // Added useEffect
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { z } from "zod";
@@ -43,9 +43,19 @@ import {
 } from "@/components/ui/popover";
 import { Calendar } from "@/components/ui/calendar";
 import { cn } from "@/lib/utils";
-import { CalendarIcon } from "lucide-react";
+import { CalendarIcon, ChevronsUpDown, Check } from "lucide-react"; // Added ChevronsUpDown, Check
 import { format } from "date-fns";
 import { ptBR } from "date-fns/locale"; // For date formatting
+import { getPartners } from "@/app/partner/list/actions"; // Import server action
+import { type SelectPartner } from "@/db/repositories/schemas/partnerSchema"; // Import type
+import {
+  Command,
+  CommandEmpty,
+  CommandGroup,
+  CommandInput,
+  CommandItem,
+  CommandList, // Added CommandList
+} from "@/components/ui/command";
 
 // Define the Zod schema for form validation (based on previous step's analysis)
 // This will be refined with actual field components later.
@@ -70,6 +80,9 @@ type CreateTransactionFormValues = z.infer<typeof createTransactionFormSchema>;
 
 export function CreateTransactionDialog() {
   const [isOpen, setIsOpen] = useState(false);
+  const [partners, setPartners] = useState<SelectPartner[]>([]);
+  const [partnersLoading, setPartnersLoading] = useState(false);
+  const [comboboxOpen, setComboboxOpen] = useState(false);
 
   const form = useForm<CreateTransactionFormValues>({
     resolver: zodResolver(createTransactionFormSchema),
@@ -83,6 +96,24 @@ export function CreateTransactionDialog() {
       dueDate: undefined,
     },
   });
+
+  useEffect(() => {
+    if (isOpen && partners.length === 0 && !partnersLoading) { // Fetch only if dialog is open and partners not loaded
+      const fetchPartners = async () => {
+        setPartnersLoading(true);
+        try {
+          const fetchedPartners = await getPartners("", true); // Fetch all active partners
+          setPartners(fetchedPartners);
+        } catch (error) {
+          console.error("Failed to fetch partners:", error);
+          // Optionally, show a toast error here
+        } finally {
+          setPartnersLoading(false);
+        }
+      };
+      fetchPartners();
+    }
+  }, [isOpen, partners.length, partnersLoading]); // Added dependencies
 
   const onSubmit = (data: CreateTransactionFormValues) => {
     console.log("Form submitted (UI-TX-CREATE.1 - no action yet):", data);
@@ -189,12 +220,61 @@ export function CreateTransactionDialog() {
               control={form.control}
               name="partnerId"
               render={({ field }) => (
-                <FormItem>
+                <FormItem className="flex flex-col">
                   <FormLabel>Parceiro</FormLabel>
-                  <FormControl>
-                    {/* Placeholder - will be replaced by Combobox in UI-TX-CREATE.2 */}
-                    <Input placeholder="Selecione um parceiro (será um combobox)" {...field} disabled />
-                  </FormControl>
+                  <Popover open={comboboxOpen} onOpenChange={setComboboxOpen}>
+                    <PopoverTrigger asChild>
+                      <FormControl>
+                        <Button
+                          variant="outline"
+                          role="combobox"
+                          aria-expanded={comboboxOpen}
+                          className={cn(
+                            "w-full justify-between",
+                            !field.value && "text-muted-foreground"
+                          )}
+                        >
+                          {field.value
+                            ? partners.find(
+                                (partner) => partner.id === field.value
+                              )?.name
+                            : "Selecione um parceiro"}
+                          <ChevronsUpDown className="ml-2 h-4 w-4 shrink-0 opacity-50" />
+                        </Button>
+                      </FormControl>
+                    </PopoverTrigger>
+                    <PopoverContent className="w-[--radix-popover-trigger-width] p-0">
+                      <Command>
+                        <CommandInput placeholder="Buscar parceiro..." disabled={partnersLoading} />
+                        {partnersLoading && <div className="p-4 text-sm text-center">Carregando...</div>}
+                        {!partnersLoading && <CommandEmpty>Nenhum parceiro encontrado.</CommandEmpty>}
+                        {!partnersLoading && partners.length > 0 && (
+                          <CommandList> {/* Use CommandList for scrolling if many items */}
+                            <CommandGroup>
+                              {partners.map((partner) => (
+                                <CommandItem
+                                  value={partner.id} // Use partner.id for value
+                                  key={partner.id}
+                                  onSelect={(currentValue) => {
+                                    form.setValue("partnerId", currentValue === field.value ? "" : currentValue);
+                                    setComboboxOpen(false);
+                                  }}
+                                >
+                                  <Check
+                                    className={cn(
+                                      "mr-2 h-4 w-4",
+                                      field.value === partner.id ? "opacity-100" : "opacity-0"
+                                    )}
+                                  />
+                                  {partner.name}
+                                </CommandItem>
+                              ))}
+                            </CommandGroup>
+                          </CommandList>
+                        )}
+                      </Command>
+                    </PopoverContent>
+                  </Popover>
                   <FormMessage />
                 </FormItem>
               )}
