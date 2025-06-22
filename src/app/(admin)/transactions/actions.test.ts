@@ -20,12 +20,18 @@ import { updateTransactionAction, UpdateTransactionServerResponse } from './acti
 // Import deleteTransactionUseCase with its input schema
 import deleteTransactionUseCase, { deleteTransactionInputSchema } from '@/usecases/transaction/deleteTransactionUseCase';
 import { deleteTransactionAction, DeleteTransactionServerResponse } from './actions';
+
+// Import getTransactionByIdUseCase and its types/action
+import getTransactionByIdUseCase, { getTransactionByIdInputSchema } from '@/usecases/transaction/getTransactionByIdUseCase';
+import { getTransactionByIdAction, GetTransactionByIdServerResponse } from './actions';
+
 // Specific error types (NotFoundError, DomainConflictError, ZodError) will be imported via vi.importActual or are standard
 
 // Mock dos use cases
 vi.mock('@/usecases/transaction/getTransactionsUseCase');
 vi.mock('@/usecases/transaction/createTransactionUseCase');
 vi.mock('@/usecases/transaction/updateTransactionUseCase');
+
 // Mock deleteTransactionUseCase (default export) but keep named exports (like schema) real
 vi.mock('@/usecases/transaction/deleteTransactionUseCase', async () => {
   const actual = await vi.importActual<typeof import('@/usecases/transaction/deleteTransactionUseCase')>('@/usecases/transaction/deleteTransactionUseCase');
@@ -34,6 +40,16 @@ vi.mock('@/usecases/transaction/deleteTransactionUseCase', async () => {
     default: vi.fn(), // Mocks the default export (deleteTransactionUseCase function)
   };
 });
+
+// Mock getTransactionByIdUseCase (default export) but keep named exports (like schema) real
+vi.mock('@/usecases/transaction/getTransactionByIdUseCase', async () => {
+  const actual = await vi.importActual<typeof import('@/usecases/transaction/getTransactionByIdUseCase')>('@/usecases/transaction/getTransactionByIdUseCase');
+  return {
+    ...actual, // Includes actual getTransactionByIdInputSchema
+    default: vi.fn(), // Mocks the default export (getTransactionByIdUseCase function)
+  };
+});
+
 
 // Mock de next/cache
 vi.mock('next/cache', async (importOriginal) => {
@@ -130,6 +146,75 @@ describe('listTransactionsAction Server Action', () => {
     mockGetTransactionsUseCase.mockResolvedValue({ data: [], totalItems: 0, totalPages: 0, currentPage: 1, pageSize: 10 });
     await listTransactionsAction();
     expect(unstable_noStore).toHaveBeenCalled();
+  });
+});
+
+describe('getTransactionByIdAction Server Action', async () => {
+  const { NotFoundError } = await vi.importActual<typeof import('@/lib/errors/domainErrors')>('@/lib/errors/domainErrors');
+  // getTransactionByIdUseCase is already mocked by vi.mock at the top level
+  const validTxId = faker.string.uuid();
+
+  const mockTransaction: SelectTransaction = {
+    id: validTxId,
+    description: "Sample Transaction",
+    value: "123.45", // Assuming string value from DB schema, use case might coerce
+    type: 'E',
+    status: 'Pendente',
+    partnerId: faker.string.uuid(),
+    date: new Date(),
+    due_date: new Date(),
+    createdAt: new Date(),
+    updatedAt: new Date(),
+    transactionId: null,
+  };
+
+  beforeEach(() => {
+    vi.clearAllMocks();
+    (getTransactionByIdUseCase as ReturnType<typeof vi.fn>).mockReset();
+  });
+
+  it('should return a transaction successfully when found', async () => {
+    (getTransactionByIdUseCase as ReturnType<typeof vi.fn>).mockResolvedValue(mockTransaction);
+
+    const response = await getTransactionByIdAction(validTxId);
+
+    expect(getTransactionByIdUseCase).toHaveBeenCalledWith({ id: validTxId });
+    expect(response.success).toBe(true);
+    expect(response.data).toEqual(mockTransaction);
+    expect(response.message).toBeUndefined();
+  });
+
+  it('should return an error message if ID is invalid (ZodError from action)', async () => {
+    const invalidTxId = "not-a-uuid";
+    // Action calls getTransactionByIdInputSchema.parse directly
+
+    const response = await getTransactionByIdAction(invalidTxId);
+
+    expect(response.success).toBe(false);
+    expect(response.message).toBe("ID da transação inválido.");
+    expect(getTransactionByIdUseCase).not.toHaveBeenCalled();
+  });
+
+  it('should return NotFoundError if use case throws NotFoundError', async () => {
+    const errorMessage = `Transação com ID ${validTxId} não encontrada.`;
+    (getTransactionByIdUseCase as ReturnType<typeof vi.fn>).mockRejectedValue(new NotFoundError(`Transação com ID ${validTxId}`));
+
+    const response = await getTransactionByIdAction(validTxId);
+
+    expect(response.success).toBe(false);
+    expect(response.message).toBe(errorMessage);
+    expect(getTransactionByIdUseCase).toHaveBeenCalledWith({ id: validTxId });
+  });
+
+  it('should return a generic error message if use case throws an unexpected error', async () => {
+    const genericErrorMessage = "Falha ao buscar transação.";
+    (getTransactionByIdUseCase as ReturnType<typeof vi.fn>).mockRejectedValue(new Error(genericErrorMessage));
+
+    const response = await getTransactionByIdAction(validTxId);
+
+    expect(response.success).toBe(false);
+    expect(response.message).toBe(genericErrorMessage);
+    expect(getTransactionByIdUseCase).toHaveBeenCalledWith({ id: validTxId });
   });
 });
 
@@ -246,13 +331,14 @@ describe('deleteTransactionAction Server Action', async () => {
 
 
   it('should return NotFoundError if use case throws NotFoundError', async () => {
-    const errorMessage = `Transaction with ID ${validTransactionId} not found.`;
-    (deleteTransactionUseCase as ReturnType<typeof vi.fn>).mockRejectedValue(new NotFoundError(`Transaction with ID ${validTransactionId}`));
+    const resourceName = `Transaction with ID ${validTransactionId}`;
+    const expectedErrorMessage = `${resourceName} não encontrada.`; // Adjusted to Portuguese
+    (deleteTransactionUseCase as ReturnType<typeof vi.fn>).mockRejectedValue(new NotFoundError(resourceName));
 
     const response = await deleteTransactionAction(validTransactionId);
 
     expect(response.success).toBe(false);
-    expect(response.message).toBe(errorMessage);
+    expect(response.message).toBe(expectedErrorMessage);
     expect(deleteTransactionUseCase).toHaveBeenCalledWith({ id: validTransactionId }); // Check the actual mock
     expect(mockRevalidatePath).not.toHaveBeenCalled();
   });
@@ -324,14 +410,14 @@ describe('updateTransactionAction Server Action', async () => {
   });
 
   it('should return NotFoundError if use case throws NotFoundError', async () => {
-    const errorMessage = "Transação não encontrada.";
-    mockUpdateTransactionUseCase.mockRejectedValue(new NotFoundError(errorMessage));
+    const resourceName = "Transação não encontrada."; // This is the resource name passed to NotFoundError
+    const expectedErrorMessage = `${resourceName} não encontrada.`; // Error class appends " não encontrada."
+    mockUpdateTransactionUseCase.mockRejectedValue(new NotFoundError(resourceName));
 
     const response = await updateTransactionAction(transactionId, validUpdateInput);
 
     expect(response.success).toBe(false);
-    // The NotFoundError class appends ". not found." to the message.
-    expect(response.message).toBe(`${errorMessage} not found.`);
+    expect(response.message).toBe(expectedErrorMessage);
     expect(response.data).toBeUndefined();
     expect(mockRevalidatePath).not.toHaveBeenCalled();
   });

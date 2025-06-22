@@ -42,6 +42,40 @@ export async function listTransactionsAction(
   }
 }
 
+// Server response type for fetching a single transaction
+export type GetTransactionByIdServerResponse = {
+  success: boolean;
+  data?: SelectTransaction;
+  message?: string;
+  // No fieldErrors expected here as it's a GET by ID
+};
+
+export async function getTransactionByIdAction(id: string): Promise<GetTransactionByIdServerResponse> {
+  try {
+    const validatedInput = getTransactionByIdInputSchema.parse({ id });
+    const transaction = await getTransactionByIdUseCase(validatedInput);
+    return { success: true, data: transaction };
+  } catch (error: any) {
+    if (error instanceof ZodError) {
+      return {
+        success: false,
+        message: "ID da transação inválido.", // Or specific field error if schema was more complex
+      };
+    }
+    if (error instanceof NotFoundError) {
+      return {
+        success: false,
+        message: error.message, // "Transação com ID X não encontrada."
+      };
+    }
+    console.error("getTransactionByIdAction Error:", error);
+    return {
+      success: false,
+      message: error.message || "Falha ao buscar transação.",
+    };
+  }
+}
+
 import createTransactionUseCase, { CreateTransactionInput } from "@/usecases/transaction/createTransactionUseCase";
 import { ZodError } from "zod";
 import { revalidatePath } from "next/cache";
@@ -124,8 +158,11 @@ export async function updateTransactionAction(
 }
 
 import deleteTransactionUseCase, { deleteTransactionInputSchema } from "@/usecases/transaction/deleteTransactionUseCase";
+// Import getTransactionByIdUseCase and its input schema
+import getTransactionByIdUseCase, { getTransactionByIdInputSchema } from "@/usecases/transaction/getTransactionByIdUseCase";
 import { DomainConflictError, NotFoundError } from "@/lib/errors/domainErrors";
 import { ZodError } from "zod";
+import { SelectTransaction } from "@/db/repositories/schemas/transactionSchema";
 
 // Tipo específico para a resposta da action de exclusão
 export type DeleteTransactionServerResponse = {

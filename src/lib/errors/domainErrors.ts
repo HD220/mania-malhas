@@ -7,8 +7,11 @@ export class DomainError extends Error {
 
 export class NotFoundError extends DomainError {
   constructor(resourceName: string, query?: Record<string, any>) {
-    const queryStr = query ? ` for query: ${JSON.stringify(query)}` : "";
-    super(`${resourceName} not found${queryStr}.`);
+    const queryStr = query ? ` para a consulta: ${JSON.stringify(query)}` : "";
+    // Adapting the message to Portuguese, assuming the resourceName itself is already in Portuguese or contextually makes sense.
+    // If resourceName is like "Transaction with ID X", then "Transaction with ID X não encontrada."
+    // If resourceName is "Transação", then "Transação não encontrada."
+    super(`${resourceName} não encontrada${queryStr}.`);
     this.name = "NotFoundError";
   }
 }
