@@ -72,6 +72,22 @@ describe('getTransactionsUseCase', () => {
     expect(mockTransactionRepo.countAll).toHaveBeenCalledWith(expectedRepoFilters);
   });
 
+  it('should fetch transactions with description filter', async () => {
+    (mockTransactionRepo.findAll as ReturnType<typeof vi.fn>).mockResolvedValue([mockTransaction]);
+    (mockTransactionRepo.countAll as ReturnType<typeof vi.fn>).mockResolvedValue(1);
+
+    const filters = { description: 'Test Transaction' };
+    await getTransactionsUseCase(filters);
+
+    const expectedRepoFilters = { description: 'Test Transaction' };
+    expect(mockTransactionRepo.findAll).toHaveBeenCalledWith(
+      expectedRepoFilters,
+      { offset: 0, limit: 10 }, // default pagination
+      undefined // orderBy
+    );
+    expect(mockTransactionRepo.countAll).toHaveBeenCalledWith(expectedRepoFilters);
+  });
+
   it('should fetch transactions with specified pagination', async () => {
     (mockTransactionRepo.findAll as ReturnType<typeof vi.fn>).mockResolvedValue([]);
     (mockTransactionRepo.countAll as ReturnType<typeof vi.fn>).mockResolvedValue(25); // Ex: 25 itens no total

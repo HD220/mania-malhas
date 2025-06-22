@@ -10,7 +10,7 @@ import {
   CardTitle,
 } from "@/components/ui/card";
 import { useEffect, useState, useCallback } from "react";
-import { listTransactionsAction } from "./actions";
+import { listTransactionsAction } from "../actions"; // CORRECTED PATH
 import { TransactionWithPartner } from "@/db/repositories/transactionRepository";
 import { TransactionPaymentsModal } from "@/components/transaction-payments-modal";
 import { useToast } from "@/components/ui/use-toast";
@@ -152,10 +152,11 @@ export default function TransactionsListPage() {
     // setSortConfig({ column: "date", direction: "desc" });
   };
 
-  const handleSelectFilterChange = (filterName: "type" | "status", value: string) => {
-    setCurrentPage(1);
-    setFilters(prev => ({ ...prev, ...newFilters }));
-  };
+  // const handleSelectFilterChange = (filterName: "type" | "status", value: string) => {
+  //   setCurrentPage(1);
+  //   setFilters(prev => ({ ...prev, ...newFilters }));
+  // };
+  // This first declaration was buggy (newFilters not defined) and duplicated.
 
   const handleSelectFilterChange = (filterName: "type" | "status", value: string) => {
     handleFilterChange({ [filterName]: value === "all" ? undefined : value as "E" | "S" | undefined });
