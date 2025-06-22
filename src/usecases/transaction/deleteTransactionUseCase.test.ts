@@ -1,126 +1,112 @@
-import { describe, it, expect, vi, beforeEach } from 'vitest';
-import deleteTransactionUseCase from './deleteTransactionUseCase';
-import { transactionRepository } from '@/db/repositories/transactionRepository';
-import { paymentRepository } from '@/db/repositories/paymentRepository';
-import { SelectTransaction } from '@/db/repositories/schemas/transactionSchema';
-import { SelectPayment } from '@/db/repositories/schemas/paymentSchema';
-// Note: We will import errors using vi.importActual within describe block
-import { faker } from '@faker-js/faker';
+import { describe, it, expect, vi } from "vitest";
+import { ZodError } from "zod";
+import { NotFoundError } from "@/lib/errors/domainErrors";
+import deleteTransactionUseCase, {
+  DeleteTransactionInput,
+} from "./deleteTransactionUseCase"; // Adjust path as necessary
+import { TransactionRepositoryFactory } from "@/db/repositories/transactionRepository";
+import { SelectTransaction } from "@/db/repositories/schemas/transactionSchema";
 
-// Mock repositories
-vi.mock('@/db/repositories/transactionRepository');
-vi.mock('@/db/repositories/paymentRepository');
+// Mock the transaction repository
+const mockTransactionRepository = {
+  findById: vi.fn(),
+  deleteById: vi.fn(),
+  // Add other methods if your factory/interface expects them, even if not used in this specific use case
+  findAll: vi.fn(),
+  countAll: vi.fn(),
+  update: vi.fn(),
+  insert: vi.fn(),
+};
 
-describe('deleteTransactionUseCase', async () => {
-  // Import actual error classes for instanceof checks and instantiation in mocks
-  const { NotFoundError, InvalidOperationError } = await vi.importActual<typeof import('@/lib/errors/domainErrors')>('@/lib/errors/domainErrors');
+const mockTransactionRepoFactory: TransactionRepositoryFactory = () => mockTransactionRepository;
 
-  let mockTransactionRepo: ReturnType<ReturnType<typeof transactionRepository>>;
-  let mockPaymentRepo: ReturnType<ReturnType<typeof paymentRepository>>;
-  const transactionId = faker.string.uuid();
+const validTransactionId = "a1b2c3d4-e5f6-7890-1234-567890abcdef";
+const sampleTransaction: SelectTransaction = {
+  id: validTransactionId,
+  description: "Test Transaction",
+  value: 100,
+  type: "E",
+  status: "PENDING",
+  partnerId: "p1",
+  date: new Date(),
+  createdAt: new Date(),
+  updatedAt: new Date(),
+  paymentMethod: "card",
+  installments: 1,
+  dueDate: new Date(),
+};
 
-  const mockExistingTransaction: SelectTransaction = {
-    id: transactionId,
-    description: 'Transação para Deletar',
-    value: "50.00",
-    type: 'S',
-    status: 'Pendente',
-    partnerId: faker.string.uuid(),
-    date: new Date(),
-    due_date: new Date(),
-    createdAt: new Date(),
-    updatedAt: new Date(),
-    transactionId: null,
-  };
-
+describe("deleteTransactionUseCase", () => {
   beforeEach(() => {
-    vi.clearAllMocks();
-
-    // Setup mock implementations for repository methods
-    mockTransactionRepo = {
-      findById: vi.fn(),
-      deleteById: vi.fn(),
-      // Add other methods to satisfy the type, if necessary for stricter typing,
-      // or ensure the mocked factory returns this specific shape.
-      insert: vi.fn(),
-      update: vi.fn(),
-      findAll: vi.fn(),
-      countAll: vi.fn(),
-    };
-    (transactionRepository as vi.Mock).mockReturnValue(mockTransactionRepo);
-
-    mockPaymentRepo = {
-      findByTransactionId: vi.fn(),
-      // Add other methods if needed
-      insert: vi.fn(),
-      findById: vi.fn(),
-      update: vi.fn(),
-      findAllByTransactionIds: vi.fn(),
-    };
-    (paymentRepository as vi.Mock).mockReturnValue(mockPaymentRepo);
+    vi.resetAllMocks(); // Clear mocks before each test
   });
 
-  it('should successfully delete a transaction if it exists and has no associated payments', async () => {
-    (mockTransactionRepo.findById as vi.Mock).mockResolvedValue(mockExistingTransaction);
-    (mockPaymentRepo.findByTransactionId as vi.Mock).mockResolvedValue([]); // No payments
-    (mockTransactionRepo.deleteById as vi.Mock).mockResolvedValue(undefined);
+  it("should successfully delete a transaction when a valid ID is provided and transaction exists", async () => {
+    const input: DeleteTransactionInput = { id: validTransactionId };
+    mockTransactionRepository.findById.mockResolvedValue(sampleTransaction);
+    mockTransactionRepository.deleteById.mockResolvedValue(undefined); // deleteById usually doesn't return anything
 
-    await expect(deleteTransactionUseCase(transactionId)).resolves.toBeUndefined();
+    const result = await deleteTransactionUseCase(input, mockTransactionRepoFactory);
 
-    expect(mockTransactionRepo.findById).toHaveBeenCalledWith(transactionId);
-    expect(mockPaymentRepo.findByTransactionId).toHaveBeenCalledWith(transactionId);
-    expect(mockTransactionRepo.deleteById).toHaveBeenCalledWith(transactionId);
+    expect(mockTransactionRepository.findById).toHaveBeenCalledWith(validTransactionId);
+    expect(mockTransactionRepository.deleteById).toHaveBeenCalledWith(validTransactionId);
+    expect(result).toEqual({ success: true });
   });
 
-  it('should throw NotFoundError if the transaction does not exist', async () => {
-    (mockTransactionRepo.findById as vi.Mock).mockResolvedValue(null);
+  it("should throw NotFoundError if the transaction to be deleted does not exist", async () => {
+    const input: DeleteTransactionInput = { id: validTransactionId };
+    mockTransactionRepository.findById.mockResolvedValue(null); // Simulate transaction not found
 
-    await expect(deleteTransactionUseCase(transactionId)).rejects.toThrow(NotFoundError);
-    await expect(deleteTransactionUseCase(transactionId)).rejects.toThrow("Transação não encontrada.");
-
-    expect(mockPaymentRepo.findByTransactionId).not.toHaveBeenCalled();
-    expect(mockTransactionRepo.deleteById).not.toHaveBeenCalled();
+    await expect(
+      deleteTransactionUseCase(input, mockTransactionRepoFactory)
+    ).rejects.toThrow(NotFoundError);
+    expect(mockTransactionRepository.findById).toHaveBeenCalledWith(validTransactionId);
+    expect(mockTransactionRepository.deleteById).not.toHaveBeenCalled();
   });
 
-  it('should throw InvalidOperationError if the transaction has associated payments', async () => {
-    const mockPayment: SelectPayment = {
-      id: faker.string.uuid(),
-      transactionId: transactionId,
-      value: "50.00",
-      date: new Date(),
-      createdAt: new Date(),
-      updatedAt: new Date(),
-    };
-    (mockTransactionRepo.findById as vi.Mock).mockResolvedValue(mockExistingTransaction);
-    (mockPaymentRepo.findByTransactionId as vi.Mock).mockResolvedValue([mockPayment]);
+  it("should throw ZodError if the input ID is invalid (not a UUID)", async () => {
+    const input: DeleteTransactionInput = { id: "not-a-uuid" };
 
-    const expectedErrorMessage = "Não é possível excluir transação pois existem pagamentos associados. Cancele ou desvincule os pagamentos primeiro.";
-    // Use vi.importActual for the error class in assertions
-    const { InvalidOperationError: ActualInvalidOperationError } = await vi.importActual<typeof import('@/lib/errors/domainErrors')>('@/lib/errors/domainErrors');
-
-    await expect(deleteTransactionUseCase(transactionId))
-      .rejects.toThrow(ActualInvalidOperationError);
-    await expect(deleteTransactionUseCase(transactionId))
-      .rejects.toThrow(expectedErrorMessage);
-
-    expect(mockTransactionRepo.deleteById).not.toHaveBeenCalled();
+    await expect(
+      deleteTransactionUseCase(input, mockTransactionRepoFactory)
+    ).rejects.toThrow(ZodError);
+    expect(mockTransactionRepository.findById).not.toHaveBeenCalled();
+    expect(mockTransactionRepository.deleteById).not.toHaveBeenCalled();
   });
 
-  it('should throw an error if transactionRepo.deleteById fails', async () => {
-    const dbError = new Error('Database deletion failed');
-    (mockTransactionRepo.findById as vi.Mock).mockResolvedValue(mockExistingTransaction);
-    (mockPaymentRepo.findByTransactionId as vi.Mock).mockResolvedValue([]);
-    (mockTransactionRepo.deleteById as vi.Mock).mockRejectedValue(dbError);
+  it("should throw ZodError if the input ID is missing", async () => {
+    // @ts-expect-error Testing invalid input
+    const input: DeleteTransactionInput = {};
 
-    await expect(deleteTransactionUseCase(transactionId)).rejects.toThrow(dbError);
+    await expect(
+      deleteTransactionUseCase(input, mockTransactionRepoFactory)
+    ).rejects.toThrow(ZodError);
+    expect(mockTransactionRepository.findById).not.toHaveBeenCalled();
+    expect(mockTransactionRepository.deleteById).not.toHaveBeenCalled();
   });
 
-  it('should throw an error if paymentRepo.findByTransactionId fails', async () => {
-    const dbError = new Error('Failed to fetch payments');
-    (mockTransactionRepo.findById as vi.Mock).mockResolvedValue(mockExistingTransaction);
-    (mockPaymentRepo.findByTransactionId as vi.Mock).mockRejectedValue(dbError);
+  it("should propagate an error from transactionRepository.deleteById if it occurs", async () => {
+    const input: DeleteTransactionInput = { id: validTransactionId };
+    const deleteError = new Error("Database deletion failed");
+    mockTransactionRepository.findById.mockResolvedValue(sampleTransaction);
+    mockTransactionRepository.deleteById.mockRejectedValue(deleteError);
 
-    await expect(deleteTransactionUseCase(transactionId)).rejects.toThrow(dbError);
-    expect(mockTransactionRepo.deleteById).not.toHaveBeenCalled();
+    await expect(
+      deleteTransactionUseCase(input, mockTransactionRepoFactory)
+    ).rejects.toThrow(deleteError);
+    expect(mockTransactionRepository.findById).toHaveBeenCalledWith(validTransactionId);
+    expect(mockTransactionRepository.deleteById).toHaveBeenCalledWith(validTransactionId);
+  });
+
+  it("should propagate an error from transactionRepository.findById if it occurs", async () => {
+    const input: DeleteTransactionInput = { id: validTransactionId };
+    const findError = new Error("Database find failed");
+    mockTransactionRepository.findById.mockRejectedValue(findError);
+
+    await expect(
+      deleteTransactionUseCase(input, mockTransactionRepoFactory)
+    ).rejects.toThrow(findError);
+    expect(mockTransactionRepository.findById).toHaveBeenCalledWith(validTransactionId);
+    expect(mockTransactionRepository.deleteById).not.toHaveBeenCalled();
   });
 });

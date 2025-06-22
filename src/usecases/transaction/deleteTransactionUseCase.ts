@@ -1,54 +1,55 @@
+import { z } from "zod";
 import { db } from "@/db/postgres";
 import {
   transactionRepository as createTransactionRepository,
   TransactionRepositoryFactory
 } from "@/db/repositories/transactionRepository";
-import {
-  paymentRepository as createPaymentRepository,
-  PaymentRepositoryFactory
-} from "@/db/repositories/paymentRepository";
-import { NotFoundError, InvalidOperationError } from "@/lib/errors/domainErrors";
+import { NotFoundError } from "@/lib/errors/domainErrors";
+
+/**
+ * Schema for the input of the deleteTransactionUseCase.
+ * Expects a transaction ID, which should be a UUID.
+ */
+export const deleteTransactionInputSchema = z.object({
+  id: z.string().uuid("Invalid transaction ID format."),
+});
+
+export type DeleteTransactionInput = z.infer<typeof deleteTransactionInputSchema>;
 
 /**
  * @description Use case for deleting a transaction.
- * Implements a hard delete strategy.
- * Allows deletion only if there are no associated payments.
+ * It validates the input ID, then attempts to delete the transaction using the repository.
  *
- * @param {string} id - The ID of the transaction to delete.
- * @param {Object} [repositories] - Optional repository factories for testing.
- * @param {TransactionRepositoryFactory} [repositories.transactionRepoFactory=createTransactionRepository]
- * @param {PaymentRepositoryFactory} [repositories.paymentRepoFactory=createPaymentRepository]
- * @returns {Promise<void>}
+ * @param {DeleteTransactionInput} input - The input containing the transaction ID.
+ * @param {TransactionRepositoryFactory} [transactionRepoFactory=createTransactionRepository] - Optional factory for transaction repository.
+ * @returns {Promise<{ success: true }>} An object indicating successful deletion.
+ * @throws {ZodError} If input data validation fails.
  * @throws {NotFoundError} If the transaction with the given ID is not found.
- * @throws {InvalidOperationError} If the transaction has associated payments.
  * @throws {Error} If there's an issue with the repository or other unexpected errors.
  */
 export default async function deleteTransactionUseCase(
-  id: string,
-  repositories?: {
-    transactionRepoFactory?: TransactionRepositoryFactory,
-    paymentRepoFactory?: PaymentRepositoryFactory
-  }
-): Promise<void> {
-  const transactionRepo = repositories?.transactionRepoFactory?.(db) ?? createTransactionRepository(db);
-  const paymentRepo = repositories?.paymentRepoFactory?.(db) ?? createPaymentRepository(db);
+  input: DeleteTransactionInput,
+  transactionRepoFactory: TransactionRepositoryFactory = createTransactionRepository
+): Promise<{ success: true }> {
+  // 1. Validate input data
+  const { id } = deleteTransactionInputSchema.parse(input);
 
-  // 1. Check if the transaction exists
+  const transactionRepo = transactionRepoFactory(db);
+
+  // 2. Attempt to find the transaction first to ensure it exists before deletion
+  // This helps in providing a more specific NotFoundError.
+  // The actual deleteById in the repository might not throw if the record doesn't exist,
+  // depending on its implementation (ours currently doesn't).
   const existingTransaction = await transactionRepo.findById(id);
   if (!existingTransaction) {
-    throw new NotFoundError("Transação não encontrada.");
+    throw new NotFoundError(`Transaction with ID ${id} not found.`);
   }
 
-  // 2. Check for associated payments
-  const associatedPayments = await paymentRepo.findByTransactionId(id);
-  if (associatedPayments && associatedPayments.length > 0) {
-    throw new InvalidOperationError(
-      "Não é possível excluir transação pois existem pagamentos associados. Cancele ou desvincule os pagamentos primeiro."
-    );
-  }
-
-  // 3. Perform hard delete
+  // 3. Delete the transaction
+  // Note: UC-TX-DELETE.2 will handle logic related to associated payments.
+  // For now, this directly calls deleteById.
   await transactionRepo.deleteById(id);
 
-  // No explicit return value for a successful deletion.
+  // 4. Return success
+  return { success: true };
 }
