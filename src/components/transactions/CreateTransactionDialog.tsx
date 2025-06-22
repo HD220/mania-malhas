@@ -1,7 +1,7 @@
 "use client";
 
 import * as React from "react";
-import { useState, useEffect } from "react"; // Added useEffect
+import { useState, useEffect, useTransition } from "react"; // Added useTransition
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { z } from "zod";
@@ -54,15 +54,25 @@ import {
   CommandGroup,
   CommandInput,
   CommandItem,
-  CommandList, // Added CommandList
+  CommandList,
 } from "@/components/ui/command";
+import { createTransactionAction, CreateTransactionServerResponse } from "@/app/(admin)/transactions/actions"; // Import server action
+import { toast } from "sonner"; // Import toast
+import { Loader2 } from "lucide-react"; // For loading indicator
 
 // Define the Zod schema for form validation (based on previous step's analysis)
 // This will be refined with actual field components later.
 const createTransactionFormSchema = z.object({
   description: z.string().min(1, "Descrição é obrigatória."),
-  value: z.string().refine(val => !isNaN(parseFloat(val.replace(',', '.'))) && parseFloat(val.replace(',', '.')) > 0, {
-    message: "Valor deve ser um número positivo.",
+  // Using z.string() for value as InputMoneyField provides a string.
+  // The action will handle conversion/validation before passing to the use case,
+  // which expects a number or can coerce a numeric string.
+  // The refine here is for client-side feedback.
+  value: z.string().min(1, "Valor é obrigatório.").refine(val => {
+    const num = parseFloat(val.replace('.', '').replace(',', '.')); // Handle both , and . as decimal, remove thousands separators for parsing
+    return !isNaN(num) && num > 0;
+  }, {
+    message: "Valor deve ser um número positivo. Ex: 123,45 ou 123.45",
   }),
   type: z.enum(["E", "S"], {
     required_error: "Tipo é obrigatório.",
@@ -83,6 +93,7 @@ export function CreateTransactionDialog() {
   const [partners, setPartners] = useState<SelectPartner[]>([]);
   const [partnersLoading, setPartnersLoading] = useState(false);
   const [comboboxOpen, setComboboxOpen] = useState(false);
+  const [isPending, startTransition] = useTransition();
 
   const form = useForm<CreateTransactionFormValues>({
     resolver: zodResolver(createTransactionFormSchema),
@@ -116,10 +127,41 @@ export function CreateTransactionDialog() {
   }, [isOpen, partners.length, partnersLoading]); // Added dependencies
 
   const onSubmit = (data: CreateTransactionFormValues) => {
-    console.log("Form submitted (UI-TX-CREATE.1 - no action yet):", data);
-    // Actual action call will be in UI-TX-CREATE.3
-    // form.reset(); // Reset form on successful submission later
-    // setIsOpen(false); // Close dialog on successful submission later
+    startTransition(async () => {
+      // Ensure value is a string representation of a number for the action
+      // The use case's Zod schema will coerce it to a number.
+      const formData = {
+        ...data,
+        value: String(data.value).replace(',', '.'), // Ensure dot for decimal
+      };
+
+      try {
+        const response: CreateTransactionServerResponse = await createTransactionAction(formData);
+
+        if (response.success && response.data) {
+          toast.success(response.message || "Transação criada com sucesso!");
+          form.reset();
+          setIsOpen(false);
+        } else {
+          if (response.errors) {
+            Object.entries(response.errors).forEach(([key, value]) => {
+              if (value && value.length > 0) {
+                form.setError(key as keyof CreateTransactionFormValues, {
+                  type: "server",
+                  message: value.join(", "),
+                });
+              }
+            });
+            toast.error("Por favor, corrija os erros no formulário.");
+          } else {
+            toast.error(response.message || "Falha ao criar transação.");
+          }
+        }
+      } catch (error) {
+        console.error("Create transaction submission error:", error);
+        toast.error("Ocorreu um erro inesperado ao criar a transação.");
+      }
+    });
   };
 
   return (
@@ -365,11 +407,12 @@ export function CreateTransactionDialog() {
         </Form>
         <DialogFooter className="pt-4"> {/* Added pt-4 for spacing */}
           <DialogClose asChild>
-            <Button type="button" variant="outline">
+            <Button type="button" variant="outline" disabled={isPending}>
               Cancelar
             </Button>
           </DialogClose>
-          <Button type="submit" form="create-transaction-form">
+          <Button type="submit" form="create-transaction-form" disabled={isPending}>
+            {isPending && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
             Salvar Transação
           </Button>
         </DialogFooter>
