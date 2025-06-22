@@ -47,10 +47,27 @@ type JoinProductWithImage = {
   } | null;
 };
 
+/**
+ * Factory function for creating a product repository instance.
+ * Contains methods for CRUD operations and querying product data, including associated images.
+ * @param {DBConnection} db - The Drizzle database connection instance.
+ * @returns {Object} An object containing product repository methods.
+ */
 export const productRepository: ProductRepository = (db) => {
-  const convert = (productsDb: JoinProductWithImage[]) => {
+  /**
+   * Converts a flat list of product-image joins into a structured list of products,
+   * where each product contains an array of its active images.
+   * This is necessary because a left join can result in multiple rows per product if a product has multiple images.
+   * @private
+   * @param {JoinProductWithImage[]} productsDb - Flat array of product and image data from a database join.
+   * @returns {SelectProductWithImages[]} An array of products with nested image arrays.
+   */
+  const convert = (productsDb: JoinProductWithImage[]): SelectProductWithImages[] => {
     const reduced = productsDb.reduce<SelectProductWithImages[]>(
-      (accu, curr, idx, arr) => {
+      (accu, curr) => {
+        // Skip if product part is null (should not happen with current queries but good for safety)
+        if (!curr.product) return accu;
+
         const idxExists = accu.findIndex(({ id }) => id === curr.product.id);
 
         if (idxExists !== -1) {
@@ -72,7 +89,12 @@ export const productRepository: ProductRepository = (db) => {
     return reduced;
   };
 
-  const findAll = async (status = true) => {
+  /**
+   * Retrieves all products, optionally filtered by status, including their active images.
+   * @param {boolean} [status=true] - The status of products to retrieve (true for active, false for inactive).
+   * @returns {Promise<SelectProductWithImages[]>} A list of products.
+   */
+  const findAll = async (status = true): Promise<SelectProductWithImages[]> => {
     const productsDb = await db
       .select()
       .from(productTable)
@@ -94,7 +116,14 @@ export const productRepository: ProductRepository = (db) => {
     return convert(productsDb);
   };
 
-  const findBySearch = async (search: string, status = true) => {
+  /**
+   * Finds products by a search term (name or description) and status, including their active images.
+   * Uses ILIKE for case-insensitive search and unaccent for ignoring accents.
+   * @param {string} search - The search term.
+   * @param {boolean} [status=true] - The status of products to search for.
+   * @returns {Promise<SelectProductWithImages[]>} A list of matching products.
+   */
+  const findBySearch = async (search: string, status = true): Promise<SelectProductWithImages[]> => {
     const productsDb = await db
       .select()
       .from(productTable)
@@ -124,7 +153,13 @@ export const productRepository: ProductRepository = (db) => {
     return convert(productsDb);
   };
 
-  const findById = async (id: string) => {
+  /**
+   * Finds a single product by its ID, including its active images.
+   * Returns null if the product is not found or if parsing fails.
+   * @param {string} id - The UUID of the product.
+   * @returns {Promise<SelectProductWithImages | null>} The product data or null.
+   */
+  const findById = async (id: string): Promise<SelectProductWithImages | null> => {
     // Query principal busca pelo ID do produto.
     // O LEFT JOIN agora filtra as imagens ativas na própria condição do JOIN.
     const productsDb = await db
@@ -187,10 +222,19 @@ export const productRepository: ProductRepository = (db) => {
     return image || null; // Retorna a imagem ou null se não encontrada
   };
 
+  /**
+   * Updates an existing product and its associated images.
+   * Handles adding new images and updating existing ones based on whether an image ID is present.
+   * @param {string} id - The UUID of the product to update.
+   * @param {InsertProductWithImages} productData - The product data to update, including images.
+   * @returns {Promise<void>}
+   */
   const update = async (
     id: string,
     { images = [], ...data }: InsertProductWithImages
-  ) => {
+  ): Promise<void> => {
+    // Process images: update existing, insert new ones.
+    // Active status of images is handled by the data in `images` array.
     await Promise.all(
       images?.map((image) => {
         if (image.id === undefined) {
@@ -216,7 +260,12 @@ export const productRepository: ProductRepository = (db) => {
       .where(eq(productTable.id, id));
   };
 
-  const insert = async ({ images, ...data }: InsertProductWithImages) => {
+  /**
+   * Inserts a new product along with its associated images.
+   * @param {InsertProductWithImages} productData - The product data to insert, including images.
+   * @returns {Promise<{ id: string }>} An object containing the ID of the newly created product.
+   */
+  const insert = async ({ images, ...data }: InsertProductWithImages): Promise<{ id: string }> => {
     const [{ id }] = await db
       .insert(productTable)
       .values({

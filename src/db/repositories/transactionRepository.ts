@@ -1,5 +1,5 @@
 import { dbType, db as defaultDb } from "@/db/postgres";
-import { eq, desc, asc } from "drizzle-orm"; // Importar asc
+import { eq, desc, asc, sql } from "drizzle-orm"; // Importar asc e sql
 import {
   InsertTransaction,
   SelectTransaction,
@@ -24,7 +24,8 @@ export interface TransactionFiltersForRepo {
   status?: string;
   dateFrom?: Date;
   dateTo?: Date;
-  partnerId?: string; // Adicionado partnerId
+  partnerId?: string;
+  description?: string; // Adicionado filtro de descrição textual
 }
 
 // Interface para parâmetros de paginação
@@ -76,6 +77,9 @@ export const transactionRepository: TransactionRepositoryFactory = (dbInstance) 
     }
     if (filters?.partnerId) {
       conditions.push(eq(transactionTable.partnerId, filters.partnerId));
+    }
+    if (filters?.description && filters.description.trim() !== "") {
+      conditions.push(sql`unaccent(${transactionTable.description}) ilike unaccent(${`%${filters.description.trim()}%`})`);
     }
     return conditions;
   };

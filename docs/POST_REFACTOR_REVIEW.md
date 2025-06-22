@@ -245,3 +245,25 @@ A Fase 5 focou em concluir os aspectos restantes da UI de Transações, adiciona
 *   As limpezas de baixa prioridade ajudam a manter a qualidade do código.
 *   A questão da atualização do `drizzle-kit` destaca a importância de gerenciar cuidadosamente as dependências e alocar tempo para resolver incompatibilidades.
 *   Com a conclusão desta fase, a maioria dos itens de alta e média prioridade do plano de ação original foram abordados. Os itens restantes são, em sua maioria, melhorias futuras, expansão de cobertura (testes, comentários) ou tarefas de baixa prioridade.
+
+## 10. Atualizações da Fase 6 (Conclusão de Testes e Comentários)
+
+A Fase 6 teve como objetivo principal finalizar a cobertura de testes para os casos de uso de Produto e Parceiro, além de avançar na documentação com comentários.
+
+*   **Concluir Testes para Casos de Uso de Produto (T01 - continuação):**
+    *   Implementados testes unitários/integração para `getProductsUseCase` e `getProductByIdUseCase`.
+    *   Todos os cenários relevantes, incluindo buscas com e sem resultados, e tratamento de IDs inválidos, foram cobertos.
+
+*   **Concluir Testes para Casos de Uso de Parceiro (T01 - continuação):**
+    *   Implementados testes unitários/integração para `alterPartnerUseCase`, `getPartnerByIdUseCase`, `searchPartnersUseCase`, e `listActivePartnersUseCase`.
+    *   Cenários de sucesso, falha de validação, IDs inválidos e falhas de repositório foram cobertos.
+    *   Com estes testes, a cobertura para os casos de uso de Produto e Parceiro está significativamente mais completa. Atualmente, há 83 testes passando no total do projeto.
+
+*   **Revisão Sistemática de Comentários (G01 - Avanço):**
+    *   Adicionados/melhorados comentários JSDoc/TSDoc para `productRepository.ts` e `partnerRepository.ts`, detalhando as responsabilidades de cada função exportada. A revisão para `paymentRepository.ts` e `transactionRepository.ts` foi iniciada na Fase 5 e considerada suficiente por agora.
+
+### 10.1. Observações Adicionais da Fase 6
+
+*   A cobertura de testes para os casos de uso de `Product` e `Partner` agora é robusta, aumentando a confiança na lógica de negócios central.
+*   A adição de comentários aos repositórios melhora a compreensão e manutenibilidade da camada de acesso a dados.
+*   O projeto atingiu um bom nível de conclusão em relação ao plano de ação original. Os itens restantes são principalmente melhorias contínuas (mais testes, mais comentários) ou funcionalidades de menor prioridade/complexidade que podem ser abordadas em ciclos futuros.

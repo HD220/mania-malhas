@@ -9,6 +9,7 @@ export interface GetTransactionsFilters {
   partnerId?: string;
   dateFrom?: Date;
   dateTo?: Date;
+  description?: string; // Adicionar filtro de descrição
 }
 
 // Interface para os parâmetros de paginação do caso de uso
@@ -76,8 +77,11 @@ export default async function getTransactionsUseCase(
   if (filters?.dateTo) {
     repoFilters.dateTo = filters.dateTo;
   }
-  if (filters?.partnerId) { // Passar partnerId para repoFilters
+  if (filters?.partnerId) {
     repoFilters.partnerId = filters.partnerId;
+  }
+  if (filters?.description && filters.description.trim() !== "") { // Passar descrição para repoFilters
+    repoFilters.description = filters.description.trim();
   }
 
   // Aplicar filtros que o repositório ainda não suporta (se houver)

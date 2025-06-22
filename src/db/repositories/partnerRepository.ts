@@ -18,8 +18,19 @@ export type PartnerRepository = (db: DBConnection) => {
   insert: (data: InsertPartner) => Promise<{ id: string }>;
 };
 
+/**
+ * Factory function for creating a partner repository instance.
+ * Contains methods for CRUD operations and querying partner data.
+ * @param {DBConnection} db - The Drizzle database connection instance.
+ * @returns {Object} An object containing partner repository methods.
+ */
 export const partnerRepository: PartnerRepository = (db) => {
-  const findAll = async (status = true) => {
+  /**
+   * Retrieves all partners, optionally filtered by status.
+   * @param {boolean} [status=true] - The status of partners to retrieve (true for active, false for inactive).
+   * @returns {Promise<SelectPartner[]>} A list of partners.
+   */
+  const findAll = async (status = true): Promise<SelectPartner[]> => {
     const partnersDb = await db
       .select()
       .from(partnerTable)
@@ -29,7 +40,14 @@ export const partnerRepository: PartnerRepository = (db) => {
     return partnersDb;
   };
 
-  const findBySearch = async (search: string, status = true) => {
+  /**
+   * Finds partners by a search term (name, notes, or phone) and status.
+   * Uses ILIKE for case-insensitive search and unaccent for ignoring accents.
+   * @param {string} search - The search term.
+   * @param {boolean} [status=true] - The status of partners to search for.
+   * @returns {Promise<SelectPartner[]>} A list of matching partners.
+   */
+  const findBySearch = async (search: string, status = true): Promise<SelectPartner[]> => {
     const partnersDb = await db
       .select()
       .from(partnerTable)
@@ -54,7 +72,13 @@ export const partnerRepository: PartnerRepository = (db) => {
     return partnersDb;
   };
 
-  const findById = async (id: string) => {
+  /**
+   * Finds a single partner by their ID.
+   * Returns null if the partner is not found or if parsing fails.
+   * @param {string} id - The UUID of the partner.
+   * @returns {Promise<SelectPartner | null>} The partner data or null.
+   */
+  const findById = async (id: string): Promise<SelectPartner | null> => {
     const partnersDb = await db
       .select()
       .from(partnerTable)
@@ -86,7 +110,13 @@ export const partnerRepository: PartnerRepository = (db) => {
     return null;
   };
 
-  const update = async (id: string, { ...data }: InsertPartner) => {
+  /**
+   * Updates an existing partner's details.
+   * @param {string} id - The UUID of the partner to update.
+   * @param {InsertPartner} data - The partner data to update.
+   * @returns {Promise<void>}
+   */
+  const update = async (id: string, { ...data }: InsertPartner): Promise<void> => {
     await db
       .update(partnerTable)
       .set({
