@@ -65,7 +65,7 @@ A organização do código fonte (`src/`) é a seguinte:
 *   `src/styles/`: Arquivos de estilo globais.
 *   `src/test/`: Configuração de ambiente de teste (ex: `setup.ts` para Vitest).
 *   `src/usecases/`: Lógica de negócios desacoplada, organizada por entidade (produto, parceiro, pagamento, transação).
-*   `.jules/`: Arquivos específicos para a colaboração com agentes LLM (`TASKS.md`, `PROMPT_HANDOFF.md`).
+*   `.jules/`: Arquivos específicos para a colaboração com agentes LLM (`TASKS.md`, `AGENT_WORKFLOW.md`).
 
 ## Tecnologias Chave
 
@@ -98,7 +98,7 @@ A organização do código fonte (`src/`) é a seguinte:
 ## Comunicação
 
 *   **Progresso:** Para tarefas longas, forneça atualizações periódicas sobre seu progresso.
-*   **Dúvidas e Bloqueios:** Se encontrar ambiguidades nos requisitos, tiver dúvidas técnicas ou estiver bloqueado, não hesite em pedir ajuda. Utilize o template `.jules/PROMPT_HANDOFF.md` para fornecer contexto ao solicitar assistência ou ao pausar uma tarefa.
+*   **Dúvidas e Bloqueios:** Se encontrar ambiguidades nos requisitos, tiver dúvidas técnicas ou estiver bloqueado, não hesite em pedir ajuda. Forneça um resumo claro do problema, o que foi tentado e o contexto relevante (últimas ações, arquivos modificados) para facilitar a assistência. O `.jules/AGENT_WORKFLOW.md` detalha como você deve pausar e reportar.
 *   **Feedback:** Forneça feedback construtivo sobre o código e os processos. Estamos todos aprendendo e melhorando.
 *   **Ferramentas:** A comunicação principal pode ocorrer via comentários em PRs, issues no GitHub (se usado), ou através da plataforma de interação com o agente.
 
@@ -112,16 +112,7 @@ A organização do código fonte (`src/`) é a seguinte:
 
 ## Regras para LLMs
 
-*   **Subdivisão de Tarefas Complexas:** Não tente realizar tarefas com `Complexidade (1-5)` maior que 1 diretamente (conforme definido em `.jules/TASKS.md`). Se uma tarefa tiver complexidade > 1, solicite sua subdivisão em tarefas menores e mais manejáveis (idealmente complexidade 1) antes de iniciar o trabalho. Você pode sugerir as subdivisões.
-*   **Foco:** Trabalhe em uma tarefa por vez para manter o foco e a qualidade.
-*   **Contexto:** Utilize o `.jules/PROMPT_HANDOFF.md` para entender o ponto de partida de uma tarefa e para documentar seu trabalho ao final de uma sessão ou ao encontrar um bloqueio.
-
-Obrigado por sua colaboração!
-
-## Regras para LLMs
-
-*   **Subdivisão de Tarefas Complexas:** Não tente realizar tarefas com `Complexidade (1-5)` maior que 1 diretamente. Se uma tarefa em `.jules/TASKS.md` tiver complexidade > 1, solicite sua subdivisão em tarefas menores e mais manejáveis (idealmente complexidade 1) antes de iniciar o trabalho. Você pode sugerir as subdivisões.
-*   **Foco:** Trabalhe em uma tarefa por vez para manter o foco e a qualidade.
-*   **Contexto:** Utilize o `PROMPT_HANDOFF.md` para entender o ponto de partida de uma tarefa e para documentar seu trabalho ao final de uma sessão ou ao encontrar um bloqueio.
+*   **Fluxo de Trabalho:** Siga rigorosamente o protocolo definido em `.jules/AGENT_WORKFLOW.md`. Isso inclui como selecionar tarefas, lidar com complexidade, planejar, executar, testar, submeter e comunicar.
+*   **Foco:** Trabalhe em uma tarefa (ou sub-tarefa de complexidade 1) por vez para manter o foco e a qualidade.
 
 Obrigado por sua colaboração!
