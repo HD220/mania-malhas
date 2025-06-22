@@ -109,42 +109,39 @@ describe('getTransactionsUseCase', () => {
       { ...createBaseMockTransaction(), id: 'txn_3', partnerId: 'partner_A', date: new Date('2023-01-20') }, // Será filtrado por data no repo-level (mock)
     ];
 
-    // Simular que o repositório filtra por data
-    (mockTransactionRepo.findAll as ReturnType<typeof vi.fn>).mockImplementation(async (repoFilters) => {
-      let data = transactionsFromRepo;
+    // Simular que o repositório agora filtra por data E partnerId
+    const mockRepoImplementation = async (repoFilters: any) => { // 'any' para simplificar o mock dos filtros
+      let data = [...transactionsFromRepo]; // Copiar para não modificar o original entre chamadas
       if (repoFilters?.dateFrom) {
         data = data.filter(t => t.date.getTime() >= repoFilters.dateFrom!.getTime());
       }
       if (repoFilters?.dateTo) {
         data = data.filter(t => t.date.getTime() <= repoFilters.dateTo!.getTime());
       }
+      if (repoFilters?.partnerId) {
+        data = data.filter(t => t.partnerId === repoFilters.partnerId);
+      }
       return data;
-    });
-    // countAll deve refletir os filtros que o repo suporta
-    (mockTransactionRepo.countAll as ReturnType<typeof vi.fn>).mockImplementation(async (repoFilters) => {
-        let data = transactionsFromRepo;
-        if (repoFilters?.dateFrom) {
-          data = data.filter(t => t.date.getTime() >= repoFilters.dateFrom!.getTime());
-        }
-        if (repoFilters?.dateTo) {
-          data = data.filter(t => t.date.getTime() <= repoFilters.dateTo!.getTime());
-        }
-        return data.length;
-    });
+    };
+
+    (mockTransactionRepo.findAll as ReturnType<typeof vi.fn>).mockImplementation(async (repoFilters) => mockRepoImplementation(repoFilters));
+    (mockTransactionRepo.countAll as ReturnType<typeof vi.fn>).mockImplementation(async (repoFilters) => (await mockRepoImplementation(repoFilters)).length);
 
     const filters = { partnerId: 'partner_A', dateFrom: new Date('2023-01-01'), dateTo: new Date('2023-01-15') };
     const result = await getTransactionsUseCase(filters);
 
-    expect(result.data.length).toBe(1); // Apenas txn_1 deve passar todos os filtros
+    expect(result.data.length).toBe(1);
     expect(result.data[0].id).toBe('txn_1');
 
-    // Verificar se countAll foi chamado com os filtros de data
-    const expectedRepoFilters = { dateFrom: filters.dateFrom, dateTo: filters.dateTo };
+    const expectedRepoFilters = {
+      partnerId: filters.partnerId,
+      dateFrom: filters.dateFrom,
+      dateTo: filters.dateTo
+    };
     expect(mockTransactionRepo.countAll).toHaveBeenCalledWith(expectedRepoFilters);
-    // E findAll também
     expect(mockTransactionRepo.findAll).toHaveBeenCalledWith(
-      expect.objectContaining(expectedRepoFilters), // Contém filtros de data
-      expect.any(Object) // Paginação
+      expect.objectContaining(expectedRepoFilters),
+      expect.objectContaining({ offset: 0, limit: 10 }) // Default pagination
     );
   });
 
@@ -152,23 +149,41 @@ describe('getTransactionsUseCase', () => {
   // Este cenário agora está coberto pelo teste combinado 'should apply application-level filters for partnerId and dates'
   // e pela expectativa de que o repositório (mockado) filtre por data.
 
-  it('should apply application-level partnerId filter correctly', async () => {
+  it('should filter by partnerId (via repo)', async () => {
     const createBase = (): TransactionWithPartner => ({
       id: faker.string.uuid(), description: 'Test', value: "100", type: 'E', status: 'Pendente',
       partnerId: faker.string.uuid(), partnerName: 'Test Partner', date: new Date(),
       due_date: new Date(), createdAt: new Date(), updatedAt: new Date(), transactionId: null,
     });
-    const transactionsFromRepo = [
+    const allTransactions = [
       { ...createBase(), id: 'partner_ok', partnerId: 'partner_A_test' },
       { ...createBase(), id: 'partner_wrong', partnerId: 'partner_B_test' },
     ];
-    (mockTransactionRepo.findAll as ReturnType<typeof vi.fn>).mockResolvedValue(transactionsFromRepo);
-    (mockTransactionRepo.countAll as ReturnType<typeof vi.fn>).mockResolvedValue(2);
+
+    (mockTransactionRepo.findAll as ReturnType<typeof vi.fn>).mockImplementation(async (repoFilters) => {
+      if (repoFilters?.partnerId) {
+        return allTransactions.filter(t => t.partnerId === repoFilters.partnerId);
+      }
+      return allTransactions;
+    });
+    (mockTransactionRepo.countAll as ReturnType<typeof vi.fn>).mockImplementation(async (repoFilters) => {
+      if (repoFilters?.partnerId) {
+        return allTransactions.filter(t => t.partnerId === repoFilters.partnerId).length;
+      }
+      return allTransactions.length;
+    });
 
     const filters = { partnerId: 'partner_A_test' };
     const result = await getTransactionsUseCase(filters);
     expect(result.data.length).toBe(1);
     expect(result.data[0].id).toBe('partner_ok');
+    expect(mockTransactionRepo.findAll).toHaveBeenCalledWith(
+      expect.objectContaining({ partnerId: 'partner_A_test' }),
+      expect.any(Object)
+    );
+    expect(mockTransactionRepo.countAll).toHaveBeenCalledWith(
+      expect.objectContaining({ partnerId: 'partner_A_test' })
+    );
   });
 
   it('should return empty data and correct pagination if repository throws error', async () => {

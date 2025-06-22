@@ -1,9 +1,9 @@
 import {
-  AnyForeignKeyBuilder,
+  // AnyForeignKeyBuilder, // Removido
   AnyPgColumn,
   char,
   decimal,
-  foreignKey,
+  // foreignKey, // Removido
   pgTable,
   timestamp,
   uuid,

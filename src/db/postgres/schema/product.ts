@@ -2,7 +2,7 @@ import {
   boolean,
   decimal,
   pgTable,
-  serial,
+  // serial, // Removido serial pois não está sendo usado
   text,
   timestamp,
   uuid,

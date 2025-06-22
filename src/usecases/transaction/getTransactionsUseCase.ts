@@ -66,7 +66,9 @@ export default async function getTransactionsUseCase(
   if (filters?.dateTo) {
     repoFilters.dateTo = filters.dateTo;
   }
-  // TODO: Implementar filtro de partnerId no repositório e mapeá-lo aqui.
+  if (filters?.partnerId) { // Passar partnerId para repoFilters
+    repoFilters.partnerId = filters.partnerId;
+  }
 
   // Aplicar filtros que o repositório ainda não suporta (se houver)
   // Esta lógica de filtro no lado da aplicação deve ser minimizada ou eliminada
@@ -75,10 +77,15 @@ export default async function getTransactionsUseCase(
     if (!appFilters) return data;
     return data.filter(t => {
       let matches = true;
-      if (appFilters.partnerId && t.partnerId !== appFilters.partnerId) matches = false;
-      // dateFrom e dateTo agora são tratados pelo repositório
+      // partnerId agora é tratado pelo repositório
+      // if (appFilters.partnerId && t.partnerId !== appFilters.partnerId) matches = false;
+
+      // dateFrom e dateTo também são tratados pelo repositório
       // if (appFilters.dateFrom && new Date(t.date) < new Date(appFilters.dateFrom)) matches = false;
       // if (appFilters.dateTo && new Date(t.date) > new Date(appFilters.dateTo)) matches = false;
+
+      // Se não houver mais filtros a nível de aplicação, esta função pode retornar 'data' diretamente.
+      // Por enquanto, manter a estrutura caso outros filtros app-level sejam necessários no futuro.
       return matches;
     });
   };

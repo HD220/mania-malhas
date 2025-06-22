@@ -24,7 +24,7 @@ export interface TransactionFiltersForRepo {
   status?: string;
   dateFrom?: Date;
   dateTo?: Date;
-  // Adicionar outros filtros conforme necessário (partnerId)
+  partnerId?: string; // Adicionado partnerId
 }
 
 // Interface para parâmetros de paginação
@@ -67,7 +67,9 @@ export const transactionRepository: TransactionRepositoryFactory = (dbInstance) 
       // Por simplicidade, usando lte diretamente.
       conditions.push(lte(transactionTable.date, filters.dateTo));
     }
-    // Adicionar mais condições de filtro aqui (ex: partnerId)
+    if (filters?.partnerId) {
+      conditions.push(eq(transactionTable.partnerId, filters.partnerId));
+    }
     return conditions;
   };
 

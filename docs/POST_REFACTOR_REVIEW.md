@@ -175,3 +175,37 @@ Durante a Fase 3, o foco foi em concluir funcionalidades pendentes, expandir tes
 *   O sistema de notificações, embora básico, estabelece a fundação para futuras notificações reais.
 *   As melhorias no script de seed e as correções de baixa prioridade contribuem para a saúde geral do projeto.
 *   Ainda há oportunidades para mover mais lógica de filtragem (datas, `partnerId` em transações) para o nível do banco de dados para otimizar o desempenho.
+
+## 8. Atualizações da Fase 4
+
+A Fase 4 concentrou-se em concluir a funcionalidade de filtros da UI de transações, expandir ainda mais a cobertura de testes, implementar a revalidação de cache e realizar limpezas de baixa prioridade.
+
+*   **Avançar UI de Transações (F03 - continuação):**
+    *   Implementados filtros por intervalo de datas na UI da lista de transações (`TransactionsListPage`).
+    *   A lógica de backend (`transactionRepository` e `getTransactionsUseCase`) foi atualizada para aplicar esses filtros de data na consulta ao banco de dados.
+
+*   **Expandir Cobertura de Testes Críticos (T01 - continuação):**
+    *   Adicionados testes unitários/integração para `createPaymentUseCase`.
+    *   Adicionados testes para as Server Actions de Produto (`createProduct`, `updateProduct`) e Parceiro (`createPartner`, `updatePartner`), mockando seus respectivos casos de uso e verificando o tratamento de sucesso e erro.
+    *   Todos os 51 testes em 10 arquivos estão passando.
+
+*   **Refatorar Filtros para Repositório (Otimização):**
+    *   O filtro por `partnerId` na listagem de transações foi movido do `getTransactionsUseCase` (nível da aplicação) para o `transactionRepository` (nível do banco de dados), otimizando a consulta.
+    *   Testes foram ajustados para refletir essa mudança.
+
+*   **Implementar Revalidação de Cache (Server Actions):**
+    *   Revisadas as principais Server Actions de CRUD.
+    *   A action `addPaymentAction` foi atualizada para incluir `revalidatePath("/transactions/list")`. As outras actions de Produto e Parceiro já continham revalidação apropriada.
+
+*   **Limpeza de Baixa Prioridade (Seleção):**
+    *   **C03:** Removidas as dependências não utilizadas `better-sqlite3`, `@neondatabase/serverless` e `@types/better-sqlite3` do `package.json`.
+    *   **D04:** Removidos imports não utilizados dos arquivos de schema Drizzle (`product.ts`, `transaction.ts`).
+
+### 8.1. Observações Adicionais da Fase 4
+
+*   A movimentação dos filtros de data e `partnerId` para o repositório melhora o desempenho das consultas de transações.
+*   A cobertura de testes para Server Actions fornece uma camada adicional de confiança.
+*   A revalidação de cache, embora básica, ajuda na consistência dos dados exibidos.
+*   A limpeza de dependências e imports contribui para um projeto mais enxuto.
+*   Ainda existem itens de baixa prioridade no `ACTION_PLAN.md` que podem ser abordados em ciclos futuros (C04, C05, UI03), bem como a expansão contínua de comentários (G01) e testes (T01).
+*   A funcionalidade de ordenação na lista de transações e filtros mais avançados (como busca textual na descrição da transação) são melhorias futuras possíveis para F03.

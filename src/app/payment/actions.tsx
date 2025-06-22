@@ -22,9 +22,9 @@ export async function addPaymentAction(
     // Revalidate the path where transaction details/payments are shown
     // This path might need to be dynamic, e.g., /transactions/[id]
     // For now, let's assume a generic revalidation or handle it on the client.
-    // revalidatePath("/transactions"); // Placeholder
-    // TODO: Adicionar revalidação de path para a lista de transações ou detalhes da transação.
-    // ex: revalidatePath(`/transactions/list`); ou revalidatePath(`/transactions/${data.transactionId}`);
+    revalidatePath("/transactions/list"); // Revalidar a lista de transações
+    // Se existir uma página de detalhes da transação, considerar:
+    // revalidatePath(`/admin/transactions/${data.transactionId}`); // Ajustar path conforme a rota real
     return { success: true, data: newPayment, message: "Pagamento adicionado com sucesso!" };
   } catch (error: unknown) { // Tipar error como unknown
     if (error instanceof ZodError) {
