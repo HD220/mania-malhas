@@ -53,11 +53,10 @@ import {
   CommandItem,
   CommandList,
 } from "@/components/ui/command";
-import { getTransactionByIdAction, GetTransactionByIdServerResponse } from "@/app/(admin)/transactions/actions";
+import { getTransactionByIdAction, GetTransactionByIdServerResponse, updateTransactionAction, UpdateTransactionServerResponse } from "@/app/(admin)/transactions/actions"; // Added updateTransactionAction
 import { type SelectTransaction } from "@/db/repositories/schemas/transactionSchema";
-// import { updateTransactionAction, UpdateTransactionServerResponse } from "@/app/(admin)/transactions/actions"; // For UI-TX-EDIT.3
-// import { useTransition } from "react"; // For UI-TX-EDIT.3
-// import { toast } from "sonner"; // For UI-TX-EDIT.3
+import { useTransition } from "react"; // Uncommented
+import { toast } from "sonner"; // Uncommented
 import { Skeleton } from "@/components/ui/skeleton"; // For loading state
 
 // Zod Schema for Edit Form
@@ -96,7 +95,7 @@ export function EditTransactionDialog({
   const [partnersLoading, setPartnersLoading] = useState(false);
   const [partnerComboboxOpen, setPartnerComboboxOpen] = useState(false); // Renamed to avoid conflict if other comboboxes are added
 
-  // const [isSubmitting, startSubmitTransition] = useTransition(); // For UI-TX-EDIT.3
+  const [isSubmitting, startSubmitTransition] = useTransition(); // Uncommented and using isSubmitting
 
   const form = useForm<EditTransactionFormValues>({
     resolver: zodResolver(editTransactionFormSchema),
@@ -163,8 +162,42 @@ export function EditTransactionDialog({
 
 
   const onSubmit = (data: EditTransactionFormValues) => {
-    console.log("Form submitted (UI-TX-EDIT.1 - no action yet):", data);
-    // Actual update action call will be in UI-TX-EDIT.3
+    startSubmitTransition(async () => {
+      const formDataForAction = {
+        ...data,
+        value: String(data.value).replace(',', '.'), // Ensure dot for decimal for backend
+        // Ensure dates are in a format the action/use case expects if not already Date objects
+        // If date objects are fine, no change needed here for date/dueDate
+      };
+
+      try {
+        const response: UpdateTransactionServerResponse = await updateTransactionAction(transactionId, formDataForAction);
+
+        if (response.success && response.data) {
+          toast.success(response.message || "Transação atualizada com sucesso!");
+          setIsOpen(false); // Close dialog on success
+          // No form.reset() needed typically for edit, as user might want to see new values or dialog closes.
+          // Revalidation of path in action should update any lists.
+        } else {
+          if (response.errors) {
+            Object.entries(response.errors).forEach(([key, value]) => {
+              if (value && value.length > 0) {
+                form.setError(key as keyof EditTransactionFormValues, { // Use EditTransactionFormValues here
+                  type: "server",
+                  message: value.join(", "),
+                });
+              }
+            });
+            toast.error("Por favor, corrija os erros no formulário.");
+          } else {
+            toast.error(response.message || "Falha ao atualizar transação.");
+          }
+        }
+      } catch (error) {
+        console.error("Update transaction submission error:", error);
+        toast.error("Ocorreu um erro inesperado ao atualizar a transação.");
+      }
+    });
   };
 
   return (
@@ -421,12 +454,12 @@ export function EditTransactionDialog({
 
         <DialogFooter className="pt-4">
           <DialogClose asChild>
-            <Button type="button" variant="outline" /*disabled={isSubmitting}*/>
+            <Button type="button" variant="outline" disabled={isSubmitting || isLoadingData}>
               Cancelar
             </Button>
           </DialogClose>
-          <Button type="submit" form="edit-transaction-form" /*disabled={isSubmitting || isLoadingData}*/>
-            {/* {isSubmitting && <Loader2 className="mr-2 h-4 w-4 animate-spin" />} */}
+          <Button type="submit" form="edit-transaction-form" disabled={isSubmitting || isLoadingData}>
+            {isSubmitting && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
             Salvar Alterações
           </Button>
         </DialogFooter>
