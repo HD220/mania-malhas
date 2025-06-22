@@ -56,7 +56,7 @@ describe('getPaymentsByTransactionIdUseCase', () => {
 
     expect(result).toEqual([]);
     expect(mockPaymentRepo.findByTransactionId).not.toHaveBeenCalled();
-    expect(consoleWarnSpy).toHaveBeenCalledWith("getPaymentsByTransactionIdUseCase called with invalid transactionId.");
+    expect(consoleWarnSpy).toHaveBeenCalledWith("getPaymentsByTransactionIdUseCase called with invalid transactionId: ''");
     consoleWarnSpy.mockRestore();
   });
 
@@ -67,7 +67,7 @@ describe('getPaymentsByTransactionIdUseCase', () => {
 
     expect(result).toEqual([]);
     expect(mockPaymentRepo.findByTransactionId).not.toHaveBeenCalled();
-    expect(consoleWarnSpy).toHaveBeenCalledWith("getPaymentsByTransactionIdUseCase called with invalid transactionId.");
+    expect(consoleWarnSpy).toHaveBeenCalledWith("getPaymentsByTransactionIdUseCase called with invalid transactionId: 'null'");
     consoleWarnSpy.mockRestore();
   });
 

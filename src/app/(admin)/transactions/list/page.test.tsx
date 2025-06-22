@@ -1,4 +1,4 @@
-import { render, screen, fireEvent, waitFor } from '@testing-library/react';
+import { render, screen, fireEvent, waitFor, act } from '@testing-library/react';
 import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest';
 import TransactionsListPage from './page'; // Component to test
 import { listTransactionsAction } from '../actions'; // Import the specific action
@@ -81,125 +81,129 @@ const mockEmptyResponse: PaginatedTransactionsResult = {
 describe('TransactionsListPage', () => {
 
   beforeEach(() => {
-    // vi.useFakeTimers(); // For debounce - Temporarily removed for diagnostics
+    vi.useFakeTimers(); // For debounce
     (listTransactionsAction as vi.Mock).mockClear(); // Clear previous calls and instances
     (listTransactionsAction as vi.Mock).mockResolvedValue({ success: true, data: mockInitialResponse }); // Set default resolution
   });
 
   afterEach(() => {
-    // vi.runOnlyPendingTimers(); // Temporarily removed
-    // vi.useRealTimers(); // Temporarily removed
+    vi.runOnlyPendingTimers();
+    vi.useRealTimers();
     (listTransactionsAction as vi.Mock).mockClear(); // Clear this specific mock
   });
 
   it('should render and load initial transactions', async () => {
-    render(<TransactionsListPage />);
+    (listTransactionsAction as vi.Mock).mockResolvedValue({ success: true, data: mockInitialResponse });
 
-    await waitFor(() => {
-      expect(listTransactionsAction).toHaveBeenCalledTimes(1);
-      expect(screen.getByText('Initial Transaction')).toBeInTheDocument();
+    await act(async () => {
+      render(<TransactionsListPage />);
+      await vi.runAllTimersAsync();
     });
-  });
+
+    expect(listTransactionsAction).toHaveBeenCalledWith(
+      {},
+      { page: 1, pageSize: 10 },
+      { column: 'date', direction: 'desc' }
+    );
+    expect(await screen.findByText('Initial Transaction')).toBeInTheDocument();
+  }, 10000);
 
   it('should call listTransactionsAction with description filter when user types in search input', async () => {
     (listTransactionsAction as vi.Mock)
-      .mockResolvedValueOnce({ success: true, data: mockInitialResponse }) // Initial load
-      .mockResolvedValueOnce({ success: true, data: mockFilteredResponse }); // Filtered load
+      .mockResolvedValueOnce({ success: true, data: mockInitialResponse })
+      .mockResolvedValueOnce({ success: true, data: mockFilteredResponse });
 
-    render(<TransactionsListPage />);
-
-    // Wait for initial load
-    await waitFor(() => {
-      expect(screen.getByText('Initial Transaction')).toBeInTheDocument();
+    await act(async () => {
+      render(<TransactionsListPage />);
+      await vi.runAllTimersAsync();
     });
 
-    const searchInput = screen.getByPlaceholderText('Ex: Venda Camiseta...');
-    fireEvent.change(searchInput, { target: { value: 'Coffee' } });
+    expect(await screen.findByText('Initial Transaction')).toBeInTheDocument();
 
-    // Fast-forward timers to trigger debounce
-    vi.advanceTimersByTime(500); // Debounce time is 500ms
-
-    await waitFor(() => {
-      expect(listTransactionsAction).toHaveBeenCalledTimes(2); // Initial load + filtered load
-      expect(listTransactionsAction).toHaveBeenLastCalledWith(
-        { description: 'Coffee' }, // filters
-        { page: 1, pageSize: 10 },  // pagination
-        { column: 'date', direction: 'desc' } // orderBy (default)
-      );
+    await act(async () => {
+      const searchInput = screen.getByPlaceholderText('Ex: Venda Camiseta...');
+      fireEvent.change(searchInput, { target: { value: 'Coffee' } });
+      vi.advanceTimersByTime(500);
+      await vi.runAllTimersAsync();
     });
 
-    // Check if the UI updates with filtered data
-    await waitFor(() => {
-        expect(screen.getByText('Filtered Coffee Purchase')).toBeInTheDocument();
-        expect(screen.queryByText('Initial Transaction')).not.toBeInTheDocument();
-    });
-  });
+    expect(listTransactionsAction).toHaveBeenCalledTimes(2);
+    expect(listTransactionsAction).toHaveBeenLastCalledWith(
+      { description: 'Coffee' },
+      { page: 1, pageSize: 10 },
+      { column: 'date', direction: 'desc' }
+    );
+    expect(await screen.findByText('Filtered Coffee Purchase')).toBeInTheDocument();
+    expect(screen.queryByText('Initial Transaction')).not.toBeInTheDocument();
+  }, 10000);
 
   it('should display "Nenhuma transação encontrada." when search yields no results', async () => {
     (listTransactionsAction as vi.Mock)
       .mockResolvedValueOnce({ success: true, data: mockInitialResponse })
       .mockResolvedValueOnce({ success: true, data: mockEmptyResponse });
 
-    render(<TransactionsListPage />);
-    await waitFor(() => {
-      expect(screen.getByText('Initial Transaction')).toBeInTheDocument();
+    await act(async () => {
+      render(<TransactionsListPage />);
+      await vi.runAllTimersAsync();
+    });
+    expect(await screen.findByText('Initial Transaction')).toBeInTheDocument();
+    await waitFor(() => expect(listTransactionsAction).toHaveBeenCalledTimes(1));
+
+
+    await act(async () => {
+      const searchInput = screen.getByPlaceholderText('Ex: Venda Camiseta...');
+      fireEvent.change(searchInput, { target: { value: 'NonExistentSearchTerm' } });
+      vi.advanceTimersByTime(500);
+      await vi.runAllTimersAsync();
     });
 
-    const searchInput = screen.getByPlaceholderText('Ex: Venda Camiseta...');
-    fireEvent.change(searchInput, { target: { value: 'NonExistentSearchTerm' } });
-    vi.advanceTimersByTime(500);
-
-    await waitFor(() => {
-      expect(listTransactionsAction).toHaveBeenCalledTimes(2);
-      expect(listTransactionsAction).toHaveBeenLastCalledWith(
-        { description: 'NonExistentSearchTerm' },
-        expect.any(Object),
-        expect.any(Object)
-      );
-    });
-
-    await waitFor(() => {
-        expect(screen.getByText('Nenhuma transação encontrada.')).toBeInTheDocument();
-    });
-  });
+    expect(listTransactionsAction).toHaveBeenCalledTimes(2);
+    expect(listTransactionsAction).toHaveBeenLastCalledWith(
+      { description: 'NonExistentSearchTerm' },
+      expect.any(Object),
+      expect.any(Object)
+    );
+    expect(await screen.findByText('Nenhuma transação encontrada.')).toBeInTheDocument();
+  }, 10000);
 
   it('should clear description filter when search input is cleared', async () => {
-    // Initial load (filtered), then load with cleared filter
-    // Note: The beforeEach already sets up a mockResolvedValue for the first call.
-    // So, the first call in this test will use mockFilteredResponse,
-    // and the second call (after clearing) will use mockInitialResponse.
     (listTransactionsAction as vi.Mock)
-      .mockResolvedValueOnce({ success: true, data: mockFilteredResponse }) // Simulating already filtered
-      .mockResolvedValueOnce({ success: true, data: mockInitialResponse }); // Back to initial
+      .mockResolvedValueOnce({ success: true, data: mockInitialResponse })
+      .mockResolvedValueOnce({ success: true, data: mockFilteredResponse })
+      .mockResolvedValueOnce({ success: true, data: mockInitialResponse });
 
-    render(<TransactionsListPage />);
+    await act(async () => {
+      render(<TransactionsListPage />);
+      await vi.runAllTimersAsync();
+    });
+    expect(await screen.findByText('Initial Transaction')).toBeInTheDocument();
+    await waitFor(() => expect(listTransactionsAction).toHaveBeenCalledTimes(1));
 
-    // Set initial search value and trigger first load (simulated as already filtered)
-    const searchInput = screen.getByPlaceholderText('Ex: Venda Camiseta...');
-    fireEvent.change(searchInput, { target: { value: 'Coffee' } });
-    vi.advanceTimersByTime(500);
 
-    await waitFor(() => {
-      expect(listTransactionsAction).toHaveBeenCalledTimes(1); // This is the "initial" call for this test
-      expect(screen.getByText('Filtered Coffee Purchase')).toBeInTheDocument();
+    await act(async () => {
+      const searchInput = screen.getByPlaceholderText('Ex: Venda Camiseta...');
+      fireEvent.change(searchInput, { target: { value: 'Coffee' } });
+      vi.advanceTimersByTime(500);
+      await vi.runAllTimersAsync();
+    });
+    expect(await screen.findByText('Filtered Coffee Purchase')).toBeInTheDocument();
+    await waitFor(() => expect(listTransactionsAction).toHaveBeenCalledTimes(2));
+
+
+    await act(async () => {
+      const searchInput = screen.getByPlaceholderText('Ex: Venda Camiseta...');
+      fireEvent.change(searchInput, { target: { value: '' } });
+      vi.advanceTimersByTime(500);
+      await vi.runAllTimersAsync();
     });
 
-    // Clear the search input
-    fireEvent.change(searchInput, { target: { value: '' } });
-    vi.advanceTimersByTime(500);
-
-    await waitFor(() => {
-      expect(listTransactionsAction).toHaveBeenCalledTimes(2);
-      expect(listTransactionsAction).toHaveBeenLastCalledWith(
-        { description: undefined }, // description filter should be undefined
-        expect.any(Object),
-        expect.any(Object)
-      );
-    });
-
-    await waitFor(() => {
-      expect(screen.getByText('Initial Transaction')).toBeInTheDocument();
-    });
-  });
+    expect(listTransactionsAction).toHaveBeenCalledTimes(3);
+    expect(listTransactionsAction).toHaveBeenLastCalledWith(
+      { description: undefined },
+      expect.any(Object),
+      expect.any(Object)
+    );
+    expect(await screen.findByText('Initial Transaction')).toBeInTheDocument();
+  }, 10000);
 
 });

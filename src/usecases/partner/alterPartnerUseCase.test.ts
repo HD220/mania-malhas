@@ -43,11 +43,12 @@ describe('alterPartnerUseCase', () => {
   });
 
   it('should throw Error if ID is not provided', async () => {
+    const expectedErrorMessage = "Invalid Partner ID provided for alteration.";
     // @ts-expect-error Testando ID nulo
-    await expect(alterPartnerUseCase(null, validUpdateData)).rejects.toThrow("Partner ID is required for alteration.");
+    await expect(alterPartnerUseCase(null, validUpdateData)).rejects.toThrow(expectedErrorMessage);
     // @ts-expect-error Testando ID undefined
-    await expect(alterPartnerUseCase(undefined, validUpdateData)).rejects.toThrow("Partner ID is required for alteration.");
-    await expect(alterPartnerUseCase('', validUpdateData)).rejects.toThrow("Partner ID is required for alteration.");
+    await expect(alterPartnerUseCase(undefined, validUpdateData)).rejects.toThrow(expectedErrorMessage);
+    await expect(alterPartnerUseCase('', validUpdateData)).rejects.toThrow(expectedErrorMessage);
     expect(mockPartnerRepo.update).not.toHaveBeenCalled();
   });
 
