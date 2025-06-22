@@ -4,6 +4,7 @@ import {
   InsertPartner,
   insertPartnerSchema,
 } from "@/db/repositories/schemas/partnerSchema";
+import { ZodError } from "zod";
 
 /**
  * Creates a new partner.
@@ -15,7 +16,7 @@ import {
  * @param {InsertPartner} input - The partner data to be created.
  *   - `name`: Name of the partner.
  *   - `phone`: Phone number (10 or 11 digits).
- *   - `active` (optional): Status of the partner (defaults to true if not provided by schema/db).
+ *   - `active` (optional): Status of the partner (defaults to true if not provided by schema or database default).
  *   - `notes` (optional): Additional notes.
  * @returns {Promise<{ id: string }>} A promise that resolves to an object containing the ID of the newly created partner.
  * @throws {ZodError} If the input data fails validation.

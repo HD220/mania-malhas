@@ -7,29 +7,39 @@ interface PendingTransactionsStats {
 }
 
 /**
- * Fetches statistics about pending transactions, including their count and total value.
+ * Fetches statistics about 'Pendente' (Pending) transactions.
  *
- * @returns {Promise<PendingTransactionsStats>} An object containing the count and totalValue of pending transactions.
+ * This use case retrieves all transactions currently marked with the status 'Pendente'.
+ * It then calculates:
+ * - `count`: The total number of such pending transactions.
+ * - `totalValue`: The sum of the 'value' for all these pending transactions.
+ *
+ * The actual filtering by status 'Pendente' is handled by the `findAll` method
+ * of the transaction repository.
+ *
+ * @returns {Promise<PendingTransactionsStats>} An object containing the `count` and `totalValue`
+ *                                             of pending transactions. `totalValue` is a number.
+ * @throws {Error} If there's an issue with the repository during data retrieval.
  */
 export default async function getPendingTransactionsStatsUseCase(): Promise<PendingTransactionsStats> {
   const transactionRepo = createTransactionRepository(db);
 
-  // Define o filtro para transações pendentes
+  // Define the filter for pending transactions.
+  // The repository's findAll method is expected to handle this status filter.
   const filters = { status: "Pendente" };
-  // A ordenação e paginação não são necessárias para este caso de uso de agregação.
 
-  // O método findAll do repositório já aplica os filtros no DB.
-  // E já retorna com partnerName (embora não usado aqui diretamente).
+  // Fetch all transactions that match the 'Pendente' status.
+  // Pagination and ordering are not relevant for this aggregate calculation.
   const pendingTransactions = await transactionRepo.findAll(filters);
 
   let totalValue = 0;
   for (const transaction of pendingTransactions) {
-    // transaction.value é string do schema, precisa ser convertido para número
+    // The transaction.value is stored as a string in the schema and needs conversion.
     totalValue += parseFloat(transaction.value as unknown as string);
   }
 
   return {
     count: pendingTransactions.length,
-    totalValue: totalValue,
+    totalValue: totalValue, // This will be a number, formatting (e.g. toFixed(2)) should be done by the caller/UI if needed.
   };
 }

@@ -3,29 +3,32 @@ import { partnerRepository } from "@/db/repositories/partnerRepository";
 import { SelectPartner } from "@/db/repositories/schemas/partnerSchema";
 
 /**
- * Searches for partners based on a search term and status.
+ * Searches for partners based on a search term and their status.
  *
- * The search term is typically matched against fields like name, notes, or phone.
- * The repository's `findBySearch` method handles the actual search logic.
+ * This use case allows for searching partners by matching the search term against
+ * relevant partner fields (e.g., name, notes, phone - depends on repository implementation)
+ * and filtering by the partner's active status.
  *
- * @param {string} search - The search term to filter partners. The string is trimmed before use.
- * @param {boolean} [status=true] - The status of partners to search for (true for active, false for inactive).
- *                                  Defaults to true (active partners).
- * @returns {Promise<SelectPartner[]>} A promise that resolves to an array of matching partners.
- *                                     Returns an empty array if no partners match the criteria.
+ * The search term is trimmed before being passed to the repository.
+ * The behavior for an empty search term (after trimming) depends on the
+ * repository's `findBySearch` implementation (it might return all partners
+ * matching the status, or none).
+ *
+ * @param {string} search - The search term to filter partners by.
+ * @param {boolean} [status=true] - The status of the partners to fetch (true for active, false for inactive).
+ *                                  Defaults to `true` (active partners).
+ * @returns {Promise<SelectPartner[]>} A promise that resolves to an array of partners
+ *                                     matching the search criteria and status. Returns an
+ *                                     empty array if no matching partners are found.
  * @throws {Error} If there's an issue with the repository during data retrieval.
  */
 export default async function searchPartnersUseCase(
   search: string,
   status: boolean = true
 ): Promise<SelectPartner[]> {
-  // Note on empty search string:
-  // The behavior of `repo.findBySearch` with an empty `search.trim()` string
-  // (e.g., returning all partners of the given status, or none)
-  // depends on the SQL LIKE logic within the repository.
-  // This use case currently assumes the repository handles it as desired.
-
   const repo = partnerRepository(db);
+  // The repository's findBySearch method is responsible for the actual search logic,
+  // including how an empty search string (after trim) is handled.
   const partners = await repo.findBySearch(search.trim(), status);
 
   return partners;
