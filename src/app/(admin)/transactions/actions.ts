@@ -123,8 +123,9 @@ export async function updateTransactionAction(
   }
 }
 
-import deleteTransactionUseCase from "@/usecases/transaction/deleteTransactionUseCase";
-import { InvalidOperationError } from "@/lib/errors/domainErrors";
+import deleteTransactionUseCase, { deleteTransactionInputSchema } from "@/usecases/transaction/deleteTransactionUseCase";
+import { DomainConflictError, NotFoundError } from "@/lib/errors/domainErrors";
+import { ZodError } from "zod";
 
 // Tipo específico para a resposta da action de exclusão
 export type DeleteTransactionServerResponse = {
@@ -134,16 +135,33 @@ export type DeleteTransactionServerResponse = {
 
 export async function deleteTransactionAction(id: string): Promise<DeleteTransactionServerResponse> {
   try {
-    await deleteTransactionUseCase(id);
+    // Validate the ID using the use case's schema before calling the use case
+    const validatedInput = deleteTransactionInputSchema.parse({ id });
+    await deleteTransactionUseCase(validatedInput);
+
     revalidatePath("/(admin)/transactions/list");
     // Considerar revalidar outras páginas que possam ser afetadas (ex: dashboard)
     // revalidatePath("/(admin)/dashboard");
     return { success: true, message: "Transação excluída com sucesso." };
   } catch (error: any) {
-    if (error instanceof NotFoundError || error instanceof InvalidOperationError) {
+    if (error instanceof ZodError) {
+      // Although we parse 'id' which is simple, if the schema were complex,
+      // this would map field errors. For a simple ID, a general message is fine.
       return {
         success: false,
-        message: error.message,
+        message: "ID da transação inválido." // Or error.flatten().fieldErrors.id?.join(", ")
+      };
+    }
+    if (error instanceof NotFoundError) {
+      return {
+        success: false,
+        message: error.message, // "Transaction with ID X not found."
+      };
+    }
+    if (error instanceof DomainConflictError) {
+      return {
+        success: false,
+        message: error.message, // "Transaction with ID X cannot be deleted because..."
       };
     }
     console.error("deleteTransactionAction Error:", error);

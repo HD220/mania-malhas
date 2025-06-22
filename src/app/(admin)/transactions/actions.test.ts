@@ -17,15 +17,23 @@ import { createTransactionAction, CreateTransactionServerResponse } from './acti
 import updateTransactionUseCase, { UpdateTransactionInput } from '@/usecases/transaction/updateTransactionUseCase';
 import { updateTransactionAction, UpdateTransactionServerResponse } from './actions';
 
-import deleteTransactionUseCase from '@/usecases/transaction/deleteTransactionUseCase';
+// Import deleteTransactionUseCase with its input schema
+import deleteTransactionUseCase, { deleteTransactionInputSchema } from '@/usecases/transaction/deleteTransactionUseCase';
 import { deleteTransactionAction, DeleteTransactionServerResponse } from './actions';
-// Note: Specific error types (NotFoundError, InvalidOperationError) will be imported via vi.importActual in test suites
+// Specific error types (NotFoundError, DomainConflictError, ZodError) will be imported via vi.importActual or are standard
 
 // Mock dos use cases
 vi.mock('@/usecases/transaction/getTransactionsUseCase');
 vi.mock('@/usecases/transaction/createTransactionUseCase');
 vi.mock('@/usecases/transaction/updateTransactionUseCase');
-vi.mock('@/usecases/transaction/deleteTransactionUseCase');
+// Mock deleteTransactionUseCase (default export) but keep named exports (like schema) real
+vi.mock('@/usecases/transaction/deleteTransactionUseCase', async () => {
+  const actual = await vi.importActual<typeof import('@/usecases/transaction/deleteTransactionUseCase')>('@/usecases/transaction/deleteTransactionUseCase');
+  return {
+    ...actual, // Includes actual deleteTransactionInputSchema
+    default: vi.fn(), // Mocks the default export (deleteTransactionUseCase function)
+  };
+});
 
 // Mock de next/cache
 vi.mock('next/cache', async (importOriginal) => {
@@ -200,59 +208,76 @@ describe('createTransactionAction Server Action', () => {
 });
 
 describe('deleteTransactionAction Server Action', async () => {
-  const errorClasses = await vi.importActual<typeof import('@/lib/errors/domainErrors')>('@/lib/errors/domainErrors');
-  const mockDeleteTransactionUseCase = deleteTransactionUseCase as ReturnType<typeof vi.fn>;
-  const mockRevalidatePath = revalidatePath as ReturnType<typeof vi.fn>;
-  const transactionId = faker.string.uuid();
+  const { NotFoundError, DomainConflictError } = await vi.importActual<typeof import('@/lib/errors/domainErrors')>('@/lib/errors/domainErrors');
+  // deleteTransactionUseCase is already mocked by vi.mock at the top level
+  const mockRevalidatePath = revalidatePath as ReturnType<typeof vi.fn>; // Correctly typed mock
+  const validTransactionId = faker.string.uuid();
 
   beforeEach(() => {
     vi.clearAllMocks();
+    // Resetting the mock implementation if necessary, or just clear calls.
+    // The mock itself is persistent due to vi.mock.
+    (deleteTransactionUseCase as ReturnType<typeof vi.fn>).mockReset();
   });
 
   it('should delete a transaction successfully and revalidate path', async () => {
-    mockDeleteTransactionUseCase.mockResolvedValue(undefined); // delete use case returns void
+    (deleteTransactionUseCase as ReturnType<typeof vi.fn>).mockResolvedValue({ success: true });
 
-    const response = await deleteTransactionAction(transactionId);
+    const response = await deleteTransactionAction(validTransactionId);
 
-    expect(mockDeleteTransactionUseCase).toHaveBeenCalledWith(transactionId);
+    expect(deleteTransactionUseCase).toHaveBeenCalledWith({ id: validTransactionId });
     expect(response.success).toBe(true);
     expect(response.message).toBe("Transação excluída com sucesso.");
     expect(mockRevalidatePath).toHaveBeenCalledWith("/(admin)/transactions/list");
   });
 
+  it('should return validation error if ID is invalid (ZodError from action)', async () => {
+    const invalidTransactionId = "not-a-uuid";
+    // The action itself calls deleteTransactionInputSchema.parse.
+    // No need to mock the use case throwing ZodError here, the action's parse will throw.
+
+    const response = await deleteTransactionAction(invalidTransactionId);
+
+    expect(response.success).toBe(false);
+    expect(response.message).toBe("ID da transação inválido.");
+    expect(deleteTransactionUseCase).not.toHaveBeenCalled(); // Check the actual mock
+    expect(mockRevalidatePath).not.toHaveBeenCalled();
+  });
+
+
   it('should return NotFoundError if use case throws NotFoundError', async () => {
-    const errorMessage = "Transação não encontrada.";
-    // The NotFoundError class appends ". not found." to the message.
-    mockDeleteTransactionUseCase.mockRejectedValue(new NotFoundError(errorMessage));
+    const errorMessage = `Transaction with ID ${validTransactionId} not found.`;
+    (deleteTransactionUseCase as ReturnType<typeof vi.fn>).mockRejectedValue(new NotFoundError(`Transaction with ID ${validTransactionId}`));
 
-    const response = await deleteTransactionAction(transactionId);
-
-    expect(response.success).toBe(false);
-    expect(response.message).toBe(`${errorMessage} not found.`);
-    expect(mockRevalidatePath).not.toHaveBeenCalled();
-  });
-
-  it('should return InvalidOperationError if use case throws InvalidOperationError', async () => {
-    const errorMessage = "Não é possível excluir transação pois existem pagamentos associados. Cancele ou desvincule os pagamentos primeiro.";
-    // Use a plain object for the mock rejection as `new InvalidOperationError` was problematic in test setup
-    const mockErrorObject = { name: 'InvalidOperationError', message: errorMessage };
-    mockDeleteTransactionUseCase.mockRejectedValue(mockErrorObject);
-
-    const response = await deleteTransactionAction(transactionId);
+    const response = await deleteTransactionAction(validTransactionId);
 
     expect(response.success).toBe(false);
     expect(response.message).toBe(errorMessage);
+    expect(deleteTransactionUseCase).toHaveBeenCalledWith({ id: validTransactionId }); // Check the actual mock
     expect(mockRevalidatePath).not.toHaveBeenCalled();
   });
 
-  it('should return a generic error message if use case throws a generic error', async () => {
+  it('should return DomainConflictError if use case throws DomainConflictError (e.g. has payments)', async () => {
+    const errorMessage = `Transaction with ID ${validTransactionId} cannot be deleted because it has 1 associated payment(s).`;
+    (deleteTransactionUseCase as ReturnType<typeof vi.fn>).mockRejectedValue(new DomainConflictError(errorMessage));
+
+    const response = await deleteTransactionAction(validTransactionId);
+
+    expect(response.success).toBe(false);
+    expect(response.message).toBe(errorMessage);
+    expect(deleteTransactionUseCase).toHaveBeenCalledWith({ id: validTransactionId }); // Check the actual mock
+    expect(mockRevalidatePath).not.toHaveBeenCalled();
+  });
+
+  it('should return a generic error message if use case throws an unexpected generic error', async () => {
     const errorMessage = 'Erro genérico ao excluir transação';
-    mockDeleteTransactionUseCase.mockRejectedValue(new Error(errorMessage));
+    (deleteTransactionUseCase as ReturnType<typeof vi.fn>).mockRejectedValue(new Error(errorMessage));
 
-    const response = await deleteTransactionAction(transactionId);
+    const response = await deleteTransactionAction(validTransactionId);
 
     expect(response.success).toBe(false);
     expect(response.message).toBe(errorMessage);
+    expect(deleteTransactionUseCase).toHaveBeenCalledWith({ id: validTransactionId }); // Check the actual mock
     expect(mockRevalidatePath).not.toHaveBeenCalled();
   });
 });
