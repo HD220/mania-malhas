@@ -31,19 +31,20 @@ export async function createPartner(
       message: "Parceiro criado com sucesso!",
       partner: newPartner, // Adjust if use case returns something else e.g. {id: string}
     };
-  } catch (error) {
+  } catch (error: unknown) { // Tipar error como unknown
     if (error instanceof ZodError) {
       return {
         success: false,
         errors: error.flatten().fieldErrors,
-        message: "Erro de validação nos dados fornecidos.",
+        message: error.flatten().formErrors.length > 0 ? error.flatten().formErrors.join(', ') : "Erro de validação nos dados fornecidos."
       };
     }
+
     let errorMessage = "Erro ao criar parceiro. Tente novamente.";
     if (error instanceof Error) {
-      console.error("createPartner Server Action Error:", error.message);
+      console.error("createPartner Server Action Error:", error.message, error.stack);
     } else {
-      console.error("createPartner Server Action Unexpected Error:", error);
+      console.error("createPartner Server Action Unexpected Error Type:", error);
     }
     return { success: false, message: errorMessage };
   }

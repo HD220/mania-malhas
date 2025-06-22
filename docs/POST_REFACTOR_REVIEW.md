@@ -138,3 +138,40 @@ Durante a Fase 2, as seguintes tarefas e melhorias foram realizadas, complementa
 *   A adição de comentários melhora a legibilidade e manutenibilidade do código.
 *   As correções de baixa prioridade contribuem para a qualidade geral e consistência do código.
 *   O ambiente de teste com Vitest demonstrou ser estável após a configuração inicial e reinstalação de uma dependência.
+
+## 7. Atualizações da Fase 3
+
+Durante a Fase 3, o foco foi em concluir funcionalidades pendentes, expandir testes e realizar melhorias de baixa prioridade:
+
+*   **Conclusão da UI de Transações (F03 - restante):**
+    *   Implementada paginação completa na lista de transações, incluindo modificações no repositório (`limit`, `offset`, `countAll`), caso de uso, action e UI da página.
+    *   Filtros por data (opcional) não foram implementados nesta fase.
+
+*   **Expansão da Cobertura de Testes (T01 - continuação):**
+    *   Adicionados testes unitários/integração para `getTransactionsUseCase`, cobrindo filtros e paginação.
+    *   Adicionados testes de componente para `TransactionPaymentsModal` usando `@testing-library/react`, testando renderização, interações e mocks de actions. Todos os 29 testes em 5 arquivos estão passando.
+
+*   **Implementação do Sistema Básico de Notificações (F05 - base):**
+    *   Criado o componente `NotificationsPanel.tsx` utilizando `Sheet` do Shadcn/UI.
+    *   O painel exibe notificações mockadas e foi integrado ao `Header.tsx`, controlado por um novo ícone de sino.
+
+*   **Revisão do Script de Seed de Dados (D05):**
+    *   Corrigida a geração de números de telefone para parceiros para alinhar com o schema.
+    *   Ajustada a tipagem de valores monetários em `seedPayments` para confiar na coerção do schema.
+    *   Melhorada a mensagem no console sobre a necessidade de rodar migrações.
+
+*   **Implementação de Itens de Baixa Prioridade Selecionados:**
+    *   **G04 (Tipagem em `catch`):** Aplicado `error: unknown` e `instanceof Error` em blocos `catch` de várias Server Actions (`createProduct`, `updateProduct`, `createPartner`, `updatePartner`, `addPaymentAction`).
+    *   **UI02 (Uso de `notFound()`):** Verificado que as páginas de edição de Produto e Parceiro já utilizavam `notFound()` corretamente.
+
+*   **Revisão Final de Comentários (G01) e `.env.exemple` (DC01):**
+    *   Adicionados/revisados comentários JSDoc/TSDoc em `transactionRepository.ts` e `getTransactionsUseCase.ts`.
+    *   Verificado e atualizado `.env.exemple` (adicionado `DB_SEEDING`).
+
+### 7.1. Observações Adicionais da Fase 3
+
+*   A paginação na lista de transações é uma melhoria significativa de usabilidade para grandes volumes de dados.
+*   Os testes de componente para o modal de pagamentos aumentam a confiança na UI financeira.
+*   O sistema de notificações, embora básico, estabelece a fundação para futuras notificações reais.
+*   As melhorias no script de seed e as correções de baixa prioridade contribuem para a saúde geral do projeto.
+*   Ainda há oportunidades para mover mais lógica de filtragem (datas, `partnerId` em transações) para o nível do banco de dados para otimizar o desempenho.

@@ -26,6 +26,21 @@ export interface PaginatedTransactionsResult {
   pageSize: number;
 }
 
+/**
+ * Fetches a paginated list of transactions, optionally applying filters.
+ * Includes partner names in the transaction data.
+ *
+ * This use case handles:
+ * - Mapping UI filters to repository filters.
+ * - Calling the repository to get a paginated list of transactions and the total count of items.
+ * - Applying any filters not yet supported by the repository at the application level (with a TODO to move them).
+ * - Calculating pagination metadata (totalPages, currentPage, etc.).
+ *
+ * @param {GetTransactionsFilters} [filters] - Filters to apply (e.g., type, status, partnerId, date range).
+ * @param {UseCasePaginationParams} [pagination] - Pagination parameters (page, pageSize).
+ * @returns {Promise<PaginatedTransactionsResult>} An object containing the paginated transaction data and pagination info.
+ * @throws {Error} If there's an issue with the repository during data retrieval.
+ */
 export default async function getTransactionsUseCase(
   filters?: GetTransactionsFilters,
   pagination?: UseCasePaginationParams

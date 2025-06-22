@@ -21,9 +21,9 @@ type InsertedTransaction = Awaited<ReturnType<typeof db.insert<typeof transactio
 async function seedPartners(): Promise<InsertedPartner[]> {
   console.log("🌱 Seeding partners...");
   const partnersData = [
-    { name: faker.company.name(), phone: faker.phone.number('9########'), active: true, notes: faker.lorem.sentence() },
-    { name: faker.person.fullName(), phone: faker.phone.number('9########'), active: true, notes: faker.lorem.paragraph(1) },
-    { name: faker.company.name(), phone: faker.phone.number('9########'), active: false, notes: "Parceiro inativo para testes." },
+    { name: faker.company.name(), phone: faker.phone.number('9##########'), active: true, notes: faker.lorem.sentence() }, // 11 digits
+    { name: faker.person.fullName(), phone: faker.phone.number('9#########'), active: true, notes: faker.lorem.paragraph(1) }, // 10 digits
+    { name: faker.company.name(), phone: faker.helpers.arrayElement([faker.phone.number('9#########'), faker.phone.number('9##########')]), active: false, notes: "Parceiro inativo para testes." },
   ];
   const insertedPartners = await db.insert(partnerTable).values(partnersData).returning();
   console.log(`-> ${insertedPartners.length} partners seeded.`);
@@ -143,9 +143,9 @@ async function seedPayments(transactions: InsertedTransaction[]) {
   }
   let paymentCount = 0;
   for (const transaction of transactions) {
-    // Certifique-se de que transaction.value é um número para cálculos
-    const transactionValue = parseFloat(transaction.value as unknown as string); // value from DB SELECT might be string
-    const transactionDate = new Date(transaction.date); // Certificar que é Date
+    // transaction.value should already be a number due to z.coerce.number() in selectTransactionSchema
+    const transactionValue = transaction.value;
+    const transactionDate = new Date(transaction.date); // Ensure date is a Date object
 
     if (transaction.status === "Cancelado") continue;
 
@@ -251,7 +251,9 @@ async function main() {
   // For a true self-contained seed after reset, you might:
   // import { migrate } from 'drizzle-orm/postgres-js/migrator';
   // await migrate(db, { migrationsFolder: 'src/db/postgres/migrations' });
-  // console.log("✅ Migrations applied.");
+  // console.log("✅ Migrations applied by seed script.");
+  // For now, we assume migrations are handled externally if this script only drops/seeds.
+  console.log("‼️ IMPORTANT: If tables were dropped, ensure migrations (e.g., `npm run pg:migrate`) are run to recreate the schema before seeding data, unless this script is part of a flow that handles it.");
 
 
   // Seed data

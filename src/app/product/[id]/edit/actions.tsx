@@ -57,20 +57,21 @@ export async function updateProduct({
       message: "Produto atualizado com sucesso!",
       product: { id, ...data },
     };
-  } catch (error) {
+  } catch (error: unknown) { // Tipar error como unknown
     if (error instanceof ZodError) {
       return {
         success: false,
         errors: error.flatten().fieldErrors,
-        message: "Erro de validação nos dados fornecidos.",
+        message: error.flatten().formErrors.length > 0 ? error.flatten().formErrors.join(', ') : "Erro de validação nos dados fornecidos."
       };
     }
+
     let errorMessage = "Erro ao atualizar produto. Tente novamente.";
     if (error instanceof Error) {
-      console.error("updateProduct Server Action Error:", error.message);
+      console.error("updateProduct Server Action Error:", error.message, error.stack);
       // Potentially use error.message if it's a known, safe error type
     } else {
-      console.error("updateProduct Server Action Unexpected Error:", error);
+      console.error("updateProduct Server Action Unexpected Error Type:", error);
     }
     return { success: false, message: errorMessage };
   }

@@ -23,19 +23,26 @@ export async function addPaymentAction(
     // This path might need to be dynamic, e.g., /transactions/[id]
     // For now, let's assume a generic revalidation or handle it on the client.
     // revalidatePath("/transactions"); // Placeholder
+    // TODO: Adicionar revalidação de path para a lista de transações ou detalhes da transação.
+    // ex: revalidatePath(`/transactions/list`); ou revalidatePath(`/transactions/${data.transactionId}`);
     return { success: true, data: newPayment, message: "Pagamento adicionado com sucesso!" };
-  } catch (error) {
+  } catch (error: unknown) { // Tipar error como unknown
     if (error instanceof ZodError) {
-      return { success: false, errors: error.flatten().fieldErrors, message: "Erro de validação nos dados do pagamento." };
+      return {
+        success: false,
+        errors: error.flatten().fieldErrors,
+        message: error.flatten().formErrors.length > 0 ? error.flatten().formErrors.join(', ') : "Erro de validação nos dados do pagamento."
+      };
     }
+
     let errorMessage = "Erro ao adicionar pagamento. Tente novamente.";
     if (error instanceof Error) {
-      // Mensagens de erro do createPaymentUseCase (ex: "Transação não encontrada", valor excedido) são passadas aqui.
-      // Elas são consideradas "seguras" para serem exibidas ao cliente.
+      // Mensagens de erro do createPaymentUseCase (ex: "Transação não encontrada", valor excedido)
+      // são consideradas seguras para exibição, pois são erros de domínio.
       errorMessage = error.message;
-      console.error("addPaymentAction Server Action Error:", error.message);
+      console.error("addPaymentAction Server Action Error:", error.message, error.stack);
     } else {
-      console.error("addPaymentAction Server Action Unexpected Error:", error);
+      console.error("addPaymentAction Server Action Unexpected Error Type:", error);
     }
     return { success: false, message: errorMessage };
   }

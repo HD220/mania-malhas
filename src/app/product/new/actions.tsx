@@ -32,21 +32,25 @@ export async function createProduct(
     revalidatePath("/product/list");
     // redirect("/product/list"); // Redirect should happen on the client after successful form submission feedback
     return { success: true, message: "Produto criado com sucesso!" };
-  } catch (error) {
+  } catch (error: unknown) { // Tipar error como unknown
     if (error instanceof ZodError) {
-      return { success: false, errors: error.flatten().fieldErrors, message: "Erro de validação nos dados fornecidos." };
+      return {
+        success: false,
+        errors: error.flatten().fieldErrors,
+        message: error.flatten().formErrors.length > 0 ? error.flatten().formErrors.join(', ') : "Erro de validação nos dados fornecidos."
+      };
     }
-    // Para outros tipos de erro, logar e retornar mensagem genérica
-    // Idealmente, erros específicos do use case (ex: falha no DB) poderiam ser tratados diferentemente
+
     let errorMessage = "Erro ao criar produto. Tente novamente.";
     if (error instanceof Error) {
-      // Poderia logar error.message para o servidor, mas não expor diretamente ao cliente por segurança
-      console.error("createProduct Server Action Error:", error.message);
-      // Em alguns casos, você pode querer expor mensagens de erro específicas se forem seguras
+      // Logar a mensagem de erro real no servidor para debugging
+      console.error("createProduct Server Action Error:", error.message, error.stack);
+      // Não expor error.message diretamente ao cliente por padrão, a menos que seja seguro e intencional.
+      // Se o use case lançar erros de domínio customizados com mensagens seguras, elas poderiam ser usadas.
       // errorMessage = error.message;
     } else {
-      // Lidar com erros que não são instâncias de Error
-      console.error("createProduct Server Action Unexpected Error:", error);
+      // Lidar com casos onde o erro não é uma instância de Error
+      console.error("createProduct Server Action Unexpected Error Type:", error);
     }
     return { success: false, message: errorMessage };
   }

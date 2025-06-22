@@ -46,19 +46,20 @@ export async function updatePartner({
       message: "Parceiro atualizado com sucesso!",
       partner: { id, ...data }, // Return the full partner data including id
     };
-  } catch (error) {
+  } catch (error: unknown) { // Tipar error como unknown
     if (error instanceof ZodError) {
       return {
         success: false,
         errors: error.flatten().fieldErrors,
-        message: "Erro de validação nos dados fornecidos.",
+        message: error.flatten().formErrors.length > 0 ? error.flatten().formErrors.join(', ') : "Erro de validação nos dados fornecidos."
       };
     }
+
     let errorMessage = "Erro ao atualizar parceiro. Tente novamente.";
     if (error instanceof Error) {
-      console.error("updatePartner Server Action Error:", error.message);
+      console.error("updatePartner Server Action Error:", error.message, error.stack);
     } else {
-      console.error("updatePartner Server Action Unexpected Error:", error);
+      console.error("updatePartner Server Action Unexpected Error Type:", error);
     }
     return { success: false, message: errorMessage };
   }
