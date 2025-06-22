@@ -47,6 +47,7 @@ export type TransactionRepositoryFactory = (dbInstance?: DBConnection) => {
   findById: (id: string) => Promise<SelectTransaction | null>;
   update: (id: string, data: Partial<InsertTransaction>) => Promise<void>;
   insert: (data: InsertTransaction) => Promise<{ id: string }>;
+  deleteById: (id: string) => Promise<void>;
 };
 
 export const transactionRepository: TransactionRepositoryFactory = (dbInstance) => {
@@ -199,11 +200,16 @@ export const transactionRepository: TransactionRepositoryFactory = (dbInstance) 
     return { id: newId };
   };
 
+  const deleteById = async (id: string): Promise<void> => {
+    await db.delete(transactionTable).where(eq(transactionTable.id, id));
+  };
+
   return {
     insert,
     update,
     findById,
     findAll,
-    countAll, // Adicionar countAll ao objeto retornado
+    countAll,
+    deleteById,
   };
 };
