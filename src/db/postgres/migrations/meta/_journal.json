@@ -92,6 +92,13 @@
       "when": 1750540877510,
       "tag": "0012_opposite_paper_doll",
       "breakpoints": true
+    },
+    {
+      "idx": 13,
+      "version": "7",
+      "when": 1750630751500,
+      "tag": "0013_rare_thaddeus_ross",
+      "breakpoints": true
     }
   ]
 }
