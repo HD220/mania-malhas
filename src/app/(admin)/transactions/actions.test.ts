@@ -14,14 +14,18 @@ import { createTransactionAction, CreateTransactionServerResponse } from './acti
 
 
 // Mock dos use cases
-import updateTransactionUseCase, { UpdateTransactionInput } from '@/usecases/transaction/updateTransactionUseCase'; // Import new use case
-import { NotFoundError } from '@/lib/errors/domainErrors'; // Import NotFoundError
-import { updateTransactionAction, UpdateTransactionServerResponse } from './actions'; // Import new action and type
+import updateTransactionUseCase, { UpdateTransactionInput } from '@/usecases/transaction/updateTransactionUseCase';
+import { updateTransactionAction, UpdateTransactionServerResponse } from './actions';
+
+import deleteTransactionUseCase from '@/usecases/transaction/deleteTransactionUseCase';
+import { deleteTransactionAction, DeleteTransactionServerResponse } from './actions';
+// Note: Specific error types (NotFoundError, InvalidOperationError) will be imported via vi.importActual in test suites
 
 // Mock dos use cases
 vi.mock('@/usecases/transaction/getTransactionsUseCase');
 vi.mock('@/usecases/transaction/createTransactionUseCase');
-vi.mock('@/usecases/transaction/updateTransactionUseCase'); // Mock new use case
+vi.mock('@/usecases/transaction/updateTransactionUseCase');
+vi.mock('@/usecases/transaction/deleteTransactionUseCase');
 
 // Mock de next/cache
 vi.mock('next/cache', async (importOriginal) => {
@@ -195,7 +199,66 @@ describe('createTransactionAction Server Action', () => {
   });
 });
 
-describe('updateTransactionAction Server Action', () => {
+describe('deleteTransactionAction Server Action', async () => {
+  const errorClasses = await vi.importActual<typeof import('@/lib/errors/domainErrors')>('@/lib/errors/domainErrors');
+  const mockDeleteTransactionUseCase = deleteTransactionUseCase as ReturnType<typeof vi.fn>;
+  const mockRevalidatePath = revalidatePath as ReturnType<typeof vi.fn>;
+  const transactionId = faker.string.uuid();
+
+  beforeEach(() => {
+    vi.clearAllMocks();
+  });
+
+  it('should delete a transaction successfully and revalidate path', async () => {
+    mockDeleteTransactionUseCase.mockResolvedValue(undefined); // delete use case returns void
+
+    const response = await deleteTransactionAction(transactionId);
+
+    expect(mockDeleteTransactionUseCase).toHaveBeenCalledWith(transactionId);
+    expect(response.success).toBe(true);
+    expect(response.message).toBe("Transação excluída com sucesso.");
+    expect(mockRevalidatePath).toHaveBeenCalledWith("/(admin)/transactions/list");
+  });
+
+  it('should return NotFoundError if use case throws NotFoundError', async () => {
+    const errorMessage = "Transação não encontrada.";
+    // The NotFoundError class appends ". not found." to the message.
+    mockDeleteTransactionUseCase.mockRejectedValue(new NotFoundError(errorMessage));
+
+    const response = await deleteTransactionAction(transactionId);
+
+    expect(response.success).toBe(false);
+    expect(response.message).toBe(`${errorMessage} not found.`);
+    expect(mockRevalidatePath).not.toHaveBeenCalled();
+  });
+
+  it('should return InvalidOperationError if use case throws InvalidOperationError', async () => {
+    const errorMessage = "Não é possível excluir transação pois existem pagamentos associados. Cancele ou desvincule os pagamentos primeiro.";
+    // Use a plain object for the mock rejection as `new InvalidOperationError` was problematic in test setup
+    const mockErrorObject = { name: 'InvalidOperationError', message: errorMessage };
+    mockDeleteTransactionUseCase.mockRejectedValue(mockErrorObject);
+
+    const response = await deleteTransactionAction(transactionId);
+
+    expect(response.success).toBe(false);
+    expect(response.message).toBe(errorMessage);
+    expect(mockRevalidatePath).not.toHaveBeenCalled();
+  });
+
+  it('should return a generic error message if use case throws a generic error', async () => {
+    const errorMessage = 'Erro genérico ao excluir transação';
+    mockDeleteTransactionUseCase.mockRejectedValue(new Error(errorMessage));
+
+    const response = await deleteTransactionAction(transactionId);
+
+    expect(response.success).toBe(false);
+    expect(response.message).toBe(errorMessage);
+    expect(mockRevalidatePath).not.toHaveBeenCalled();
+  });
+});
+
+describe('updateTransactionAction Server Action', async () => {
+  const { NotFoundError } = await vi.importActual<typeof import('@/lib/errors/domainErrors')>('@/lib/errors/domainErrors');
   const mockUpdateTransactionUseCase = updateTransactionUseCase as ReturnType<typeof vi.fn>;
   const mockRevalidatePath = revalidatePath as ReturnType<typeof vi.fn>;
   const transactionId = faker.string.uuid();

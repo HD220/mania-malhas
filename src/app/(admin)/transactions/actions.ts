@@ -123,5 +123,33 @@ export async function updateTransactionAction(
   }
 }
 
-// Poderíamos adicionar actions para criar/atualizar/deletar transações aqui também, se necessário.
-// Ex: createTransactionAction, updateTransactionStatusAction, etc.
+import deleteTransactionUseCase from "@/usecases/transaction/deleteTransactionUseCase";
+import { InvalidOperationError } from "@/lib/errors/domainErrors";
+
+// Tipo específico para a resposta da action de exclusão
+export type DeleteTransactionServerResponse = {
+  success: boolean;
+  message?: string;
+};
+
+export async function deleteTransactionAction(id: string): Promise<DeleteTransactionServerResponse> {
+  try {
+    await deleteTransactionUseCase(id);
+    revalidatePath("/(admin)/transactions/list");
+    // Considerar revalidar outras páginas que possam ser afetadas (ex: dashboard)
+    // revalidatePath("/(admin)/dashboard");
+    return { success: true, message: "Transação excluída com sucesso." };
+  } catch (error: any) {
+    if (error instanceof NotFoundError || error instanceof InvalidOperationError) {
+      return {
+        success: false,
+        message: error.message,
+      };
+    }
+    console.error("deleteTransactionAction Error:", error);
+    return {
+      success: false,
+      message: error.message || "Falha ao excluir transação.",
+    };
+  }
+}
