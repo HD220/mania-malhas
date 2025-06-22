@@ -2,9 +2,13 @@ import { z } from "zod";
 import { db } from "@/db/postgres";
 import {
   transactionRepository as createTransactionRepository,
-  TransactionRepositoryFactory
+  TransactionRepositoryFactory,
 } from "@/db/repositories/transactionRepository";
-import { NotFoundError } from "@/lib/errors/domainErrors";
+import {
+  paymentRepository as createPaymentRepository,
+  PaymentRepositoryFactory,
+} from "@/db/repositories/paymentRepository";
+import { NotFoundError, DomainConflictError } from "@/lib/errors/domainErrors";
 
 /**
  * Schema for the input of the deleteTransactionUseCase.
@@ -29,12 +33,14 @@ export type DeleteTransactionInput = z.infer<typeof deleteTransactionInputSchema
  */
 export default async function deleteTransactionUseCase(
   input: DeleteTransactionInput,
-  transactionRepoFactory: TransactionRepositoryFactory = createTransactionRepository
+  transactionRepoFactory: TransactionRepositoryFactory = createTransactionRepository,
+  paymentRepoFactory: PaymentRepositoryFactory = createPaymentRepository
 ): Promise<{ success: true }> {
   // 1. Validate input data
   const { id } = deleteTransactionInputSchema.parse(input);
 
   const transactionRepo = transactionRepoFactory(db);
+  const paymentRepo = paymentRepoFactory(db);
 
   // 2. Attempt to find the transaction first to ensure it exists before deletion
   // This helps in providing a more specific NotFoundError.
@@ -45,11 +51,17 @@ export default async function deleteTransactionUseCase(
     throw new NotFoundError(`Transaction with ID ${id} not found.`);
   }
 
-  // 3. Delete the transaction
-  // Note: UC-TX-DELETE.2 will handle logic related to associated payments.
-  // For now, this directly calls deleteById.
+  // 3. Check for associated payments
+  const associatedPayments = await paymentRepo.findByTransactionId(id);
+  if (associatedPayments && associatedPayments.length > 0) {
+    throw new DomainConflictError(
+      `Transaction with ID ${id} cannot be deleted because it has ${associatedPayments.length} associated payment(s).`
+    );
+  }
+
+  // 4. Delete the transaction
   await transactionRepo.deleteById(id);
 
-  // 4. Return success
+  // 5. Return success
   return { success: true };
 }

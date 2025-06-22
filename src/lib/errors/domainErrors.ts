@@ -27,3 +27,10 @@ export class ValidationError extends DomainError {
 // export class AuthenticationError extends DomainError { ... }
 // export class AuthorizationError extends DomainError { ... }
 // export class InvalidOperationError extends DomainError { ... }
+
+export class DomainConflictError extends DomainError {
+  constructor(message: string) {
+    super(message);
+    this.name = "DomainConflictError";
+  }
+}
