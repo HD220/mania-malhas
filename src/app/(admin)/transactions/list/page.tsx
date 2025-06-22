@@ -1,4 +1,4 @@
-"use client"; // Esta página agora precisa ser um Client Component para usar hooks de estado
+"use client";
 
 import { Button } from "@/components/ui/button";
 import {
@@ -9,53 +9,96 @@ import {
   CardHeader,
   CardTitle,
 } from "@/components/ui/card";
-import { Suspense, useEffect, useState, useCallback } from "react";
+import { useEffect, useState, useCallback } from "react";
 import { listTransactionsAction } from "./actions";
 import { TransactionWithPartner } from "@/db/repositories/transactionRepository";
 import { TransactionPaymentsModal } from "@/components/transaction-payments-modal";
 import { useToast } from "@/components/ui/use-toast";
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"; // Para filtros
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Label } from "@/components/ui/label";
+import { CalendarIcon, ArrowUpDown, ArrowUp, ArrowDown } from "lucide-react";
+import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
+import { Calendar } from "@/components/ui/calendar";
+import { format, isValid as isValidDate } from "date-fns";
+import { ptBR } from "date-fns/locale";
+import { cn } from "@/utils";
+import { UseCaseOrderByParams } from "@/usecases/transaction/getTransactionsUseCase"; // Importar o tipo
 
-import { CalendarIcon } from "lucide-react"; // Importar CalendarIcon
-import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover"; // Para DatePicker
-import { Calendar } from "@/components/ui/calendar"; // Para DatePicker
-import { format, isValid as isValidDate } from "date-fns"; // Para formatar datas e verificar validade
-import { ptBR } from "date-fns/locale"; // Para locale pt-BR
-import { cn } from "@/utils"; // Para classnames condicionais
-
-// Tipos de Filtro
 interface TransactionFilters {
-  type?: "E" | "S"; // Removido "all" pois undefined representa "all"
-  status?: string; // Removido "all"
+  type?: "E" | "S";
+  status?: string;
   dateFrom?: Date;
   dateTo?: Date;
+  partnerId?: string;
 }
 
-// Componente da Tabela de Transações
+/**
+ * Defines which columns of the transaction table are sortable.
+ */
+type SortableColumn = keyof Pick<TransactionWithPartner, "date" | "value" | "status" | "description" | "type">;
+interface SortConfig {
+  column: SortableColumn;
+  direction: "asc" | "desc";
+}
+
+/**
+ * Renders the table of transactions.
+ *
+ * @param transactions - Array of transactions to display.
+ * @param onViewPaymentsClick - Callback function when "Ver Pagamentos" is clicked.
+ * @param sortConfig - Current sort configuration.
+ * @param onSort - Callback function to handle sorting when a column header is clicked.
+ */
 function TransactionsTable({
   transactions,
-  onViewPaymentsClick
+  onViewPaymentsClick,
+  sortConfig,
+  onSort,
 }: {
-  transactions: TransactionWithPartner[]; // Atualizado para TransactionWithPartner
-  onViewPaymentsClick: (transaction: TransactionWithPartner) => void; // Atualizado para TransactionWithPartner
+  transactions: TransactionWithPartner[];
+  onViewPaymentsClick: (transaction: TransactionWithPartner) => void;
+  sortConfig: SortConfig; // Non-null
+  onSort: (column: SortableColumn) => void;
 }) {
   if (!transactions || transactions.length === 0) {
     return <p>Nenhuma transação encontrada.</p>;
   }
+
+  const renderSortIcon = (column: SortableColumn) => {
+    if (sortConfig.column !== column) {
+      return <ArrowUpDown className="ml-2 h-3 w-3 text-muted-foreground/70" />;
+    }
+    return sortConfig.direction === "asc" ?
+      <ArrowUp className="ml-2 h-3 w-3" /> :
+      <ArrowDown className="ml-2 h-3 w-3" />;
+  };
+
+  const thClassName = "px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider cursor-pointer hover:bg-gray-100";
+  const thActionClassName = "px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider";
+
 
   return (
     <div className="overflow-x-auto">
       <table className="min-w-full divide-y divide-gray-200">
         <thead className="bg-gray-50">
           <tr>
-            <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Descrição</th>
-            <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Parceiro</th>
-            <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Valor</th>
-            <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Tipo</th>
-            <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Status</th>
-            <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Data</th>
-            <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Ações</th>
+            <th scope="col" className={thClassName} onClick={() => onSort("description")}>
+              <div className="flex items-center">Descrição {renderSortIcon("description")}</div>
+            </th>
+            <th scope="col" className={thActionClassName}>Parceiro</th>
+            <th scope="col" className={thClassName} onClick={() => onSort("value")}>
+              <div className="flex items-center">Valor {renderSortIcon("value")}</div>
+            </th>
+            <th scope="col" className={thClassName} onClick={() => onSort("type")}>
+              <div className="flex items-center">Tipo {renderSortIcon("type")}</div>
+            </th>
+            <th scope="col" className={thClassName} onClick={() => onSort("status")}>
+              <div className="flex items-center">Status {renderSortIcon("status")}</div>
+            </th>
+            <th scope="col" className={thClassName} onClick={() => onSort("date")}>
+             <div className="flex items-center">Data {renderSortIcon("date")}</div>
+            </th>
+            <th scope="col" className={thActionClassName}>Ações</th>
           </tr>
         </thead>
         <tbody className="bg-white divide-y divide-gray-200">
@@ -71,7 +114,6 @@ function TransactionsTable({
               <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">{new Intl.DateTimeFormat("pt-BR").format(new Date(transaction.date))}</td>
               <td className="px-6 py-4 whitespace-nowrap text-right text-sm font-medium">
                 <Button variant="outline" size="sm" onClick={() => onViewPaymentsClick(transaction)}>Ver Pagamentos</Button>
-                {/* Adicionar mais ações como editar, excluir */}
               </td>
             </tr>
           ))}
@@ -81,70 +123,80 @@ function TransactionsTable({
   );
 }
 
+/**
+ * `TransactionsListPage` is a client component responsible for displaying a list
+ * of transactions with filtering, sorting, and pagination capabilities.
+ * It allows users to view payments for each transaction via a modal.
+ */
 export default function TransactionsListPage() {
+  // State for storing the list of transactions
   const [transactions, setTransactions] = useState<TransactionWithPartner[]>([]);
+  // State for loading indicator
   const [isLoading, setIsLoading] = useState(true);
+  // State for storing any error messages during data fetching
   const [error, setError] = useState<string | null>(null);
   const { toast } = useToast();
 
+  // State for the currently selected transaction to view payments
   const [selectedTransaction, setSelectedTransaction] = useState<TransactionWithPartner | null>(null);
+  // State to control the visibility of the payments modal
   const [isModalOpen, setIsModalOpen] = useState(false);
 
-  const [filters, setFilters] = useState<TransactionFilters>({}); // Inicializar filtros vazios
+  // State for applied filters (type, status, dateFrom, dateTo)
+  const [filters, setFilters] = useState<TransactionFilters>({});
+  // State for the current page in pagination
   const [currentPage, setCurrentPage] = useState(1);
+  // State for the total number of pages based on filters and pageSize
   const [totalPages, setTotalPages] = useState(0);
-  const pageSize = 10;
+  const pageSize = 10; // Number of items per page
+  // State for the current sort configuration (column and direction)
+  const [sortConfig, setSortConfig] = useState<SortConfig>({ column: "date", direction: "desc" });
 
-  /**
-   * Handles changes in filter selection for string-based filters (type, status).
-   * Resets to page 1 when these filters change.
-   */
+  const handleFilterChange = (newFilters: Partial<TransactionFilters>) => {
+    setCurrentPage(1);
+    setFilters(prev => ({ ...prev, ...newFilters }));
+  };
+
   const handleSelectFilterChange = (filterName: "type" | "status", value: string) => {
-    setCurrentPage(1);
-    setFilters(prev => ({
-      ...prev,
-      [filterName]: value === "all" ? undefined : value
-    }));
+    handleFilterChange({ [filterName]: value === "all" ? undefined : value as "E" | "S" | undefined });
   };
 
-  /**
-   * Handles changes in date filter selection.
-   * Resets to page 1 when date filters change.
-   */
   const handleDateFilterChange = (filterName: "dateFrom" | "dateTo", date?: Date) => {
-    setCurrentPage(1);
-    setFilters(prev => ({
-      ...prev,
-      [filterName]: date,
-    }));
+    handleFilterChange({ [filterName]: date });
   };
 
-  /**
-   * Fetches transactions from the server based on the current filter and pagination state.
-   * Updates component state for transactions, loading status, errors, and pagination info.
-   */
+  const handleSort = (column: SortableColumn) => {
+    setCurrentPage(1);
+    setSortConfig(prevSortConfig => {
+      if (prevSortConfig.column === column) {
+        return { column, direction: prevSortConfig.direction === "asc" ? "desc" : "asc" };
+      }
+      return { column, direction: "desc" };
+    });
+  };
+
   const loadTransactions = useCallback(async () => {
     setIsLoading(true);
     setError(null);
     try {
-      // activeFilters agora pode conter dateFrom e dateTo, que serão passados para a action
       const activeFilters: Partial<TransactionFilters> = { ...filters };
-      // Remover chaves 'all' se existirem (embora o state já deva ter undefined)
-      if (activeFilters.type === "all") delete activeFilters.type;
-      if (activeFilters.status === "all") delete activeFilters.status;
+      // Assegurar que "all" não é enviado para o backend
+      if ((activeFilters.type as unknown) === "all") delete activeFilters.type;
+      if ((activeFilters.status as unknown) === "all") delete activeFilters.status;
 
-      const response = await listTransactionsAction(activeFilters, { page: currentPage, pageSize });
+      const orderByForAction: UseCaseOrderByParams | undefined = sortConfig
+        ? { column: sortConfig.column, direction: sortConfig.direction }
+        : undefined;
+
+      const response = await listTransactionsAction(activeFilters, { page: currentPage, pageSize }, orderByForAction);
 
       if (response.success && response.data) {
         setTransactions(response.data.data);
-        // setTotalItems(response.data.totalItems);
         setTotalPages(response.data.totalPages);
-        // Não definir currentPage aqui, pois ele é a fonte da verdade para a chamada da action
       } else {
         setError(response.message || "Falha ao carregar transações.");
         toast({ variant: "destructive", title: "Erro", description: response.message });
         setTransactions([]);
-        // setTotalItems(0);
         setTotalPages(0);
       }
     } catch (e: any) {
@@ -152,32 +204,21 @@ export default function TransactionsListPage() {
       setError(errorMessage);
       toast({ variant: "destructive", title: "Erro de Conexão", description: errorMessage });
       setTransactions([]);
-      // setTotalItems(0);
       setTotalPages(0);
     } finally {
       setIsLoading(false);
     }
-  }, [toast, filters, currentPage, pageSize]); // `filters` e `currentPage` são dependências chave
+  }, [toast, filters, currentPage, pageSize, sortConfig]);
 
-  // useEffect para carregar transações na montagem inicial e quando filtros ou página atual mudam.
   useEffect(() => {
     loadTransactions();
-  }, [loadTransactions]); // loadTransactions já tem `filters` e `currentPage` como dependências no seu useCallback
+  }, [loadTransactions]);
 
-  /**
-   * Sets the selected transaction and opens the payments modal.
-   * @param transaction The transaction object for which to view payments.
-   */
   const handleViewPayments = (transaction: TransactionWithPartner) => {
     setSelectedTransaction(transaction);
     setIsModalOpen(true);
   };
 
-  /**
-   * Handles the open state change of the payments modal.
-   * Clears the selected transaction when the modal is closed.
-   * @param open The new open state of the modal.
-   */
   const handleModalOpenChange = (open: boolean) => {
     setIsModalOpen(open);
     if (!open) {
@@ -185,12 +226,7 @@ export default function TransactionsListPage() {
     }
   };
 
-  /**
-   * Callback function triggered when a payment is successfully added via the modal.
-   * Reloads the transactions list to reflect any changes (e.g., updated status or payment totals).
-   */
   const handlePaymentAdded = () => {
-    // Re-fetch transactions to update their status or payment-related info if necessary
     loadTransactions();
   };
 
@@ -201,16 +237,15 @@ export default function TransactionsListPage() {
           <CardTitle>Lista de Transações</CardTitle>
           <CardDescription>
             Visualize e gerencie todas as suas transações financeiras.
-            {/* TODO: Adicionar botão para Nova Transação aqui */}
           </CardDescription>
         </CardHeader>
         <CardContent className="flex flex-col gap-4">
-          <div className="flex flex-wrap items-end gap-4 mb-4"> {/* Usar flex-wrap para melhor responsividade */}
+          <div className="flex flex-wrap items-end gap-4 mb-4">
             <div className="grid gap-1.5">
               <Label htmlFor="filter-type">Tipo</Label>
               <Select
-                value={filters.type || "all"} // "all" para corresponder ao SelectItem
-                onValueChange={(value) => handleSelectFilterChange("type", value as "E" | "S" | "all")}
+                value={filters.type || "all"}
+                onValueChange={(value) => handleSelectFilterChange("type", value)}
               >
                 <SelectTrigger id="filter-type" className="w-full min-w-[150px] sm:w-auto">
                   <SelectValue placeholder="Tipo" />
@@ -225,8 +260,8 @@ export default function TransactionsListPage() {
             <div className="grid gap-1.5">
               <Label htmlFor="filter-status">Status</Label>
               <Select
-                value={filters.status || "all"} // "all" para corresponder ao SelectItem
-                onValueChange={(value) => handleSelectFilterChange("type", value as "E" | "S" | "all")}
+                value={filters.status || "all"}
+                onValueChange={(value) => handleSelectFilterChange("status", value)}
               >
                 <SelectTrigger id="filter-status" className="w-full min-w-[150px] sm:w-auto">
                   <SelectValue placeholder="Status" />
@@ -298,7 +333,12 @@ export default function TransactionsListPage() {
           {isLoading && <p>Carregando transações...</p>}
           {error && <p className="text-destructive">Erro: {error}</p>}
           {!isLoading && !error && (
-            <TransactionsTable transactions={transactions} onViewPaymentsClick={handleViewPayments} />
+            <TransactionsTable
+              transactions={transactions}
+              onViewPaymentsClick={handleViewPayments}
+              sortConfig={sortConfig}
+              onSort={handleSort}
+            />
           )}
         </CardContent>
         <CardFooter className="flex items-center justify-between">

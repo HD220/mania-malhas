@@ -1,5 +1,5 @@
 import { dbType, db as defaultDb } from "@/db/postgres";
-import { eq, desc } from "drizzle-orm";
+import { eq, desc, asc } from "drizzle-orm"; // Importar asc
 import {
   InsertTransaction,
   SelectTransaction,
@@ -33,8 +33,15 @@ export interface PaginationParams {
   limit?: number;
 }
 
+// Interface para parâmetros de ordenação
+export type TransactionSortBy = keyof Pick<SelectTransaction, "date" | "value" | "status" | "description" | "type">;
+export interface OrderByParams {
+  column?: TransactionSortBy;
+  direction?: "asc" | "desc";
+}
+
 export type TransactionRepositoryFactory = (dbInstance?: DBConnection) => {
-  findAll: (filters?: TransactionFiltersForRepo, pagination?: PaginationParams) => Promise<TransactionWithPartner[]>;
+  findAll: (filters?: TransactionFiltersForRepo, pagination?: PaginationParams, orderBy?: OrderByParams) => Promise<TransactionWithPartner[]>; // Aceita ordenação
   countAll: (filters?: TransactionFiltersForRepo) => Promise<number>;
   findById: (id: string) => Promise<SelectTransaction | null>;
   update: (id: string, data: Partial<InsertTransaction>) => Promise<void>;
@@ -91,8 +98,25 @@ export const transactionRepository: TransactionRepositoryFactory = (dbInstance) 
       })
       .from(transactionTable)
       .leftJoin(partnerTable, eq(transactionTable.partnerId, partnerTable.id))
-      .where(conditions.length > 0 ? and(...conditions) : undefined)
-      .orderBy(desc(transactionTable.createdAt));
+      .where(conditions.length > 0 ? and(...conditions) : undefined);
+      // .orderBy(desc(transactionTable.createdAt)); // Removido orderBy default daqui
+
+    // Aplicar ordenação
+    const sortableColumns: Record<TransactionSortBy, any> = { // Mapear para colunas Drizzle
+      date: transactionTable.date,
+      value: transactionTable.value,
+      status: transactionTable.status,
+      description: transactionTable.description,
+      type: transactionTable.type,
+    };
+
+    const orderByColumn = orderBy?.column && sortableColumns[orderBy.column]
+      ? sortableColumns[orderBy.column]
+      : transactionTable.createdAt; // Default sort
+    const orderByDirection = orderBy?.direction === "asc" ? asc : desc; // asc precisa ser importado de drizzle-orm
+
+    queryBuilder = queryBuilder.orderBy(orderByDirection(orderByColumn));
+
 
     if (pagination?.limit) {
       queryBuilder = queryBuilder.limit(pagination.limit);

@@ -5,8 +5,9 @@
 import { SelectTransaction } from "@/db/repositories/schemas/transactionSchema";
 import getTransactionsUseCase, {
   GetTransactionsFilters,
-  UseCasePaginationParams, // Importar tipo de paginação do caso de uso
-  PaginatedTransactionsResult // Importar tipo de resultado paginado
+  UseCasePaginationParams,
+  PaginatedTransactionsResult,
+  UseCaseOrderByParams // Importar tipo de ordenação do caso de uso
 } from "@/usecases/transaction/getTransactionsUseCase";
 import { unstable_noStore as noStore } from "next/cache";
 import { TransactionWithPartner } from "@/db/repositories/transactionRepository";
@@ -21,13 +22,14 @@ export type TransactionServerResponse<T> = {
 
 export async function listTransactionsAction(
   filters?: GetTransactionsFilters,
-  pagination?: UseCasePaginationParams // Adicionar parâmetros de paginação
+  pagination?: UseCasePaginationParams,
+  orderBy?: UseCaseOrderByParams // Adicionar parâmetros de ordenação
 ): Promise<TransactionServerResponse<PaginatedTransactionsResult>> {
   noStore();
 
   try {
-    // Passar filtros e paginação para o caso de uso
-    const paginatedResult = await getTransactionsUseCase(filters, pagination);
+    // Passar filtros, paginação e ordenação para o caso de uso
+    const paginatedResult = await getTransactionsUseCase(filters, pagination, orderBy);
     return { success: true, data: paginatedResult };
   } catch (error: any) {
     console.error("listTransactionsAction Error:", error);

@@ -36,7 +36,7 @@ export function ProductCard({
                   alt={name}
                   fill
                   sizes="100%"
-                  priority
+                  // priority // Removido para evitar priorização excessiva em listagens
                   className="object-contain"
                 />
               </AspectRatio>

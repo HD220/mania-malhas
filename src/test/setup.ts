@@ -55,3 +55,11 @@ if (process.env.NODE_ENV === 'test') {
     process.env.MINIO_BUCKET_PRODUCTS = 'test_products_bucket';
     // Adicione outras variáveis que seu env.ts valida
 }
+
+// Mock global para ResizeObserver para evitar erros com componentes Radix/Shadcn em JSDOM
+const MockResizeObserver = vi.fn(() => ({
+  observe: vi.fn(),
+  unobserve: vi.fn(),
+  disconnect: vi.fn(),
+}));
+vi.stubGlobal('ResizeObserver', MockResizeObserver);

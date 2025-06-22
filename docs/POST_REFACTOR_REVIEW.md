@@ -209,3 +209,39 @@ A Fase 4 concentrou-se em concluir a funcionalidade de filtros da UI de transaç
 *   A limpeza de dependências e imports contribui para um projeto mais enxuto.
 *   Ainda existem itens de baixa prioridade no `ACTION_PLAN.md` que podem ser abordados em ciclos futuros (C04, C05, UI03), bem como a expansão contínua de comentários (G01) e testes (T01).
 *   A funcionalidade de ordenação na lista de transações e filtros mais avançados (como busca textual na descrição da transação) são melhorias futuras possíveis para F03.
+
+## 9. Atualizações da Fase 5 (Finalização)
+
+A Fase 5 focou em concluir os aspectos restantes da UI de Transações, adicionar mais testes, e realizar as últimas limpezas e revisões de documentação.
+
+*   **Completar UI de Transações (F03 - Ordenação):**
+    *   Implementada funcionalidade de ordenação na tabela de transações (`TransactionsListPage`). O usuário pode clicar nos cabeçalhos das colunas (Data, Valor, Status, Descrição, Tipo) para ordenar os dados.
+    *   A lógica de ordenação foi adicionada ao `transactionRepository`, `getTransactionsUseCase`, `listTransactionsAction` e à UI.
+
+*   **Dashboard (F04 - Estatísticas de Transações):**
+    *   Criado `getPendingTransactionsStatsUseCase` para buscar a contagem e o valor total de transações pendentes.
+    *   A action `getDashboardStats` foi atualizada para incluir essas estatísticas.
+    *   O componente do Dashboard agora exibe as informações de transações pendentes.
+
+*   **Expandir Cobertura de Testes (T01 - Formulários):**
+    *   Adicionados testes de componente para `ProductForm`, cobrindo renderização inicial e o fluxo de submissão (mockando a prop `onSubmit` e as dependências do hook `useProductForm`).
+    *   Todos os 55 testes em 11 arquivos estão passando.
+
+*   **Limpeza Final de Baixa Prioridade:**
+    *   **C04 (Atualizar `drizzle-kit`):** Tentativa de atualização para `0.31.1` (com `drizzle-orm` também atualizado). Encontrada incompatibilidade que exigiria investigação mais aprofundada. As versões foram revertidas para `drizzle-kit: ^0.22.7` e `drizzle-orm: ^0.31.2` para manter a estabilidade. Tarefa marcada como "Pendente - Requer Investigação".
+    *   **C05 (Limpar `tailwind.config.ts`):** Caminhos comentados e redundantes na seção `content` foram removidos.
+    *   **UI03 (Revisar `priority` em `ProductCard`):** A prop `priority` foi removida do `next/image` no `ProductCard` para evitar priorização excessiva em listagens.
+
+*   **Revisão Final de Comentários (G01):**
+    *   Adicionados/revisados comentários JSDoc/TSDoc em `TransactionsListPage`, `transactionRepository`, e `getTransactionsUseCase`, com foco nas lógicas de filtro, paginação e ordenação.
+
+*   **Verificação Final do `.env.exemple` (DC01):**
+    *   Confirmado que `MINIO_BUCKET_PRODUCTS` e `DB_SEEDING` estão presentes. Nenhuma outra variável de ambiente nova precisou ser adicionada.
+
+### 9.1. Observações Adicionais da Fase 5
+
+*   A funcionalidade de ordenação na lista de transações adiciona uma importante capacidade de análise de dados para o usuário.
+*   Os testes para `ProductForm` começam a cobrir a interação com formulários complexos.
+*   As limpezas de baixa prioridade ajudam a manter a qualidade do código.
+*   A questão da atualização do `drizzle-kit` destaca a importância de gerenciar cuidadosamente as dependências e alocar tempo para resolver incompatibilidades.
+*   Com a conclusão desta fase, a maioria dos itens de alta e média prioridade do plano de ação original foram abordados. Os itens restantes são, em sua maioria, melhorias futuras, expansão de cobertura (testes, comentários) ou tarefas de baixa prioridade.

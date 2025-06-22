@@ -17,6 +17,15 @@ export interface UseCasePaginationParams {
   pageSize?: number;
 }
 
+// Importar OrderByParams do repositório ou redefinir/adaptar aqui
+import { OrderByParams as RepoOrderByParams, TransactionSortBy } from "@/db/repositories/transactionRepository";
+
+export interface UseCaseOrderByParams {
+  column?: TransactionSortBy; // Usar o mesmo tipo de coluna
+  direction?: "asc" | "desc";
+}
+
+
 // Interface para o resultado paginado
 export interface PaginatedTransactionsResult {
   data: TransactionWithPartner[];
@@ -43,7 +52,8 @@ export interface PaginatedTransactionsResult {
  */
 export default async function getTransactionsUseCase(
   filters?: GetTransactionsFilters,
-  pagination?: UseCasePaginationParams
+  pagination?: UseCasePaginationParams,
+  orderBy?: UseCaseOrderByParams // Adicionar orderBy
 ): Promise<PaginatedTransactionsResult> {
   const transactionRepo = createTransactionRepository(db);
   const page = pagination?.page ?? 1;
@@ -97,8 +107,10 @@ export default async function getTransactionsUseCase(
   // Por agora, countAll reflete apenas os filtros que o repo suporta.
   const totalItems = await transactionRepo.countAll(repoFilters);
 
-  // 2. Obter os dados paginados com os filtros que o repo suporta
-  const paginatedDataFromRepo = await transactionRepo.findAll(repoFilters, { offset, limit: pageSize });
+  // 2. Obter os dados paginados com os filtros e ordenação que o repo suporta
+  // Mapear UseCaseOrderByParams para RepoOrderByParams (são idênticos neste caso)
+  const repoOrderBy: RepoOrderByParams | undefined = orderBy;
+  const paginatedDataFromRepo = await transactionRepo.findAll(repoFilters, { offset, limit: pageSize }, repoOrderBy);
 
   // 3. Aplicar filtros restantes no lado da aplicação (se houver)
   // Nota: Isso afeta apenas os dados da página atual, não a contagem total de forma precisa

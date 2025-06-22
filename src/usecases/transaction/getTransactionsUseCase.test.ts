@@ -45,7 +45,8 @@ describe('getTransactionsUseCase', () => {
 
     expect(mockTransactionRepo.findAll).toHaveBeenCalledWith(
       {}, // repoFilters (vazio)
-      { offset: 0, limit: 10 } // default pagination
+      { offset: 0, limit: 10 }, // default pagination
+      undefined // orderBy
     );
     expect(mockTransactionRepo.countAll).toHaveBeenCalledWith({});
     expect(result.data).toEqual([mockTransaction]);
@@ -65,7 +66,8 @@ describe('getTransactionsUseCase', () => {
     const expectedRepoFilters = { type: 'E', status: 'Pendente' };
     expect(mockTransactionRepo.findAll).toHaveBeenCalledWith(
       expectedRepoFilters,
-      { offset: 0, limit: 10 }
+      { offset: 0, limit: 10 },
+      undefined // orderBy
     );
     expect(mockTransactionRepo.countAll).toHaveBeenCalledWith(expectedRepoFilters);
   });
@@ -79,7 +81,8 @@ describe('getTransactionsUseCase', () => {
 
     expect(mockTransactionRepo.findAll).toHaveBeenCalledWith(
       {},
-      { offset: 5, limit: 5 } // (page 2 - 1) * 5 = 5
+      { offset: 5, limit: 5 }, // (page 2 - 1) * 5 = 5
+      undefined // orderBy
     );
     expect(result.currentPage).toBe(2);
     expect(result.pageSize).toBe(5);
@@ -141,7 +144,8 @@ describe('getTransactionsUseCase', () => {
     expect(mockTransactionRepo.countAll).toHaveBeenCalledWith(expectedRepoFilters);
     expect(mockTransactionRepo.findAll).toHaveBeenCalledWith(
       expect.objectContaining(expectedRepoFilters),
-      expect.objectContaining({ offset: 0, limit: 10 }) // Default pagination
+      expect.objectContaining({ offset: 0, limit: 10 }), // Default pagination
+      undefined // orderBy
     );
   });
 
@@ -179,7 +183,8 @@ describe('getTransactionsUseCase', () => {
     expect(result.data[0].id).toBe('partner_ok');
     expect(mockTransactionRepo.findAll).toHaveBeenCalledWith(
       expect.objectContaining({ partnerId: 'partner_A_test' }),
-      expect.any(Object)
+      expect.any(Object), // pagination
+      undefined // orderBy
     );
     expect(mockTransactionRepo.countAll).toHaveBeenCalledWith(
       expect.objectContaining({ partnerId: 'partner_A_test' })

@@ -50,9 +50,14 @@ export default async function AdminDashboardPage() {
             <DollarSign className="h-4 w-4 text-muted-foreground" />
           </CardHeader>
           <CardContent>
-            <div className="text-2xl font-bold">Em breve</div>
+            <div className="text-2xl font-bold">
+              {stats?.pendingTransactionsCount ?? "N/A"}
+            </div>
             <p className="text-xs text-muted-foreground">
-              Valor total de transações pendentes.
+              {stats?.pendingTransactionsTotalValue !== undefined
+                ? new Intl.NumberFormat("pt-BR", { style: "currency", currency: "BRL" }).format(stats.pendingTransactionsTotalValue)
+                : "N/A"}
+              {" em valor pendente."}
             </p>
           </CardContent>
         </Card>
