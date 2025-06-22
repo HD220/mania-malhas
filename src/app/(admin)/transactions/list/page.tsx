@@ -371,6 +371,13 @@ export default function TransactionsListPage() {
             />
           )}
         </CardContent>
+        {/* Paginação: Controles para navegar entre as páginas de transações.
+            - Exibe a página atual e o total de páginas.
+            - Botão "Anterior" é desabilitado na primeira página ou durante o carregamento.
+            - Botão "Próxima" é desabilitado na última página ou durante o carregamento.
+            - pageSize é fixo (atualmente 10).
+            - currentPage é resetado para 1 ao aplicar filtros ou mudar a ordenação.
+        */}
         <CardFooter className="flex items-center justify-between pt-4 border-t">
           <div className="text-xs text-muted-foreground">
             Página {currentPage} de {totalPages}
