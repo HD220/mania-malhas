@@ -60,6 +60,30 @@ describe('listTransactionsAction Server Action', () => {
     expect(mockGetTransactionsUseCase).toHaveBeenCalledWith(filters, pagination, orderBy);
     expect(response.success).toBe(true);
     expect(response.data).toEqual(mockPaginatedResult);
+  });
+
+  it('should correctly pass description filter to use case', async () => {
+    const mockTransaction = createMockTransactionWithPartner();
+    const mockPaginatedResult: PaginatedTransactionsResult = {
+      data: [mockTransaction],
+      totalItems: 1,
+      totalPages: 1,
+      currentPage: 1,
+      pageSize: 10,
+    };
+    mockGetTransactionsUseCase.mockResolvedValue(mockPaginatedResult);
+
+    const filters: GetTransactionsFilters = { description: 'Test Desc' };
+    const pagination: UseCasePaginationParams = { page: 1, pageSize: 10 };
+    const orderBy: UseCaseOrderByParams = { column: 'date', direction: 'desc' };
+
+    const response = await listTransactionsAction(filters, pagination, orderBy);
+
+    expect(mockGetTransactionsUseCase).toHaveBeenCalledWith(
+      expect.objectContaining({ description: 'Test Desc' }),
+      pagination,
+      orderBy
+    );
     expect(response.message).toBeUndefined();
   });
 

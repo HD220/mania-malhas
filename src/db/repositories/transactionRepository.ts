@@ -42,7 +42,7 @@ export interface OrderByParams {
 }
 
 export type TransactionRepositoryFactory = (dbInstance?: DBConnection) => {
-  findAll: (filters?: TransactionFiltersForRepo, pagination?: PaginationParams, orderBy?: OrderByParams) => Promise<TransactionWithPartner[]>; // Aceita ordenação
+  findAll: (filters?: TransactionFiltersForRepo, pagination?: PaginationParams, orderBy?: OrderByParams) => Promise<TransactionWithPartner[]>;
   countAll: (filters?: TransactionFiltersForRepo) => Promise<number>;
   findById: (id: string) => Promise<SelectTransaction | null>;
   update: (id: string, data: Partial<InsertTransaction>) => Promise<void>;
@@ -88,9 +88,10 @@ export const transactionRepository: TransactionRepositoryFactory = (dbInstance) 
    * Finds all transactions, optionally filtered and paginated, including the partner's name.
    * @param {TransactionFiltersForRepo} [filters] - Optional filters to apply.
    * @param {PaginationParams} [pagination] - Optional pagination parameters (offset, limit).
+   * @param {OrderByParams} [orderBy] - Optional ordering parameters.
    * @returns {Promise<TransactionWithPartner[]>} A list of transactions with partner names.
    */
-  const findAll = async (filters?: TransactionFiltersForRepo, pagination?: PaginationParams): Promise<TransactionWithPartner[]> => {
+  const findAll = async (filters?: TransactionFiltersForRepo, pagination?: PaginationParams, orderBy?: OrderByParams): Promise<TransactionWithPartner[]> => {
     const conditions = buildFilterConditions(filters);
 
     let queryBuilder = db
