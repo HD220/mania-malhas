@@ -60,9 +60,34 @@ export default async function updateTransactionUseCase(
   // 2. Validate input data for update
   // Ensure only fields present in transactionUpdateData are validated against their schema rules.
   // `partial()` makes all fields optional. If a field is provided, it must match its type.
-  updateTransactionSchema.parse(transactionUpdateData);
+  // Validate and get potentially sparse data (with undefined for non-provided fields)
+  const parsedInput = updateTransactionSchema.parse(transactionUpdateData);
 
-  // For UC-TX-UPDATE.1, we just return the existing transaction after validation.
-  // The actual update logic will be in UC-TX-UPDATE.2.
+  // Filter out undefined values to determine if an update is truly needed
+  const dataToActuallyUpdate: Record<string, any> = {};
+  for (const key in parsedInput) {
+    if (parsedInput[key as keyof typeof parsedInput] !== undefined) {
+      dataToActuallyUpdate[key] = parsedInput[key as keyof typeof parsedInput];
+    }
+  }
+
+  // For UC-TX-UPDATE.2: Actual update logic
+  // Note for UC-TX-UPDATE.3: Complex interactions with payments (e.g., if value/status changes significantly)
+  // are NOT handled here to keep this step's complexity manageable.
+  // Such logic would require further analysis and potentially new UCs or adjustments.
+  // Current approach: Update transaction fields directly. Caller/UI should be aware of implications.
+  if (Object.keys(dataToActuallyUpdate).length > 0) { // Only update if there's actual data
+    await transactionRepo.update(id, dataToActuallyUpdate as Partial<InsertTransaction>);
+
+    // 3. Fetch and return the updated transaction
+    const updatedTransaction = await transactionRepo.findById(id);
+    if (!updatedTransaction) {
+      // This would be highly unexpected if the update call didn't throw and ID is correct
+      throw new Error("Falha ao buscar a transação após a atualização.");
+    }
+    return updatedTransaction;
+  }
+
+  // If no actual data was provided for update, return the existing transaction.
   return existingTransaction;
 }

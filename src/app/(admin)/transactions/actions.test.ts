@@ -14,8 +14,14 @@ import { createTransactionAction, CreateTransactionServerResponse } from './acti
 
 
 // Mock dos use cases
+import updateTransactionUseCase, { UpdateTransactionInput } from '@/usecases/transaction/updateTransactionUseCase'; // Import new use case
+import { NotFoundError } from '@/lib/errors/domainErrors'; // Import NotFoundError
+import { updateTransactionAction, UpdateTransactionServerResponse } from './actions'; // Import new action and type
+
+// Mock dos use cases
 vi.mock('@/usecases/transaction/getTransactionsUseCase');
 vi.mock('@/usecases/transaction/createTransactionUseCase');
+vi.mock('@/usecases/transaction/updateTransactionUseCase'); // Mock new use case
 
 // Mock de next/cache
 vi.mock('next/cache', async (importOriginal) => {
@@ -184,6 +190,89 @@ describe('createTransactionAction Server Action', () => {
     expect(response.success).toBe(false);
     expect(response.message).toBe(errorMessage);
     expect(response.errors).toBeUndefined();
+    expect(response.data).toBeUndefined();
+    expect(mockRevalidatePath).not.toHaveBeenCalled();
+  });
+});
+
+describe('updateTransactionAction Server Action', () => {
+  const mockUpdateTransactionUseCase = updateTransactionUseCase as ReturnType<typeof vi.fn>;
+  const mockRevalidatePath = revalidatePath as ReturnType<typeof vi.fn>;
+  const transactionId = faker.string.uuid();
+
+  beforeEach(() => {
+    vi.clearAllMocks();
+  });
+
+  const validUpdateInput: UpdateTransactionInput = {
+    description: 'Transação Atualizada',
+    status: 'Pago',
+  };
+
+  const mockUpdatedTx: SelectTransaction = {
+    id: transactionId,
+    description: 'Transação Atualizada',
+    value: "150.00",
+    type: 'E',
+    status: 'Pago',
+    partnerId: faker.string.uuid(),
+    date: new Date(),
+    due_date: new Date(),
+    createdAt: new Date(),
+    updatedAt: new Date(),
+    transactionId: null,
+  };
+
+  it('should update a transaction successfully and revalidate paths', async () => {
+    mockUpdateTransactionUseCase.mockResolvedValue(mockUpdatedTx);
+
+    const response = await updateTransactionAction(transactionId, validUpdateInput);
+
+    expect(mockUpdateTransactionUseCase).toHaveBeenCalledWith(transactionId, validUpdateInput);
+    expect(response.success).toBe(true);
+    expect(response.data).toEqual(mockUpdatedTx);
+    expect(mockRevalidatePath).toHaveBeenCalledWith("/(admin)/transactions/list");
+    // expect(mockRevalidatePath).toHaveBeenCalledWith(`/(admin)/transactions/${transactionId}/edit`); // If this page existed
+  });
+
+  it('should return NotFoundError if use case throws NotFoundError', async () => {
+    const errorMessage = "Transação não encontrada.";
+    mockUpdateTransactionUseCase.mockRejectedValue(new NotFoundError(errorMessage));
+
+    const response = await updateTransactionAction(transactionId, validUpdateInput);
+
+    expect(response.success).toBe(false);
+    // The NotFoundError class appends ". not found." to the message.
+    expect(response.message).toBe(`${errorMessage} not found.`);
+    expect(response.data).toBeUndefined();
+    expect(mockRevalidatePath).not.toHaveBeenCalled();
+  });
+
+  it('should return validation errors if use case throws ZodError', async () => {
+    const fieldErrors: Partial<Record<keyof UpdateTransactionInput, string[]>> = {
+      value: ["Valor precisa ser um número positivo"],
+    };
+    const zodError = new ZodError([]);
+    zodError.flatten = vi.fn().mockReturnValue({ fieldErrors, formErrors: [] });
+    mockUpdateTransactionUseCase.mockRejectedValue(zodError);
+
+    const response = await updateTransactionAction(transactionId, validUpdateInput);
+
+    expect(response.success).toBe(false);
+    expect(response.message).toBe("Erro de validação.");
+    expect(response.errors).toEqual(fieldErrors);
+    expect(response.data).toBeUndefined();
+    expect(mockRevalidatePath).not.toHaveBeenCalled();
+  });
+
+  it('should return a generic error message if use case throws a non-Zod/non-NotFoundError', async () => {
+    const errorMessage = 'Erro genérico ao atualizar transação';
+    mockUpdateTransactionUseCase.mockRejectedValue(new Error(errorMessage));
+
+    const response = await updateTransactionAction(transactionId, validUpdateInput);
+
+    expect(response.success).toBe(false);
+    expect(response.message).toBe(errorMessage);
     expect(response.data).toBeUndefined();
     expect(mockRevalidatePath).not.toHaveBeenCalled();
   });

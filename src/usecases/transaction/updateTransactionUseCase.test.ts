@@ -19,7 +19,7 @@ vi.mock('@/db/repositories/transactionRepository', () => ({
   }),
 }));
 
-describe('updateTransactionUseCase (Phase 1: Find and Validate)', () => {
+describe('updateTransactionUseCase', () => {
   let mockRepo: ReturnType<ReturnType<typeof transactionRepository>>;
   const transactionId = faker.string.uuid();
 
@@ -50,18 +50,48 @@ describe('updateTransactionUseCase (Phase 1: Find and Validate)', () => {
     status: 'Pago',
   };
 
-  it('should find existing transaction, validate data, and return existing transaction (Phase 1)', async () => {
-    (mockRepo.findById as vi.Mock).mockResolvedValue(mockExistingTransaction);
+  it('should update transaction and return the updated transaction', async () => {
+    const updatedDescription = 'Descrição Atualizada com Sucesso';
+    const updatedStatus = 'Pago';
+    const dataToUpdate: UpdateTransactionInput = { description: updatedDescription, status: updatedStatus };
 
-    const result = await updateTransactionUseCase(transactionId, validUpdateData);
+    const mockUpdatedTransaction: SelectTransaction = {
+      ...mockExistingTransaction,
+      description: updatedDescription,
+      status: updatedStatus,
+      updatedAt: new Date(Date.now() + 1000), // Simular que updatedAt mudou
+    };
 
-    expect(mockRepo.findById).toHaveBeenCalledTimes(1);
-    expect(mockRepo.findById).toHaveBeenCalledWith(transactionId);
-    // Zod parse is called internally, if it passes, no error is thrown.
-    // The actual update call is not made in this phase.
-    expect(mockRepo.update).not.toHaveBeenCalled();
-    expect(result).toEqual(mockExistingTransaction); // Returns existing for now
+    (mockRepo.findById as vi.Mock)
+      .mockResolvedValueOnce(mockExistingTransaction) // Primeira chamada para buscar
+      .mockResolvedValueOnce(mockUpdatedTransaction);  // Segunda chamada para retornar após update
+    (mockRepo.update as vi.Mock).mockResolvedValue(undefined); // update não retorna nada
+
+    const result = await updateTransactionUseCase(transactionId, dataToUpdate);
+
+    expect(mockRepo.findById).toHaveBeenCalledTimes(2);
+    expect(mockRepo.findById).toHaveBeenNthCalledWith(1, transactionId);
+
+    const expectedParsedData = updateTransactionSchema.parse(dataToUpdate);
+    expect(mockRepo.update).toHaveBeenCalledTimes(1);
+    expect(mockRepo.update).toHaveBeenCalledWith(transactionId, expectedParsedData);
+
+    expect(mockRepo.findById).toHaveBeenNthCalledWith(2, transactionId);
+    expect(result).toEqual(mockUpdatedTransaction);
   });
+
+  it('should not call update if update data is empty or only contains undefined values', async () => {
+    (mockRepo.findById as vi.Mock).mockResolvedValue(mockExistingTransaction);
+    const emptyUpdateData: UpdateTransactionInput = { description: undefined }; // Or just {}
+
+    const result = await updateTransactionUseCase(transactionId, emptyUpdateData);
+
+    expect(mockRepo.findById).toHaveBeenCalledTimes(1); // Only the initial find
+    expect(mockRepo.findById).toHaveBeenCalledWith(transactionId);
+    expect(mockRepo.update).not.toHaveBeenCalled();
+    expect(result).toEqual(mockExistingTransaction); // Should return the original transaction
+  });
+
 
   it('should throw NotFoundError if transaction is not found', async () => {
     (mockRepo.findById as vi.Mock).mockResolvedValue(null);
@@ -75,6 +105,7 @@ describe('updateTransactionUseCase (Phase 1: Find and Validate)', () => {
   });
 
   it('should throw ZodError if update data is invalid', async () => {
+    // findById will be called once before validation.
     (mockRepo.findById as vi.Mock).mockResolvedValue(mockExistingTransaction);
     const invalidUpdateData = { ...validUpdateData, value: "not-a-valid-number" } as any;
 
@@ -83,26 +114,47 @@ describe('updateTransactionUseCase (Phase 1: Find and Validate)', () => {
     expect(mockRepo.update).not.toHaveBeenCalled();
   });
 
-  it('should allow partial updates (e.g., only description)', async () => {
-    (mockRepo.findById as vi.Mock).mockResolvedValue(mockExistingTransaction);
+  it('should allow partial updates (e.g., only description), call update, and return updated', async () => {
     const partialUpdate: UpdateTransactionInput = { description: 'Só descrição atualizada' };
+    const mockUpdatedTransaction: SelectTransaction = {
+      ...mockExistingTransaction,
+      ...partialUpdate,
+      updatedAt: new Date(Date.now() + 3000),
+    };
+
+    (mockRepo.findById as vi.Mock)
+      .mockResolvedValueOnce(mockExistingTransaction) // Initial find
+      .mockResolvedValueOnce(mockUpdatedTransaction); // Find after update
+    (mockRepo.update as vi.Mock).mockResolvedValue(undefined);
 
     const result = await updateTransactionUseCase(transactionId, partialUpdate);
 
-    expect(mockRepo.findById).toHaveBeenCalledWith(transactionId);
-    expect(mockRepo.update).not.toHaveBeenCalled(); // Not called in Phase 1
-    expect(result).toEqual(mockExistingTransaction);
+    expect(mockRepo.findById).toHaveBeenCalledTimes(2);
+    expect(mockRepo.update).toHaveBeenCalledTimes(1);
+    expect(mockRepo.update).toHaveBeenCalledWith(transactionId, updateTransactionSchema.parse(partialUpdate));
+    expect(result).toEqual(mockUpdatedTransaction);
   });
 
-   it('should allow updating type and status', async () => {
-    (mockRepo.findById as vi.Mock).mockResolvedValue(mockExistingTransaction);
-    const partialUpdate: UpdateTransactionInput = { type: 'S', status: 'Cancelado' };
+   it('should allow updating type and status, calls update, and returns updated', async () => {
+    const dataToUpdate: UpdateTransactionInput = { type: 'S', status: 'Cancelado' };
+    const mockUpdatedTransaction: SelectTransaction = {
+      ...mockExistingTransaction,
+      ...dataToUpdate,
+       value: mockExistingTransaction.value,
+      updatedAt: new Date(Date.now() + 2000),
+    };
 
-    const result = await updateTransactionUseCase(transactionId, partialUpdate);
+    (mockRepo.findById as vi.Mock)
+      .mockResolvedValueOnce(mockExistingTransaction)
+      .mockResolvedValueOnce(mockUpdatedTransaction);
+    (mockRepo.update as vi.Mock).mockResolvedValue(undefined);
 
-    expect(mockRepo.findById).toHaveBeenCalledWith(transactionId);
-    expect(mockRepo.update).not.toHaveBeenCalled();
-    expect(result).toEqual(mockExistingTransaction);
+    const result = await updateTransactionUseCase(transactionId, dataToUpdate);
+
+    expect(mockRepo.findById).toHaveBeenCalledTimes(2);
+    expect(mockRepo.update).toHaveBeenCalledTimes(1);
+    expect(mockRepo.update).toHaveBeenCalledWith(transactionId, updateTransactionSchema.parse(dataToUpdate));
+    expect(result).toEqual(mockUpdatedTransaction);
   });
 
 

@@ -79,5 +79,49 @@ export async function createTransactionAction(
   }
 }
 
+import updateTransactionUseCase, { UpdateTransactionInput } from "@/usecases/transaction/updateTransactionUseCase";
+import { NotFoundError } from "@/lib/errors/domainErrors";
+
+// Tipo específico para a resposta da action de atualização
+export type UpdateTransactionServerResponse = {
+  success: boolean;
+  data?: SelectTransaction;
+  message?: string;
+  errors?: Partial<Record<keyof UpdateTransactionInput | "_form", string[]>>;
+};
+
+export async function updateTransactionAction(
+  id: string,
+  data: UpdateTransactionInput
+): Promise<UpdateTransactionServerResponse> {
+  try {
+    const updatedTransaction = await updateTransactionUseCase(id, data);
+    revalidatePath("/(admin)/transactions/list");
+    // Se houver uma página de detalhes/edição específica, revalidá-la também:
+    // revalidatePath(`/(admin)/transactions/${id}`);
+    // revalidatePath(`/(admin)/transactions/${id}/edit`);
+    return { success: true, data: updatedTransaction };
+  } catch (error: any) {
+    if (error instanceof ZodError) {
+      return {
+        success: false,
+        message: "Erro de validação.",
+        errors: error.flatten().fieldErrors as Partial<Record<keyof UpdateTransactionInput, string[]>>,
+      };
+    }
+    if (error instanceof NotFoundError) {
+      return {
+        success: false,
+        message: error.message, // "Transação não encontrada."
+      };
+    }
+    console.error("updateTransactionAction Error:", error);
+    return {
+      success: false,
+      message: error.message || "Falha ao atualizar transação.",
+    };
+  }
+}
+
 // Poderíamos adicionar actions para criar/atualizar/deletar transações aqui também, se necessário.
 // Ex: createTransactionAction, updateTransactionStatusAction, etc.
