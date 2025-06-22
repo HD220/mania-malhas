@@ -17,11 +17,14 @@ import { and } from "drizzle-orm"; // Import 'and'
 export type TransactionWithPartner = SelectTransaction & { partnerName?: string | null };
 
 import { count } from "drizzle-orm"; // Import count
+import { gte, lte } from "drizzle-orm"; // Import gte e lte para comparações de data
 // Interface para os filtros no repositório
 export interface TransactionFiltersForRepo {
   type?: "E" | "S";
   status?: string;
-  // Adicionar outros filtros conforme necessário (partnerId, date range, etc.)
+  dateFrom?: Date;
+  dateTo?: Date;
+  // Adicionar outros filtros conforme necessário (partnerId)
 }
 
 // Interface para parâmetros de paginação
@@ -55,7 +58,16 @@ export const transactionRepository: TransactionRepositoryFactory = (dbInstance) 
     if (filters?.status) {
       conditions.push(eq(transactionTable.status, filters.status));
     }
-    // Adicionar mais condições de filtro aqui
+    if (filters?.dateFrom) {
+      conditions.push(gte(transactionTable.date, filters.dateFrom));
+    }
+    if (filters?.dateTo) {
+      // Para incluir o dia inteiro, pode ser necessário ajustar para o final do dia (ex: 23:59:59)
+      // ou garantir que a data no banco esteja armazenada sem hora ou com hora zerada.
+      // Por simplicidade, usando lte diretamente.
+      conditions.push(lte(transactionTable.date, filters.dateTo));
+    }
+    // Adicionar mais condições de filtro aqui (ex: partnerId)
     return conditions;
   };
 

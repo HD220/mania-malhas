@@ -17,10 +17,19 @@ import { useToast } from "@/components/ui/use-toast";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"; // Para filtros
 import { Label } from "@/components/ui/label";
 
+import { CalendarIcon } from "lucide-react"; // Importar CalendarIcon
+import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover"; // Para DatePicker
+import { Calendar } from "@/components/ui/calendar"; // Para DatePicker
+import { format, isValid as isValidDate } from "date-fns"; // Para formatar datas e verificar validade
+import { ptBR } from "date-fns/locale"; // Para locale pt-BR
+import { cn } from "@/utils"; // Para classnames condicionais
+
 // Tipos de Filtro
 interface TransactionFilters {
-  type?: "E" | "S" | "all";
-  status?: string | "all"; // Ex: "Pendente", "Pago", "Cancelado"
+  type?: "E" | "S"; // Removido "all" pois undefined representa "all"
+  status?: string; // Removido "all"
+  dateFrom?: Date;
+  dateTo?: Date;
 }
 
 // Componente da Tabela de Transações
@@ -81,22 +90,33 @@ export default function TransactionsListPage() {
   const [selectedTransaction, setSelectedTransaction] = useState<TransactionWithPartner | null>(null);
   const [isModalOpen, setIsModalOpen] = useState(false);
 
-  const [filters, setFilters] = useState<TransactionFilters>({ type: "all", status: "all" });
+  const [filters, setFilters] = useState<TransactionFilters>({}); // Inicializar filtros vazios
   const [currentPage, setCurrentPage] = useState(1);
   const [totalPages, setTotalPages] = useState(0);
-  // const [totalItems, setTotalItems] = useState(0); // totalItems é usado para calcular totalPages, mas não precisa ser estado separado se totalPages for o principal
-  const pageSize = 10; // Itens por página
+  const pageSize = 10;
 
   /**
-   * Handles changes in filter selection.
-   * Resets to page 1 when filters change.
-   * Updates the `filters` state, setting a filter to `undefined` if "all" is selected.
-   * @param filterName The name of the filter being changed (e.g., "type", "status").
-   * @param value The new value of the filter.
+   * Handles changes in filter selection for string-based filters (type, status).
+   * Resets to page 1 when these filters change.
    */
-  const handleFilterChange = (filterName: keyof TransactionFilters, value: string) => {
-    setCurrentPage(1); // Reset page to 1 when filters change
-    setFilters(prev => ({ ...prev, [filterName]: value === "all" ? undefined : value }));
+  const handleSelectFilterChange = (filterName: "type" | "status", value: string) => {
+    setCurrentPage(1);
+    setFilters(prev => ({
+      ...prev,
+      [filterName]: value === "all" ? undefined : value
+    }));
+  };
+
+  /**
+   * Handles changes in date filter selection.
+   * Resets to page 1 when date filters change.
+   */
+  const handleDateFilterChange = (filterName: "dateFrom" | "dateTo", date?: Date) => {
+    setCurrentPage(1);
+    setFilters(prev => ({
+      ...prev,
+      [filterName]: date,
+    }));
   };
 
   /**
@@ -107,9 +127,11 @@ export default function TransactionsListPage() {
     setIsLoading(true);
     setError(null);
     try {
-      const activeFilters: Partial<TransactionFilters> = {};
-      if (filters.type && filters.type !== "all") activeFilters.type = filters.type;
-      if (filters.status && filters.status !== "all") activeFilters.status = filters.status;
+      // activeFilters agora pode conter dateFrom e dateTo, que serão passados para a action
+      const activeFilters: Partial<TransactionFilters> = { ...filters };
+      // Remover chaves 'all' se existirem (embora o state já deva ter undefined)
+      if (activeFilters.type === "all") delete activeFilters.type;
+      if (activeFilters.status === "all") delete activeFilters.status;
 
       const response = await listTransactionsAction(activeFilters, { page: currentPage, pageSize });
 
@@ -183,15 +205,15 @@ export default function TransactionsListPage() {
           </CardDescription>
         </CardHeader>
         <CardContent className="flex flex-col gap-4">
-          <div className="flex flex-col gap-4 sm:flex-row sm:items-end">
-            <div className="grid gap-2">
+          <div className="flex flex-wrap items-end gap-4 mb-4"> {/* Usar flex-wrap para melhor responsividade */}
+            <div className="grid gap-1.5">
               <Label htmlFor="filter-type">Tipo</Label>
               <Select
-                value={filters.type || "all"}
-                onValueChange={(value) => handleFilterChange("type", value)}
+                value={filters.type || "all"} // "all" para corresponder ao SelectItem
+                onValueChange={(value) => handleSelectFilterChange("type", value as "E" | "S" | "all")}
               >
-                <SelectTrigger id="filter-type" className="w-full sm:w-[180px]">
-                  <SelectValue placeholder="Todos os Tipos" />
+                <SelectTrigger id="filter-type" className="w-full min-w-[150px] sm:w-auto">
+                  <SelectValue placeholder="Tipo" />
                 </SelectTrigger>
                 <SelectContent>
                   <SelectItem value="all">Todos os Tipos</SelectItem>
@@ -200,26 +222,78 @@ export default function TransactionsListPage() {
                 </SelectContent>
               </Select>
             </div>
-            <div className="grid gap-2">
+            <div className="grid gap-1.5">
               <Label htmlFor="filter-status">Status</Label>
               <Select
-                value={filters.status || "all"}
-                onValueChange={(value) => handleFilterChange("status", value)}
+                value={filters.status || "all"} // "all" para corresponder ao SelectItem
+                onValueChange={(value) => handleSelectFilterChange("type", value as "E" | "S" | "all")}
               >
-                <SelectTrigger id="filter-status" className="w-full sm:w-[180px]">
-                  <SelectValue placeholder="Todos os Status" />
+                <SelectTrigger id="filter-status" className="w-full min-w-[150px] sm:w-auto">
+                  <SelectValue placeholder="Status" />
                 </SelectTrigger>
                 <SelectContent>
                   <SelectItem value="all">Todos os Status</SelectItem>
                   <SelectItem value="Pendente">Pendente</SelectItem>
                   <SelectItem value="Pago">Pago</SelectItem>
                   <SelectItem value="Cancelado">Cancelado</SelectItem>
-                  {/* Adicionar outros status se houver */}
                 </SelectContent>
               </Select>
             </div>
-            {/* <Button onClick={loadTransactions} disabled={isLoading}>Aplicar Filtros</Button> */}
-            {/* Os filtros são aplicados automaticamente via useEffect no `filters` */}
+            <div className="grid gap-1.5">
+              <Label htmlFor="filter-dateFrom">Data De</Label>
+              <Popover>
+                <PopoverTrigger asChild>
+                  <Button
+                    id="filter-dateFrom"
+                    variant={"outline"}
+                    className={cn(
+                      "w-full min-w-[180px] sm:w-auto justify-start text-left font-normal",
+                      !filters.dateFrom && "text-muted-foreground"
+                    )}
+                  >
+                    <CalendarIcon className="mr-2 h-4 w-4" />
+                    {filters.dateFrom && isValidDate(filters.dateFrom) ? format(filters.dateFrom, "dd/MM/yyyy", { locale: ptBR }) : <span>De</span>}
+                  </Button>
+                </PopoverTrigger>
+                <PopoverContent className="w-auto p-0">
+                  <Calendar
+                    mode="single"
+                    selected={filters.dateFrom}
+                    onSelect={(date) => handleDateFilterChange("dateFrom", date)}
+                    initialFocus
+                  />
+                </PopoverContent>
+              </Popover>
+            </div>
+            <div className="grid gap-1.5">
+              <Label htmlFor="filter-dateTo">Data Até</Label>
+              <Popover>
+                <PopoverTrigger asChild>
+                  <Button
+                    id="filter-dateTo"
+                    variant={"outline"}
+                    className={cn(
+                      "w-full min-w-[180px] sm:w-auto justify-start text-left font-normal",
+                      !filters.dateTo && "text-muted-foreground"
+                    )}
+                  >
+                    <CalendarIcon className="mr-2 h-4 w-4" />
+                    {filters.dateTo && isValidDate(filters.dateTo) ? format(filters.dateTo, "dd/MM/yyyy", { locale: ptBR }) : <span>Até</span>}
+                  </Button>
+                </PopoverTrigger>
+                <PopoverContent className="w-auto p-0">
+                  <Calendar
+                    mode="single"
+                    selected={filters.dateTo}
+                    onSelect={(date) => handleDateFilterChange("dateTo", date)}
+                    disabled={(date) =>
+                      filters.dateFrom ? date < filters.dateFrom : false
+                    }
+                    initialFocus
+                  />
+                </PopoverContent>
+              </Popover>
+            </div>
           </div>
           {isLoading && <p>Carregando transações...</p>}
           {error && <p className="text-destructive">Erro: {error}</p>}

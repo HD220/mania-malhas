@@ -60,7 +60,13 @@ export default async function getTransactionsUseCase(
   if (filters?.status && filters.status !== "all") {
     repoFilters.status = filters.status;
   }
-  // TODO: Implementar filtros de data e partnerId no repositório e mapeá-los aqui.
+  if (filters?.dateFrom) {
+    repoFilters.dateFrom = filters.dateFrom;
+  }
+  if (filters?.dateTo) {
+    repoFilters.dateTo = filters.dateTo;
+  }
+  // TODO: Implementar filtro de partnerId no repositório e mapeá-lo aqui.
 
   // Aplicar filtros que o repositório ainda não suporta (se houver)
   // Esta lógica de filtro no lado da aplicação deve ser minimizada ou eliminada
@@ -70,8 +76,9 @@ export default async function getTransactionsUseCase(
     return data.filter(t => {
       let matches = true;
       if (appFilters.partnerId && t.partnerId !== appFilters.partnerId) matches = false;
-      if (appFilters.dateFrom && new Date(t.date) < new Date(appFilters.dateFrom)) matches = false;
-      if (appFilters.dateTo && new Date(t.date) > new Date(appFilters.dateTo)) matches = false;
+      // dateFrom e dateTo agora são tratados pelo repositório
+      // if (appFilters.dateFrom && new Date(t.date) < new Date(appFilters.dateFrom)) matches = false;
+      // if (appFilters.dateTo && new Date(t.date) > new Date(appFilters.dateTo)) matches = false;
       return matches;
     });
   };
