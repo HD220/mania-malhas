@@ -166,13 +166,28 @@ export default function TransactionsListPage() {
     handleFilterChange({ [filterName]: date });
   };
 
+  /**
+   * Manipula a lógica de ordenação da tabela.
+   * Ao clicar em um cabeçalho de coluna ordenável:
+   * - Se a coluna já é a ativa, inverte a direção da ordenação.
+   * - Se é uma nova coluna, define a ordenação para essa coluna.
+   *   - Para colunas textuais (Descrição, Tipo, Status), a direção inicial é ascendente ('asc').
+   *   - Para colunas numéricas/data (Valor, Data), a direção inicial é descendente ('desc').
+   * Reseta a página atual para 1.
+   * @param {SortableColumn} column - A coluna pela qual ordenar.
+   */
   const handleSort = (column: SortableColumn) => {
     setCurrentPage(1);
     setSortConfig(prevSortConfig => {
       if (prevSortConfig.column === column) {
         return { column, direction: prevSortConfig.direction === "asc" ? "desc" : "asc" };
       }
-      return { column, direction: "desc" };
+      // Definir direção padrão baseada no tipo de coluna
+      let newDirection: "asc" | "desc" = "asc"; // Padrão para texto (description, type, status)
+      if (column === "date" || column === "value") {
+        newDirection = "desc"; // Padrão para data e valor
+      }
+      return { column, direction: newDirection };
     });
   };
 
