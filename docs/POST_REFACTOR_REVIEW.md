@@ -267,3 +267,37 @@ A Fase 6 teve como objetivo principal finalizar a cobertura de testes para os ca
 *   A cobertura de testes para os casos de uso de `Product` e `Partner` agora é robusta, aumentando a confiança na lógica de negócios central.
 *   A adição de comentários aos repositórios melhora a compreensão e manutenibilidade da camada de acesso a dados.
 *   O projeto atingiu um bom nível de conclusão em relação ao plano de ação original. Os itens restantes são principalmente melhorias contínuas (mais testes, mais comentários) ou funcionalidades de menor prioridade/complexidade que podem ser abordadas em ciclos futuros.
+
+## 11. Atualizações da Fase 7 (Finalização e Polimento)
+
+A Fase 7 concentrou-se em finalizar a cobertura de testes para formulários e actions restantes, polir a UI de transações e fazer uma última rodada de comentários e limpeza.
+
+*   **Concluir Testes para Formulários e Actions Restantes (T01 - continuação):**
+    *   Adicionados testes de componente para `PartnerForm`, cobrindo renderização, submissão e tratamento básico de erros.
+    *   Adicionados testes para a Server Action `addPaymentAction`, mockando o `createPaymentUseCase` e verificando diferentes cenários de resposta.
+    *   Todos os 92 testes em 19 arquivos estão passando.
+
+*   **Polimento Final da UI de Transações (F03 - continuação):**
+    *   Adicionado um botão "Limpar Filtros" à `TransactionsListPage` para resetar os filtros aplicados.
+    *   O feedback visual para ordenação nas colunas da tabela foi considerado adequado com os ícones já implementados.
+
+*   **Revisão Final de Comentários (G01 - conclusão):**
+    *   Adicionados/revisados comentários JSDoc/TSDoc para `paymentRepository.ts`, `AdminDashboardPage`, `AdminProfilePage`, `Header.tsx`, e `NotificationsPanel.tsx`.
+
+### 11.1. Observações Adicionais da Fase 7 e Conclusão Geral do Projeto
+
+*   Com a conclusão da Fase 7, a grande maioria das tarefas planejadas no `ACTION_PLAN.md` foram abordadas.
+*   A cobertura de testes foi significativamente expandida, cobrindo casos de uso críticos, actions importantes e alguns componentes de UI chave.
+*   As funcionalidades financeiras (Transações e Pagamentos) estão mais robustas e com melhor usabilidade (filtros, paginação, ordenação).
+*   A base de código está mais comentada e organizada.
+*   **Itens que permanecem pendentes ou requerem atenção futura significativa:**
+    *   **C01 (Route Groups):** Permanece bloqueado por limitações da ferramenta. É uma refatoração estrutural importante para o futuro.
+    *   **F03 (UI Transações - Avançado):** Filtros textuais avançados, melhorias de UX mais profundas na ordenação/paginação, e CRUD completo para transações (edição/exclusão) ainda são oportunidades.
+    *   **G01 (Comentários):** Embora melhorada, uma cobertura de 100% de comentários JSDoc/TSDoc exigiria um esforço dedicado adicional.
+    *   **F05 (Notificações):** Apenas a UI base foi feita. A lógica de backend para notificações reais é uma funcionalidade nova e completa.
+    *   **C04 (Atualizar `drizzle-kit`):** Requer investigação para resolver conflitos de versão.
+    *   **T01 (Testes):** A cobertura deve ser continuamente expandida, especialmente para componentes de UI mais complexos e fluxos de ponta a ponta (E2E).
+    *   **A02 (Perfil Admin):** Integração com sistema de autenticação real e funcionalidades de edição de perfil/senha.
+    *   **Outros itens de baixa prioridade** não explicitamente abordados.
+
+O projeto está agora em um estado consideravelmente melhor e mais completo.

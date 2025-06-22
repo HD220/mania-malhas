@@ -18,9 +18,17 @@ import { ThemeToggle } from "@/components/theme-toggle";
 import { Navbar } from "@/components/navbar/navbar";
 import menus from "@/constant";
 import { Bell, CircleUser, Menu, Package2 } from "lucide-react";
-import { useState } from "react"; // Import useState
-import { NotificationsPanel } from "./notifications/NotificationsPanel"; // Import NotificationsPanel
+import { useState } from "react";
+import { NotificationsPanel } from "./notifications/NotificationsPanel";
 
+/**
+ * Header component for the admin panel.
+ * Includes:
+ * - Mobile navigation toggle (Sheet).
+ * - Placeholder for breadcrumbs (which are actually rendered by the AdminLayout).
+ * - Notifications button and panel (Sheet).
+ * - User dropdown menu with theme toggle and logout functionality.
+ */
 export function Header() {
   const router = useRouter();
   const [isPending, startTransition] = useTransition();

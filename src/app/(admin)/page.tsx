@@ -4,9 +4,15 @@ import { Button } from "@/components/ui/button";
 import Link from "next/link";
 import { DollarSign, Package, Users, ListChecks } from "lucide-react"; // Ícones
 
+/**
+ * AdminDashboardPage serves as the main landing page for the admin panel.
+ * It displays key statistics (e.g., active products, active partners, pending transactions)
+ * and provides quick navigation links to important sections of the application.
+ * Data is fetched server-side via `getDashboardStats` action.
+ */
 export default async function AdminDashboardPage() {
   const statsResponse = await getDashboardStats();
-  const stats = statsResponse.data; // Pode ser undefined se success for false
+  const stats = statsResponse.data; // Can be undefined if success is false or data is not present
 
   return (
     <div className="flex flex-1 flex-col gap-4 p-4 md:gap-8 md:p-8">

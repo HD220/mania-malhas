@@ -130,6 +130,11 @@ export default function TransactionsListPage() {
   const [sortConfig, setSortConfig] = useState<SortConfig>({ column: "date", direction: "desc" });
   const [descriptionSearch, setDescriptionSearch] = useState("");
 
+  const handleFilterChange = (newFilters: Partial<TransactionFilters>) => {
+    setCurrentPage(1);
+    setFilters(prev => ({ ...prev, ...newFilters }));
+  };
+
   const debouncedSetDescriptionFilter = useDebouncedCallback((value: string) => {
     handleFilterChange({ description: value.trim() === "" ? undefined : value.trim() });
   }, 500);
@@ -139,7 +144,15 @@ export default function TransactionsListPage() {
     debouncedSetDescriptionFilter(event.target.value);
   };
 
-  const handleFilterChange = (newFilters: Partial<TransactionFilters>) => {
+  const clearFilters = () => {
+    setCurrentPage(1);
+    setFilters({});
+    setDescriptionSearch("");
+    // Manter a ordenação atual ou resetar? Por enquanto, manter.
+    // setSortConfig({ column: "date", direction: "desc" });
+  };
+
+  const handleSelectFilterChange = (filterName: "type" | "status", value: string) => {
     setCurrentPage(1);
     setFilters(prev => ({ ...prev, ...newFilters }));
   };
@@ -329,6 +342,7 @@ export default function TransactionsListPage() {
                 </PopoverContent>
               </Popover>
             </div>
+            <Button variant="outline" onClick={clearFilters} className="self-end">Limpar Filtros</Button>
           </div>
           {isLoading && <p className="text-center py-4">Carregando transações...</p>}
           {error && <p className="text-destructive text-center py-4">Erro: {error}</p>}

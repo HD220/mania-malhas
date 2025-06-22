@@ -21,6 +21,13 @@ interface UserProfile {
   // Adicione outros campos conforme necessário
 }
 
+/**
+ * Simulates fetching the current user's profile data.
+ * In a real application, this would integrate with an authentication system (e.g., NextAuth.js)
+ * to retrieve actual user information.
+ *
+ * @returns {Promise<UserProfile | null>} A promise that resolves to the user's profile data or null.
+ */
 async function getUserProfile(): Promise<UserProfile | null> {
   // Simulação:
   // Em um app real, aqui você faria a chamada para obter os dados do usuário logado.
@@ -42,6 +49,14 @@ async function getUserProfile(): Promise<UserProfile | null> {
   };
 }
 
+/**
+ * `AdminProfilePage` displays the profile information of the currently logged-in administrator.
+ * Currently, it uses simulated user data. In a real application, it would fetch this
+ * data from an authentication provider.
+ *
+ * TODO: Integrate with a real authentication system to display actual user data
+ * and potentially allow profile/password updates.
+ */
 export default async function AdminProfilePage() {
   const user = await getUserProfile();
 

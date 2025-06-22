@@ -96,9 +96,11 @@ export function PartnerForm({ initialValues, onSubmit }: UsePartnerFormProps) {
                 control={form.control}
                 render={({ field: { value = "", ...field } }) => (
                   <FormItem className="flex flex-1 flex-col">
-                    <FormLabel htmlFor="notes">Anotações</FormLabel>
+                    {/* Remover htmlFor="notes" para deixar FormField gerenciar */}
+                    <FormLabel>Anotações</FormLabel> {/* Confiar no FormField para associar com base no name="notes" */}
                     <FormControl>
                       <Textarea
+                        // id={field.name} // Remover id explícito, deixar react-hook-form/FormField gerenciar
                         placeholder="ex: Informações sobre o cliente."
                         className="px-3 py-2"
                         rows={15}

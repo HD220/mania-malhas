@@ -11,9 +11,21 @@ export type PaymentRepositoryFactory = (dbInstance?: DBConnection) => {
   // TODO: Add update and delete methods later if needed
 };
 
+/**
+ * Factory function for creating a payment repository instance.
+ * Contains methods for inserting and querying payment data.
+ * @param {DBConnection} [dbInstance] - Optional Drizzle database connection instance. Uses a default if not provided.
+ * @returns {Object} An object containing payment repository methods.
+ */
 export const paymentRepository: PaymentRepositoryFactory = (dbInstance) => {
   const db = dbInstance || defaultDb;
 
+  /**
+   * Inserts a new payment record into the database.
+   * Ensures a date is set for the payment, defaulting to the current date if not provided.
+   * @param {InsertPayment} data - The payment data to insert.
+   * @returns {Promise<{ id: string }>} An object containing the ID of the newly created payment.
+   */
   const insert = async (data: InsertPayment): Promise<{ id: string }> => {
     const [newPayment] = await db
       .insert(paymentTable)
@@ -25,6 +37,12 @@ export const paymentRepository: PaymentRepositoryFactory = (dbInstance) => {
     return newPayment;
   };
 
+  /**
+   * Finds all payments associated with a specific transaction ID.
+   * Orders payments by date (descending) and then by creation time (descending).
+   * @param {string} transactionId - The UUID of the transaction.
+   * @returns {Promise<SelectPayment[]>} A list of payments for the given transaction.
+   */
   const findByTransactionId = async (transactionId: string): Promise<SelectPayment[]> => {
     return await db
       .select()
