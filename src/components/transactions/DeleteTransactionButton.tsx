@@ -1,9 +1,11 @@
 "use client";
 
 import * as React from "react";
-import { useState } from "react";
-import { Trash2 } from "lucide-react";
+import { useState, useTransition } from "react";
+import { Trash2, Loader2 } from "lucide-react"; // Added Loader2
 import { Button } from "@/components/ui/button";
+import { deleteTransactionAction } from "@/app/(admin)/transactions/actions"; // Import the server action
+import { toast } from "sonner"; // Import toast
 import {
   AlertDialog,
   AlertDialogAction,
@@ -19,23 +21,28 @@ import {
 interface DeleteTransactionButtonProps {
   transactionId: string;
   transactionDescription?: string; // Optional: for a more specific message
-  onConfirmDelete: () => void; // Placeholder for now, will call server action in next task
 }
 
 export function DeleteTransactionButton({
   transactionId,
   transactionDescription,
-  onConfirmDelete,
 }: DeleteTransactionButtonProps) {
   const [isDialogOpen, setIsDialogOpen] = useState(false);
+  const [isPending, startTransition] = useTransition();
 
-  const handleDeleteConfirm = () => {
-    // console.log(`Confirmed deletion for transaction ID: ${transactionId}`);
-    onConfirmDelete(); // This will be wired to the actual action call later
-    setIsDialogOpen(false); // Close dialog after confirmation
+  const handleDeleteConfirm = async () => {
+    startTransition(async () => {
+      const response = await deleteTransactionAction(transactionId);
+      if (response.success) {
+        toast.success(response.message || "Transação excluída com sucesso.");
+      } else {
+        toast.error(response.message || "Falha ao excluir transação.");
+      }
+      setIsDialogOpen(false); // Close dialog regardless of outcome
+    });
   };
 
-  const description = transactionDescription
+  const descriptionText = transactionDescription // Renamed to avoid conflict
     ? `Tem certeza que deseja excluir a transação "${transactionDescription}"? Esta ação não pode ser desfeita.`
     : "Tem certeza que deseja excluir esta transação? Esta ação não pode ser desfeita.";
 
@@ -53,12 +60,13 @@ export function DeleteTransactionButton({
           <AlertDialogDescription>{description}</AlertDialogDescription>
         </AlertDialogHeader>
         <AlertDialogFooter>
-          <AlertDialogCancel onClick={() => setIsDialogOpen(false)}>Cancelar</AlertDialogCancel>
-          <AlertDialogAction
-            onClick={handleDeleteConfirm}
-            // Consider adding a more destructive variant style if available/desired
-            // e.g., className="bg-red-600 hover:bg-red-700"
-          >
+          <AlertDialogCancel onClick={() => setIsDialogOpen(false)} disabled={isPending}>
+            Cancelar
+          </AlertDialogCancel>
+          <AlertDialogAction onClick={handleDeleteConfirm} disabled={isPending}>
+            {isPending ? (
+              <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+            ) : null}
             Confirmar Exclusão
           </AlertDialogAction>
         </AlertDialogFooter>
