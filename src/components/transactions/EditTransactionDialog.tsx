@@ -91,10 +91,10 @@ export function EditTransactionDialog({
   const [isLoadingData, setIsLoadingData] = useState(false);
   const [initialDataError, setInitialDataError] = useState<string | null>(null);
 
-  // States for partner combobox (will be needed in UI-TX-EDIT.2)
-  // const [partners, setPartners] = useState<SelectPartner[]>([]);
-  // const [partnersLoading, setPartnersLoading] = useState(false);
-  // const [comboboxOpen, setComboboxOpen] = useState(false);
+  // States for partner combobox
+  const [partners, setPartners] = useState<SelectPartner[]>([]);
+  const [partnersLoading, setPartnersLoading] = useState(false);
+  const [partnerComboboxOpen, setPartnerComboboxOpen] = useState(false); // Renamed to avoid conflict if other comboboxes are added
 
   // const [isSubmitting, startSubmitTransition] = useTransition(); // For UI-TX-EDIT.3
 
@@ -141,6 +141,26 @@ export function EditTransactionDialog({
 
     loadTransactionData();
   }, [isOpen, transactionId, form]); // form added to dependency array for form.reset
+
+  // useEffect for fetching partners (copied and adapted from CreateTransactionDialog)
+  useEffect(() => {
+    if (isOpen && partners.length === 0 && !partnersLoading) {
+      const fetchPartners = async () => {
+        setPartnersLoading(true);
+        try {
+          const fetchedPartners = await getPartners("", true); // Fetch all active partners
+          setPartners(fetchedPartners);
+        } catch (error) {
+          console.error("Failed to fetch partners for edit dialog:", error);
+          // Optionally, show a toast error here
+        } finally {
+          setPartnersLoading(false);
+        }
+      };
+      fetchPartners();
+    }
+  }, [isOpen, partners.length, partnersLoading]);
+
 
   const onSubmit = (data: EditTransactionFormValues) => {
     console.log("Form submitted (UI-TX-EDIT.1 - no action yet):", data);
@@ -253,14 +273,62 @@ export function EditTransactionDialog({
                 control={form.control}
                 name="partnerId"
                 render={({ field }) => (
-                  // Partner Combobox will be implemented in UI-TX-EDIT.2
-                  // For now, a disabled input showing the ID, or a simple select if partners are loaded.
-                  // Since partners state is commented out, just use a disabled input for now.
-                  <FormItem>
-                    <FormLabel>Parceiro (ID)</FormLabel>
-                    <FormControl>
-                      <Input {...field} disabled placeholder="Carregando..." />
-                    </FormControl>
+                  <FormItem className="flex flex-col">
+                    <FormLabel>Parceiro</FormLabel>
+                    <Popover open={partnerComboboxOpen} onOpenChange={setPartnerComboboxOpen}>
+                      <PopoverTrigger asChild>
+                        <FormControl>
+                          <Button
+                            variant="outline"
+                            role="combobox"
+                            aria-expanded={partnerComboboxOpen}
+                            className={cn(
+                              "w-full justify-between",
+                              !field.value && "text-muted-foreground"
+                            )}
+                            disabled={partnersLoading || isLoadingData} // Disable while loading transaction or partners
+                          >
+                            {field.value
+                              ? partners.find(
+                                  (partner) => partner.id === field.value
+                                )?.name
+                              : "Selecione um parceiro"}
+                            <ChevronsUpDown className="ml-2 h-4 w-4 shrink-0 opacity-50" />
+                          </Button>
+                        </FormControl>
+                      </PopoverTrigger>
+                      <PopoverContent className="w-[--radix-popover-trigger-width] p-0">
+                        <Command>
+                          <CommandInput placeholder="Buscar parceiro..." disabled={partnersLoading} />
+                          {partnersLoading && <div className="p-4 text-sm text-center">Carregando parceiros...</div>}
+                          {!partnersLoading && <CommandEmpty>Nenhum parceiro encontrado.</CommandEmpty>}
+                          {!partnersLoading && partners.length > 0 && (
+                            <CommandList>
+                              <CommandGroup>
+                                {partners.map((partner) => (
+                                  <CommandItem
+                                    value={partner.id}
+                                    key={partner.id}
+                                    onSelect={(currentValue) => {
+                                      form.setValue("partnerId", currentValue === field.value ? "" : currentValue);
+                                      setPartnerComboboxOpen(false);
+                                    }}
+                                  >
+                                    <Check
+                                      className={cn(
+                                        "mr-2 h-4 w-4",
+                                        field.value === partner.id ? "opacity-100" : "opacity-0"
+                                      )}
+                                    />
+                                    {partner.name}
+                                  </CommandItem>
+                                ))}
+                              </CommandGroup>
+                            </CommandList>
+                          )}
+                        </Command>
+                      </PopoverContent>
+                    </Popover>
                     <FormMessage />
                   </FormItem>
                 )}
