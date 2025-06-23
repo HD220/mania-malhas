@@ -1,259 +1,220 @@
-import { describe, it, expect, vi, beforeEach } from "vitest";
-import { faker } from "@faker-js/faker";
+import { vi, describe, it, expect, beforeEach, afterEach } from "vitest";
 import { ZodError } from "zod";
-import { NotFoundError, ForbiddenError, DomainError } from "@/lib/errors/domainErrors";
-
-// ---- START MOCK DEFINITIONS ----
-const mockListNotificationsExecute = vi.fn();
-const mockMarkAsReadExecute = vi.fn();
-const mockMarkAllAsReadExecute = vi.fn();
-// ---- END MOCK DEFINITIONS ----
-
-// ---- START MOCK DEFINITIONS ----
-const mockListNotificationsExecute = vi.fn();
-const mockMarkAsReadExecute = vi.fn();
-const mockMarkAllAsReadExecute = vi.fn();
-const mockRevalidatePath = vi.fn(); // Define for vi.doMock
-const mockRevalidateTag = vi.fn();   // Define for vi.doMock
-// ---- END MOCK DEFINITIONS ----
-
-// ---- START MOCKS ----
-// IMPORTANT: All vi.mock calls must be at the top of the module, before any imports
-// that might use these mocked modules (including the actions.ts file itself).
-
-// vi.mock("next/cache", ...) // Removed, will use vi.doMock later
-
-vi.mock("@/db/postgres", () => ({
-  db: vi.fn(),
-}));
-
-vi.mock("@/db/repositories/notificationRepository", () => ({
-  notificationRepository: vi.fn().mockImplementation(() => ({
-    findByUserId: vi.fn(),
-    countByUserId: vi.fn(),
-  })),
-}));
-
-vi.mock("@/lib/auth/session", () => ({
-  internalGetUserIdFromSession: vi.fn(),
-}));
-
-// These use cases are NOT mocked at the module level anymore with vi.mock.
-// We will spy on their prototype methods instead.
-// ---- END MOCKS ----
-
-
-// Import the actual use case classes for spying AFTER mocks for their dependencies (like DB) are set up
-import {
-  ListNotificationsForUserUseCase,
-  ListNotificationsForUserInput, // type only
-  ListNotificationsForUserOutput // type only
-} from "@/usecases/notification/listNotificationsForUserUseCase";
-import {
-  MarkNotificationAsReadUseCase,
-  MarkNotificationAsReadInput // type only
-} from "@/usecases/notification/markNotificationAsReadUseCase";
-import {
-  MarkAllNotificationsAsReadUseCase,
-  MarkAllNotificationsAsReadInput, // type only
-  MarkAllNotificationsAsReadOutput // type only
-} from "@/usecases/notification/markAllNotificationsAsReadUseCase";
-import { SelectNotification, notificationTypeEnum as actualNotificationTypeEnum } from "@/db/repositories/schemas/notificationSchema";
-
-
-// Now import the items to be tested (actions) and other necessary items
-import { revalidatePath, revalidateTag } from "next/cache"; // These will be the mocked versions
-import { internalGetUserIdFromSession } from "@/lib/auth/session"; // This will be the mocked version
-
+import { revalidatePath } from "next/cache";
 import {
   listNotificationsAction,
   markAsReadAction,
   markAllAsReadAction,
+  MarkAsReadActionClientInput,
+  ListNotificationsActionInput,
 } from "./actions";
 
+// Import REAL schemas for validation testing if actions use them directly before calling use cases.
+// The actions.ts file does use listNotificationsForUserInputSchema directly for parsing.
+import { listNotificationsForUserInputSchema } from "@/usecases/notification/listNotificationsForUserUseCase";
+import { markNotificationAsReadInputSchema } from "@/usecases/notification/markNotificationAsReadUseCase";
+import { markAllNotificationsAsReadInputSchema } from "@/usecases/notification/markAllNotificationsAsReadUseCase";
 
-const sampleUserId = faker.string.uuid();
-const sampleNotificationId = faker.string.uuid();
 
-const generateMockSelectNotification = (isRead = false, userId = sampleUserId, id = faker.string.uuid()): SelectNotification => ({
-    id,
-    userId,
-    type: "info", // Hardcode a valid enum string directly
-    message: faker.lorem.sentence(),
-    isRead,
-    relatedEntityId: null,
-    relatedEntityType: null,
-    createdAt: new Date(),
-    updatedAt: new Date(),
-});
+import { ForbiddenError, NotFoundError } from "@/lib/errors/domainErrors";
+
+import {
+  ListNotificationsForUserUseCase,
+  listNotificationsForUserInputSchema,
+} from "@/usecases/notification/listNotificationsForUserUseCase";
+import {
+  MarkNotificationAsReadUseCase,
+  markNotificationAsReadInputSchema,
+} from "@/usecases/notification/markNotificationAsReadUseCase";
+import {
+  MarkAllNotificationsAsReadUseCase,
+  markAllNotificationsAsReadInputSchema,
+} from "@/usecases/notification/markAllNotificationsAsReadUseCase";
+
+// Mock Next.js cache revalidation
+vi.mock("next/cache", () => ({
+  revalidatePath: vi.fn(),
+}));
+
+// Mock repositories if they are directly used in actions.ts
+// This is still needed because actions.ts instantiates use cases with repository instances.
+// However, the use cases themselves will have their 'execute' methods spied upon.
+vi.mock("@/db/repositories", () => ({
+  notificationRepository: {}, // Placeholder mock
+  userRepository: {},       // Placeholder mock
+}));
+
+
+const MOCK_USER_ID = "00000000-0000-0000-0000-000000000001";
+// This ID is hardcoded in actions.ts's internalGetUserIdFromSession placeholder.
+
+// Spies for use case execute methods
+let listNotificationsExecuteSpy: ReturnType<typeof vi.spyOn>;
+let markAsReadExecuteSpy: ReturnType<typeof vi.spyOn>;
+let markAllAsReadExecuteSpy: ReturnType<typeof vi.spyOn>;
 
 
 describe("Notification Server Actions", () => {
   beforeEach(() => {
-    vi.resetAllMocks();
+    vi.clearAllMocks(); // Clears call counts and mock implementations for all mocks
 
-    // Reset the imported mocks from next/cache and auth/session
-    (revalidatePath as vi.Mock).mockReset(); // Reset imported mock
-    (revalidateTag as vi.Mock).mockReset();   // Reset imported mock
-    (internalGetUserIdFromSession as vi.Mock).mockReset();
+    // Spy on the execute methods of the use case prototypes
+    // These spies will be used by the actual instances created in actions.ts
+    listNotificationsExecuteSpy = vi.spyOn(ListNotificationsForUserUseCase.prototype, "execute");
+    markAsReadExecuteSpy = vi.spyOn(MarkNotificationAsReadUseCase.prototype, "execute");
+    markAllAsReadExecuteSpy = vi.spyOn(MarkAllNotificationsAsReadUseCase.prototype, "execute");
+  });
 
-    // Reset execute mocks
-    mockListNotificationsExecute.mockClear();
-    mockMarkAsReadExecute.mockClear();
-    mockMarkAllAsReadExecute.mockClear();
-
-    (internalGetUserIdFromSession as vi.Mock).mockResolvedValue(sampleUserId); // Setup for most tests
-
-    // Spy on the prototype methods for each use case
-    vi.spyOn(ListNotificationsForUserUseCase.prototype, 'execute').mockImplementation(mockListNotificationsExecute);
-    vi.spyOn(MarkNotificationAsReadUseCase.prototype, 'execute').mockImplementation(mockMarkAsReadExecute);
-    vi.spyOn(MarkAllNotificationsAsReadUseCase.prototype, 'execute').mockImplementation(mockMarkAllAsReadExecute);
+  afterEach(() => {
+    // Restore original methods after each test
+    vi.restoreAllMocks();
   });
 
   describe("listNotificationsAction", () => {
-    it("should return paginated notifications for an authenticated user", async () => {
-      const paginationOptions = { page: 1, pageSize: 5 };
-      const mockNotificationsArray = [generateMockSelectNotification()];
-      const mockOutput: ListNotificationsForUserOutput = {
-        notifications: mockNotificationsArray,
+    it("should call ListNotificationsForUserUseCase with session userId and return data on success", async () => {
+      const mockOutput = {
+        notifications: [{ id: "notif1", message: "Test", userId: MOCK_USER_ID, isRead: false, createdAt: new Date(), updatedAt: new Date(), partnerId: null, transactionId: null, type: "info" as const }],
         totalCount: 1,
         currentPage: 1,
         totalPages: 1,
-        pageSize: 5,
+        pageSize: 10,
       };
-      mockListNotificationsExecute.mockResolvedValue(mockOutput); // This is now the spy's implementation
+      listNotificationsExecuteSpy.mockResolvedValue(mockOutput);
 
-      const response = await listNotificationsAction(paginationOptions);
+      const input: ListNotificationsActionInput = { page: 1, pageSize: 10 };
+      const response = await listNotificationsAction(input);
 
-      expect(internalGetUserIdFromSession).toHaveBeenCalled();
-      // expect(ListNotificationsForUserUseCase).toHaveBeenCalled(); // Constructor is called, but not a mock fn anymore
-      expect(mockListNotificationsExecute).toHaveBeenCalledWith({ // Assert the spy was called
-        userId: sampleUserId,
-        page: paginationOptions.page,
-        pageSize: paginationOptions.pageSize,
+      expect(listNotificationsExecuteSpy).toHaveBeenCalledWith({
+        ...input,
+        userId: MOCK_USER_ID,
       });
       expect(response.success).toBe(true);
       expect(response.data).toEqual(mockOutput);
+      expect(response.error).toBeUndefined();
     });
 
-    it("should return unauthenticated error if no user ID from session", async () => {
-      (internalGetUserIdFromSession as vi.Mock).mockResolvedValue(null); // Simulate no user
-      const response = await listNotificationsAction({});
+    it("should handle ZodError when action's input parsing fails", async () => {
+      const input = { page: -1, pageSize: 10 } as ListNotificationsActionInput;
+      // No need to mock listNotificationsExecuteSpy here as it shouldn't be called
+      const response = await listNotificationsAction(input);
+
       expect(response.success).toBe(false);
-      expect(response.message).toBe("Usuário não autenticado.");
-      expect(mockListNotificationsExecute).not.toHaveBeenCalled();
+      expect(response.error).toBe("Erro de validação.");
+      expect(response.fieldErrors).toBeDefined();
+      expect(response.fieldErrors?.page).toContain("Página deve ser um inteiro positivo.");
+      expect(listNotificationsExecuteSpy).not.toHaveBeenCalled();
     });
 
-    it("should return ZodError details if use case throws ZodError", async () => {
-      const zodError = new ZodError([{ path: ["page"], message: "Invalid page", code: "custom" }]);
-      mockListNotificationsExecute.mockRejectedValue(zodError);
+    it("should handle generic errors from use case", async () => {
+      listNotificationsExecuteSpy.mockRejectedValue(new Error("UseCase failed"));
+      const input: ListNotificationsActionInput = { page: 1, pageSize: 10 };
+      const response = await listNotificationsAction(input);
 
-      const response = await listNotificationsAction({});
       expect(response.success).toBe(false);
-      expect(response.message).toBe("Dados de entrada inválidos.");
-      expect(response.fieldErrors).toEqual(zodError.flatten().fieldErrors);
-    });
-
-    it("should return DomainError message if use case throws DomainError", async () => {
-      const domainError = new DomainError("A specific domain error occurred");
-      mockListNotificationsExecute.mockRejectedValue(domainError);
-
-      const response = await listNotificationsAction({});
-      expect(response.success).toBe(false);
-      expect(response.message).toBe("A specific domain error occurred");
-    });
-
-    it("should return generic error message for other errors", async () => {
-      mockListNotificationsExecute.mockRejectedValue(new Error("Some other error"));
-      const response = await listNotificationsAction({});
-      expect(response.success).toBe(false);
-      expect(response.message).toBe("Falha ao buscar notificações. Tente novamente mais tarde.");
+      expect(response.error).toBe("Falha ao listar notificações.");
     });
   });
 
   describe("markAsReadAction", () => {
-    it("should successfully mark a notification as read and return it", async () => {
-      const updatedNotification = generateMockSelectNotification(true, sampleUserId, sampleNotificationId);
-      mockMarkAsReadExecute.mockResolvedValue(updatedNotification);
+    const validInput: MarkAsReadActionClientInput = { notificationId: "a1b2c3d4-e5f6-7890-1234-567890abcdef" };
 
-      const response = await markAsReadAction(sampleNotificationId);
+    it("should call MarkNotificationAsReadUseCase and revalidate path on success", async () => {
+      markAsReadExecuteSpy.mockResolvedValue({
+        id: validInput.notificationId,
+        userId: MOCK_USER_ID,
+        isRead: true,
+        message: "MSG",
+        createdAt: new Date(),
+        updatedAt: new Date(),
+        partnerId: null,
+        transactionId: null,
+        type: "info" as const
+      });
 
-      expect(internalGetUserIdFromSession).toHaveBeenCalled();
-      // expect(MarkNotificationAsReadUseCase).toHaveBeenCalled(); // Constructor is spied on, not a mock fn
-      expect(mockMarkAsReadExecute).toHaveBeenCalledWith({ notificationId: sampleNotificationId, userId: sampleUserId });
+      const response = await markAsReadAction(validInput);
+
+      expect(markAsReadExecuteSpy).toHaveBeenCalledWith({
+        notificationId: validInput.notificationId,
+        userId: MOCK_USER_ID,
+      });
+      expect(revalidatePath).toHaveBeenCalledWith("/(admin)/notifications", "page");
       expect(response.success).toBe(true);
-      expect(response.data).toEqual(updatedNotification);
-      expect(response.message).toBe("Notificação marcada como lida.");
-      expect(revalidatePath).toHaveBeenCalledWith("/(admin)/notifications");
-      expect(revalidateTag).toHaveBeenCalledWith("user-notifications-count");
+      expect(response.data).toBeNull();
+      expect(response.error).toBeUndefined();
     });
 
-    it("should return unauthenticated error if no user ID for markAsReadAction", async () => {
-      (internalGetUserIdFromSession as vi.Mock).mockResolvedValue(null);
-      const response = await markAsReadAction(sampleNotificationId);
+    it("should handle ZodError for invalid client input (invalid notificationId format)", async () => {
+      const invalidInput = { notificationId: "invalid-id" };
+      const response = await markAsReadAction(invalidInput as any);
+
       expect(response.success).toBe(false);
-      expect(response.message).toBe("Usuário não autenticado.");
-      expect(mockMarkAsReadExecute).not.toHaveBeenCalled();
+      expect(response.error).toBe("Erro de validação.");
+      expect(response.fieldErrors?.notificationId).toContain("ID da notificação inválido.");
+      expect(markAsReadExecuteSpy).not.toHaveBeenCalled();
     });
 
-    it("should return ZodError details for invalid notificationId from use case", async () => {
-       const zodError = new ZodError([{ path: ["notificationId"], message: "Invalid ID", code: "custom" }]);
-      mockMarkAsReadExecute.mockRejectedValue(zodError);
+    it("should handle NotFoundError from use case", async () => {
+      markAsReadExecuteSpy.mockRejectedValue(new NotFoundError("Notificação"));
+      const response = await markAsReadAction(validInput);
 
-      const response = await markAsReadAction(sampleNotificationId);
       expect(response.success).toBe(false);
-      expect(response.message).toBe("Dados de entrada inválidos.");
-      expect(response.fieldErrors).toEqual(zodError.flatten().fieldErrors);
+      expect(response.error).toBe("Notificação não encontrada.");
     });
 
-    it("should return NotFoundError message", async () => {
-      const notFoundError = new NotFoundError("Notificação");
-      mockMarkAsReadExecute.mockRejectedValue(notFoundError);
-      const response = await markAsReadAction(sampleNotificationId);
+    it("should handle ForbiddenError from use case", async () => {
+      markAsReadExecuteSpy.mockRejectedValue(new ForbiddenError("Acesso negado."));
+      const response = await markAsReadAction(validInput);
+
       expect(response.success).toBe(false);
-      expect(response.message).toBe("Notificação não encontrada.");
+      expect(response.error).toBe("Acesso negado.");
     });
 
-    it("should return ForbiddenError message", async () => {
-      const forbiddenError = new ForbiddenError("Acesso negado para esta notificação.");
-      mockMarkAsReadExecute.mockRejectedValue(forbiddenError);
-      const response = await markAsReadAction(sampleNotificationId);
+    it("should handle generic errors from use case", async () => {
+      markAsReadExecuteSpy.mockRejectedValue(new Error("UseCase failed"));
+      const response = await markAsReadAction(validInput);
+
       expect(response.success).toBe(false);
-      expect(response.message).toBe("Acesso negado para esta notificação.");
+      expect(response.error).toBe("Falha ao marcar notificação como lida.");
     });
   });
 
   describe("markAllAsReadAction", () => {
-    it("should successfully mark all notifications as read and return count", async () => {
-      const mockOutputFromUseCase: MarkAllNotificationsAsReadOutput = { success: true, markedCount: 3 };
-      mockMarkAllAsReadExecute.mockResolvedValue(mockOutputFromUseCase);
+    it("should call MarkAllNotificationsAsReadUseCase and revalidate path on success", async () => {
+      const mockResult = { success: true, markedCount: 5 };
+      markAllAsReadExecuteSpy.mockResolvedValue(mockResult);
 
       const response = await markAllAsReadAction();
 
-      expect(internalGetUserIdFromSession).toHaveBeenCalled();
-      // expect(MarkAllNotificationsAsReadUseCase).toHaveBeenCalled(); // Constructor is spied on
-      expect(mockMarkAllAsReadExecute).toHaveBeenCalledWith({ userId: sampleUserId });
+      expect(markAllAsReadExecuteSpy).toHaveBeenCalledWith({
+        userId: MOCK_USER_ID,
+      });
+      expect(revalidatePath).toHaveBeenCalledWith("/(admin)/notifications", "page");
       expect(response.success).toBe(true);
-      expect(response.markedCount).toBe(3);
-      expect(response.message).toBe("Todas as notificações foram marcadas como lidas.");
-      expect(revalidatePath).toHaveBeenCalledWith("/(admin)/notifications");
-      expect(revalidateTag).toHaveBeenCalledWith("user-notifications-count");
+      expect(response.data).toEqual(mockResult);
+      expect(response.error).toBeUndefined();
     });
 
-    it("should return unauthenticated error if no user ID for markAllAsReadAction", async () => {
-      (internalGetUserIdFromSession as vi.Mock).mockResolvedValue(null);
+    it("should handle ZodError if use case input (userId from session) is somehow invalid by use case", async () => {
+      const zodErrorInstance = new ZodError([{
+        code: 'invalid_string',
+        message: 'Invalid uuid',
+        path: ['userId'],
+        validation: 'uuid',
+      }]);
+      markAllAsReadExecuteSpy.mockRejectedValue(zodErrorInstance);
+
       const response = await markAllAsReadAction();
+
       expect(response.success).toBe(false);
-      expect(response.message).toBe("Usuário não autenticado.");
-      expect(mockMarkAllAsReadExecute).not.toHaveBeenCalled();
+      expect(response.error).toBe("Erro de validação.");
     });
 
-    it("should return error if use case throws for markAllAsReadAction", async () => {
-      const domainError = new DomainError("Failed to mark all");
-      mockMarkAllAsReadExecute.mockRejectedValue(domainError);
+    it("should handle generic errors from use case", async () => {
+      markAllAsReadExecuteSpy.mockRejectedValue(new Error("UseCase failed"));
       const response = await markAllAsReadAction();
+
       expect(response.success).toBe(false);
-      expect(response.message).toBe("Failed to mark all");
+      expect(response.error).toBe("Falha ao marcar todas as notificações como lidas.");
     });
   });
 });
