@@ -2,8 +2,13 @@ import { db } from "@/db/postgres";
 import { productRepository } from "@/db/repositories/productRepository";
 
 /**
- * Counts the number of active products.
- * @returns Promise<number> The count of active products.
+ * Counts the number of active products in the system.
+ *
+ * This use case interacts with the product repository to fetch all active products
+ * and then returns the count of this collection.
+ *
+ * @returns {Promise<number>} A promise that resolves to the total number of active products.
+ * @throws {Error} If there's an issue with the repository during data retrieval.
  */
 export default async function countActiveProductsUseCase(): Promise<number> {
   const repo = productRepository(db);

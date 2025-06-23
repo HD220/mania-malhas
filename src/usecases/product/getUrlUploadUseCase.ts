@@ -2,12 +2,20 @@ import { getPresignedUrlPutObject } from "@/services/minio";
 import { randomUUID } from "crypto";
 import env from "@/db/postgres/env";
 
+/**
+ * Defines the input structure for the `getUrlUploadUseCase`.
+ */
 export type Input = {
+  /** The file extension of the image to be uploaded (e.g., "jpg", "png"). */
   fileExt: string;
 };
 
+/**
+ * Defines the output structure of the `getUrlUploadUseCase`.
+ */
 export type Output = {
-  url: string; // This is the presigned PUT URL for uploading
+  /** The presigned PUT URL generated for uploading the file to MinIO. */
+  url: string;
 };
 
 /**
