@@ -1,103 +1,122 @@
 import { describe, it, expect, vi, beforeEach } from "vitest";
-import createNotificationUseCase, { CreateNotificationInput } from "./createNotificationUseCase";
-import { NotificationRepositoryFactory } from "@/db/repositories/notificationRepository";
-import { InsertNotification, SelectNotification } from "@/db/repositories/schemas/notificationSchema";
+import { CreateNotificationUseCase, createNotificationInputSchema, CreateNotificationInput } from "./createNotificationUseCase";
+import { NotificationRepository } from "@/db/repositories/notificationRepository";
+import { selectNotificationSchema, SelectNotification, notificationTypeEnum } from "@/db/repositories/schemas/notificationSchema";
 import { ZodError } from "zod";
+import { DomainError } from "@/lib/errors/domainErrors";
 import { faker } from "@faker-js/faker";
 
-const mockNotificationRepository = {
+const mockNotificationRepository: NotificationRepository = {
   insert: vi.fn(),
   findById: vi.fn(),
-  // Add other methods if your factory/interface expects them
   findByUserId: vi.fn(),
   countByUserId: vi.fn(),
   markAsRead: vi.fn(),
   markAllAsReadForUser: vi.fn(),
 };
 
-const mockNotificationRepoFactory: NotificationRepositoryFactory = () => mockNotificationRepository;
+const useCase = new CreateNotificationUseCase(mockNotificationRepository);
 
 const sampleUserId = faker.string.uuid();
 const sampleNotificationId = faker.string.uuid();
+const sampleRelatedEntityId = faker.string.uuid();
 
-const validNotificationInput: CreateNotificationInput = {
+const validCreateInput: CreateNotificationInput = {
   userId: sampleUserId,
-  type: "new_transaction",
-  message: "Nova transação criada",
-  relatedEntityId: faker.string.uuid(),
+  type: "new_transaction", // Valid type from the enum
+  message: "Nova transação X criada.",
+  relatedEntityId: sampleRelatedEntityId,
   relatedEntityType: "transaction",
 };
 
-const sampleCreatedNotification: SelectNotification = {
-  id: sampleNotificationId,
-  ...validNotificationInput,
-  isRead: false,
-  createdAt: new Date(),
-  updatedAt: new Date(),
-};
+const createdNotification: SelectNotification = selectNotificationSchema.parse({
+    id: sampleNotificationId,
+    userId: sampleUserId,
+    type: validCreateInput.type,
+    message: validCreateInput.message,
+    relatedEntityId: validCreateInput.relatedEntityId,
+    relatedEntityType: validCreateInput.relatedEntityType,
+    isRead: false,
+    createdAt: new Date(),
+    updatedAt: new Date(),
+});
 
-describe("createNotificationUseCase", () => {
+
+describe("CreateNotificationUseCase", () => {
   beforeEach(() => {
     vi.resetAllMocks();
   });
 
-  it("should create a notification successfully and return the full notification object", async () => {
-    mockNotificationRepository.insert.mockResolvedValueOnce({ id: sampleNotificationId });
-    mockNotificationRepository.findById.mockResolvedValueOnce(sampleCreatedNotification);
+  it("should successfully create a notification", async () => {
+    (mockNotificationRepository.insert as vi.Mock).mockResolvedValueOnce({ id: sampleNotificationId });
+    (mockNotificationRepository.findById as vi.Mock).mockResolvedValueOnce(createdNotification);
 
-    const result = await createNotificationUseCase(validNotificationInput, mockNotificationRepoFactory);
+    const result = await useCase.execute(validCreateInput);
 
-    expect(mockNotificationRepository.insert).toHaveBeenCalledWith(validNotificationInput);
+    expect(mockNotificationRepository.insert).toHaveBeenCalledWith(validCreateInput);
     expect(mockNotificationRepository.findById).toHaveBeenCalledWith(sampleNotificationId);
-    expect(result).toEqual(sampleCreatedNotification);
+    expect(result).toEqual(createdNotification);
   });
 
-  it("should throw ZodError if input data is invalid (e.g., missing userId)", async () => {
-    const invalidInput = { ...validNotificationInput, userId: "not-a-uuid" } as CreateNotificationInput;
-    // ZodError will be thrown by insertNotificationSchema.parse inside the use case
-    await expect(
-      createNotificationUseCase(invalidInput, mockNotificationRepoFactory)
-    ).rejects.toThrow(ZodError);
-    expect(mockNotificationRepository.insert).not.toHaveBeenCalled();
+  it("should successfully create a notification with optional fields undefined", async () => {
+    const inputWithoutOptional: CreateNotificationInput = {
+        userId: sampleUserId,
+        type: "generic",
+        message: "Mensagem genérica."
+        // relatedEntityId and relatedEntityType are optional in schema and input type now
+    };
+    const correspondingNotificationRecord: SelectNotification = selectNotificationSchema.parse({
+        ...createdNotification, // base
+        type: inputWithoutOptional.type,
+        message: inputWithoutOptional.message,
+        relatedEntityId: null, // How DB stores undefined optional UUIDs
+        relatedEntityType: null, // How DB stores undefined optional strings
+    });
+
+    (mockNotificationRepository.insert as vi.Mock).mockResolvedValueOnce({ id: sampleNotificationId });
+    (mockNotificationRepository.findById as vi.Mock).mockResolvedValueOnce(correspondingNotificationRecord);
+
+    const result = await useCase.execute(inputWithoutOptional);
+    expect(mockNotificationRepository.insert).toHaveBeenCalledWith(inputWithoutOptional);
+    expect(result.relatedEntityId).toBeNull();
+    expect(result.relatedEntityType).toBeNull();
   });
 
-  it("should throw ZodError if message is empty", async () => {
-    const invalidInput = { ...validNotificationInput, message: "" } as CreateNotificationInput;
-    await expect(
-      createNotificationUseCase(invalidInput, mockNotificationRepoFactory)
-    ).rejects.toThrow(ZodError);
+
+  it("should throw ZodError for invalid input - missing userId", async () => {
+    const invalidInput = { ...validCreateInput, userId: "not-a-uuid" };
+    // @ts-expect-error testing invalid type
+    await expect(useCase.execute(invalidInput)).rejects.toThrow(ZodError);
+  });
+
+  it("should throw ZodError for invalid input - invalid type", async () => {
+    const invalidInput = { ...validCreateInput, type: "invalid_type_enum" };
+    // @ts-expect-error testing invalid type
+    await expect(useCase.execute(invalidInput)).rejects.toThrow(ZodError);
+  });
+
+  it("should throw ZodError for invalid input - missing message", async () => {
+    const invalidInput = { ...validCreateInput, message: "" };
+    await expect(useCase.execute(invalidInput)).rejects.toThrow(ZodError);
+  });
+
+  it("should throw ZodError for invalid input - invalid relatedEntityId (if provided)", async () => {
+    const invalidInput = { ...validCreateInput, relatedEntityId: "not-a-uuid" };
+    await expect(useCase.execute(invalidInput)).rejects.toThrow(ZodError);
   });
 
 
-  it("should throw an error if repository.insert fails", async () => {
-    const dbError = new Error("Database insert failed");
-    mockNotificationRepository.insert.mockRejectedValueOnce(dbError);
-
-    await expect(
-      createNotificationUseCase(validNotificationInput, mockNotificationRepoFactory)
-    ).rejects.toThrow(dbError);
-    expect(mockNotificationRepository.insert).toHaveBeenCalledWith(validNotificationInput);
-    expect(mockNotificationRepository.findById).not.toHaveBeenCalled();
+  it("should throw an error if notificationRepository.insert fails", async () => {
+    (mockNotificationRepository.insert as vi.Mock).mockRejectedValueOnce(new Error("DB insert error"));
+    await expect(useCase.execute(validCreateInput)).rejects.toThrow("DB insert error");
   });
 
-  it("should throw an error if repository.findById fails after insert", async () => {
-    const findError = new Error("Database findById failed");
-    mockNotificationRepository.insert.mockResolvedValueOnce({ id: sampleNotificationId });
-    mockNotificationRepository.findById.mockRejectedValueOnce(findError);
+  it("should throw DomainError if notification is not found after insert", async () => {
+    (mockNotificationRepository.insert as vi.Mock).mockResolvedValueOnce({ id: sampleNotificationId });
+    (mockNotificationRepository.findById as vi.Mock).mockResolvedValueOnce(null);
 
-    await expect(
-      createNotificationUseCase(validNotificationInput, mockNotificationRepoFactory)
-    ).rejects.toThrow(findError);
-    expect(mockNotificationRepository.insert).toHaveBeenCalledWith(validNotificationInput);
-    expect(mockNotificationRepository.findById).toHaveBeenCalledWith(sampleNotificationId);
-  });
-
-  it("should throw an error if findById returns null after insert (should not happen)", async () => {
-    mockNotificationRepository.insert.mockResolvedValueOnce({ id: sampleNotificationId });
-    mockNotificationRepository.findById.mockResolvedValueOnce(null); // Simulate unexpected null
-
-    await expect(
-      createNotificationUseCase(validNotificationInput, mockNotificationRepoFactory)
-    ).rejects.toThrow("Falha ao recuperar a notificação criada após a inserção.");
+    const execution = useCase.execute(validCreateInput);
+    await expect(execution).rejects.toThrow(DomainError);
+    await expect(execution).rejects.toThrow("Failed to retrieve notification immediately after creation.");
   });
 });

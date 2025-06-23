@@ -37,3 +37,10 @@ export class DomainConflictError extends DomainError {
     this.name = "DomainConflictError";
   }
 }
+
+export class ForbiddenError extends DomainError {
+  constructor(message: string = "Acesso negado.") {
+    super(message);
+    this.name = "ForbiddenError";
+  }
+}

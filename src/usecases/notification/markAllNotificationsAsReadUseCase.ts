@@ -1,9 +1,6 @@
-import { db } from "@/db/postgres";
-import {
-  notificationRepository as createNotificationRepository,
-  NotificationRepositoryFactory,
-} from "@/db/repositories/notificationRepository";
 import { z } from "zod";
+import { NotificationRepository } from "@/db/repositories/notificationRepository";
+import { ZodError } from "zod";
 
 export const markAllNotificationsAsReadInputSchema = z.object({
   userId: z.string().uuid("ID do usuário inválido."),
@@ -11,22 +8,29 @@ export const markAllNotificationsAsReadInputSchema = z.object({
 
 export type MarkAllNotificationsAsReadInput = z.infer<typeof markAllNotificationsAsReadInputSchema>;
 
-/**
- * @description Use case for marking all notifications as read for a specific user.
- *
- * @param {MarkAllNotificationsAsReadInput} input - The input containing the userId.
- * @param {NotificationRepositoryFactory} [notificationRepoFactory=createNotificationRepository] - Optional factory.
- * @returns {Promise<void>}
- * @throws {ZodError} If input validation fails.
- * @throws {Error} If there's an issue with the repository or other unexpected errors.
- */
-export default async function markAllNotificationsAsReadUseCase(
-  input: MarkAllNotificationsAsReadInput,
-  notificationRepoFactory: NotificationRepositoryFactory = createNotificationRepository
-): Promise<void> {
-  const { userId } = markAllNotificationsAsReadInputSchema.parse(input);
+export interface MarkAllNotificationsAsReadOutput {
+  success: boolean;
+  markedCount: number;
+}
 
-  const notificationRepo = notificationRepoFactory(db);
+export class MarkAllNotificationsAsReadUseCase {
+  constructor(private notificationRepository: NotificationRepository) {}
 
-  await notificationRepo.markAllAsReadForUser(userId);
+  async execute(input: MarkAllNotificationsAsReadInput): Promise<MarkAllNotificationsAsReadOutput> {
+    const validationResult = markAllNotificationsAsReadInputSchema.safeParse(input);
+    if (!validationResult.success) {
+      throw new ZodError(validationResult.error.issues);
+    }
+
+    const { userId } = validationResult.data;
+
+    // The repository's markAllAsReadForUser method should return the count of updated rows.
+    // The notificationRepository.test.ts for markAllAsReadForUser expects it to return { count: number }
+    const updateResult = await this.notificationRepository.markAllAsReadForUser(userId);
+
+    return {
+      success: true,
+      markedCount: updateResult.count,
+    };
+  }
 }

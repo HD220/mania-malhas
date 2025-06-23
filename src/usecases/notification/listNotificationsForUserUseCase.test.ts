@@ -1,11 +1,12 @@
 import { describe, it, expect, vi, beforeEach } from "vitest";
-import listNotificationsForUserUseCase, { ListNotificationsInput, PaginatedNotificationsResult } from "./listNotificationsForUserUseCase";
-import { NotificationRepositoryFactory } from "@/db/repositories/notificationRepository";
-import { SelectNotification } from "@/db/repositories/schemas/notificationSchema";
+import { ListNotificationsForUserUseCase, ListNotificationsForUserInput } from "./listNotificationsForUserUseCase";
+import { NotificationRepository } from "@/db/repositories/notificationRepository";
+import { selectNotificationSchema, SelectNotification } from "@/db/repositories/schemas/notificationSchema";
+import { notificationTypeEnum } from "@/db/postgres/schema/notification"; // Import directly
 import { ZodError } from "zod";
 import { faker } from "@faker-js/faker";
 
-const mockNotificationRepository = {
+const mockNotificationRepository: NotificationRepository = {
   insert: vi.fn(),
   findById: vi.fn(),
   findByUserId: vi.fn(),
@@ -14,112 +15,125 @@ const mockNotificationRepository = {
   markAllAsReadForUser: vi.fn(),
 };
 
-const mockNotificationRepoFactory: NotificationRepositoryFactory = () => mockNotificationRepository;
+const useCase = new ListNotificationsForUserUseCase(mockNotificationRepository);
 
 const sampleUserId = faker.string.uuid();
-const sampleNotifications: SelectNotification[] = [
-  {
-    id: faker.string.uuid(), userId: sampleUserId, type: "info", message: "Msg 1", isRead: false,
-    relatedEntityId: null, relatedEntityType: null, createdAt: new Date(), updatedAt: new Date()
-  },
-  {
-    id: faker.string.uuid(), userId: sampleUserId, type: "warning", message: "Msg 2", isRead: true,
-    relatedEntityId: null, relatedEntityType: null, createdAt: new Date(), updatedAt: new Date()
-  },
-];
 
-describe("listNotificationsForUserUseCase", () => {
+const generateMockNotifications = (count: number): SelectNotification[] => {
+  return Array.from({ length: count }, (_, i) =>
+    selectNotificationSchema.parse({
+      id: faker.string.uuid(),
+      userId: sampleUserId,
+      type: notificationTypeEnum.enumValues[i % notificationTypeEnum.enumValues.length],
+      message: faker.lorem.sentence(),
+      relatedEntityId: faker.string.uuid(),
+      relatedEntityType: "test_entity",
+      isRead: false,
+      createdAt: new Date(),
+      updatedAt: new Date(),
+    })
+  );
+};
+
+describe("ListNotificationsForUserUseCase", () => {
   beforeEach(() => {
     vi.resetAllMocks();
   });
 
-  it("should return paginated notifications, totalItems, totalUnread, and pagination details", async () => {
-    const input: ListNotificationsInput = { userId: sampleUserId, page: 1, pageSize: 5 };
-    mockNotificationRepository.findByUserId.mockResolvedValueOnce(sampleNotifications);
-    mockNotificationRepository.countByUserId
-      .mockResolvedValueOnce(10) // totalItems for this user
-      .mockResolvedValueOnce(3);  // totalUnread for this user
+  it("should return paginated notifications for a user", async () => {
+    const mockNotifications = generateMockNotifications(5);
+    const totalCount = 15;
+    const input: ListNotificationsForUserInput = { userId: sampleUserId, page: 2, pageSize: 5 };
 
-    const result = await listNotificationsForUserUseCase(input, mockNotificationRepoFactory);
+    (mockNotificationRepository.findByUserId as vi.Mock).mockResolvedValueOnce(mockNotifications);
+    (mockNotificationRepository.countByUserId as vi.Mock).mockResolvedValueOnce(totalCount);
 
-    expect(mockNotificationRepository.findByUserId).toHaveBeenCalledWith(sampleUserId, 5, 0);
+    const result = await useCase.execute(input);
+
+    expect(mockNotificationRepository.findByUserId).toHaveBeenCalledWith({
+      userId: sampleUserId,
+      limit: 5,
+      offset: 5, // (page 2 - 1) * pageSize 5
+    });
     expect(mockNotificationRepository.countByUserId).toHaveBeenCalledWith(sampleUserId);
-    expect(mockNotificationRepository.countByUserId).toHaveBeenCalledWith(sampleUserId, true);
-
-    expect(result.data).toEqual(sampleNotifications);
-    expect(result.totalItems).toBe(10);
-    expect(result.totalUnread).toBe(3);
-    expect(result.totalPages).toBe(2); // 10 items / 5 per page
-    expect(result.currentPage).toBe(1);
+    expect(result.notifications).toEqual(mockNotifications);
+    expect(result.totalCount).toBe(totalCount);
+    expect(result.currentPage).toBe(2);
     expect(result.pageSize).toBe(5);
+    expect(result.totalPages).toBe(Math.ceil(totalCount / input.pageSize!));
   });
 
-  it("should use default pagination values if not provided", async () => {
-    const input: ListNotificationsInput = { userId: sampleUserId }; // page and pageSize omitted
-    mockNotificationRepository.findByUserId.mockResolvedValueOnce([]);
-    mockNotificationRepository.countByUserId.mockResolvedValueOnce(0).mockResolvedValueOnce(0);
+  it("should use default pagination when page and pageSize are not provided", async () => {
+    const mockNotifications = generateMockNotifications(10); // Default pageSize is 10
+    const totalCount = 20;
+    const input: ListNotificationsForUserInput = { userId: sampleUserId }; // No page/pageSize
 
+    (mockNotificationRepository.findByUserId as vi.Mock).mockResolvedValueOnce(mockNotifications);
+    (mockNotificationRepository.countByUserId as vi.Mock).mockResolvedValueOnce(totalCount);
 
-    await listNotificationsForUserUseCase(input, mockNotificationRepoFactory);
+    const result = await useCase.execute(input);
 
-    // Defaults: page=1, pageSize=10. Offset = (1-1)*10 = 0
-    expect(mockNotificationRepository.findByUserId).toHaveBeenCalledWith(sampleUserId, 10, 0);
+    expect(mockNotificationRepository.findByUserId).toHaveBeenCalledWith({
+      userId: sampleUserId,
+      limit: 10, // Default pageSize
+      offset: 0,   // Default page 1 => (1 - 1) * 10
+    });
+    expect(result.notifications).toEqual(mockNotifications);
+    expect(result.totalCount).toBe(totalCount);
+    expect(result.currentPage).toBe(1); // Default page
+    expect(result.pageSize).toBe(10); // Default pageSize
+    expect(result.totalPages).toBe(Math.ceil(totalCount / 10));
   });
 
-  it("should correctly calculate offset for different pages", async () => {
-    const input: ListNotificationsInput = { userId: sampleUserId, page: 3, pageSize: 7 };
-    mockNotificationRepository.findByUserId.mockResolvedValueOnce([]);
-    mockNotificationRepository.countByUserId.mockResolvedValueOnce(0).mockResolvedValueOnce(0);
+  it("should return empty array if no notifications are found", async () => {
+    const totalCount = 0;
+    const input: ListNotificationsForUserInput = { userId: sampleUserId };
 
-    await listNotificationsForUserUseCase(input, mockNotificationRepoFactory);
-    // Offset = (3-1)*7 = 14
-    expect(mockNotificationRepository.findByUserId).toHaveBeenCalledWith(sampleUserId, 7, 14);
+    (mockNotificationRepository.findByUserId as vi.Mock).mockResolvedValueOnce([]);
+    (mockNotificationRepository.countByUserId as vi.Mock).mockResolvedValueOnce(totalCount);
+
+    const result = await useCase.execute(input);
+
+    expect(result.notifications).toEqual([]);
+    expect(result.totalCount).toBe(totalCount);
+    expect(result.currentPage).toBe(1);
+    expect(result.totalPages).toBe(0);
   });
-
 
   it("should throw ZodError for invalid userId", async () => {
-    const input = { userId: "not-a-uuid" } as ListNotificationsInput;
-    await expect(listNotificationsForUserUseCase(input, mockNotificationRepoFactory))
-      .rejects.toThrow(ZodError);
+    const input = { userId: "not-a-uuid" };
+    // @ts-expect-error testing invalid type
+    await expect(useCase.execute(input)).rejects.toThrow(ZodError);
   });
 
-  it("should throw ZodError for invalid page number (e.g., zero, negative, non-integer)", async () => {
-    const input1 = { userId: sampleUserId, page: 0 } as ListNotificationsInput;
-    await expect(listNotificationsForUserUseCase(input1, mockNotificationRepoFactory))
-      .rejects.toThrow(ZodError);
-
-    const input2 = { userId: sampleUserId, page: -1 } as ListNotificationsInput;
-    await expect(listNotificationsForUserUseCase(input2, mockNotificationRepoFactory))
-      .rejects.toThrow(ZodError);
-
-    const input3 = { userId: sampleUserId, page: 1.5 } as ListNotificationsInput;
-    await expect(listNotificationsForUserUseCase(input3, mockNotificationRepoFactory))
-      .rejects.toThrow(ZodError);
+  it("should throw ZodError for non-positive page", async () => {
+    const input = { userId: sampleUserId, page: 0 };
+    await expect(useCase.execute(input)).rejects.toThrow(ZodError);
   });
 
-  it("should handle empty results correctly", async () => {
-    const input: ListNotificationsInput = { userId: sampleUserId, page: 1, pageSize: 5 };
-    mockNotificationRepository.findByUserId.mockResolvedValueOnce([]);
-    mockNotificationRepository.countByUserId.mockResolvedValueOnce(0).mockResolvedValueOnce(0);
-
-    const result = await listNotificationsForUserUseCase(input, mockNotificationRepoFactory);
-
-    expect(result.data).toEqual([]);
-    expect(result.totalItems).toBe(0);
-    expect(result.totalUnread).toBe(0);
-    expect(result.totalPages).toBe(0); // 0 items / 5 per page = 0
-    expect(result.currentPage).toBe(1);
+  it("should throw ZodError for non-positive pageSize", async () => {
+    const input = { userId: sampleUserId, pageSize: 0 };
+    await expect(useCase.execute(input)).rejects.toThrow(ZodError);
   });
 
-  it("should propagate errors from the repository", async () => {
-    const input: ListNotificationsInput = { userId: sampleUserId };
-    const dbError = new Error("DB error");
-    mockNotificationRepository.findByUserId.mockRejectedValueOnce(dbError);
-    // countByUserId will also be called by Promise.all, let one of them throw
-     mockNotificationRepository.countByUserId.mockResolvedValueOnce(0);
+  it("should throw ZodError for pageSize greater than max (100)", async () => {
+    const input = { userId: sampleUserId, pageSize: 101 };
+    await expect(useCase.execute(input)).rejects.toThrow(ZodError);
+  });
 
+  it("should propagate errors from notificationRepository.findByUserId", async () => {
+    const input: ListNotificationsForUserInput = { userId: sampleUserId };
+    (mockNotificationRepository.findByUserId as vi.Mock).mockRejectedValueOnce(new Error("DB find error"));
+    (mockNotificationRepository.countByUserId as vi.Mock).mockResolvedValueOnce(0); // count might still be called or not, depending on Promise.all behavior with rejection
 
-    await expect(listNotificationsForUserUseCase(input, mockNotificationRepoFactory))
-      .rejects.toThrow(dbError);
+    await expect(useCase.execute(input)).rejects.toThrow("DB find error");
+  });
+
+  it("should propagate errors from notificationRepository.countByUserId", async () => {
+    const input: ListNotificationsForUserInput = { userId: sampleUserId };
+    (mockNotificationRepository.findByUserId as vi.Mock).mockResolvedValueOnce([]); // This should resolve fine
+    (mockNotificationRepository.countByUserId as vi.Mock).mockRejectedValueOnce(new Error("DB count error"));
+
+    await expect(useCase.execute(input)).rejects.toThrow("DB count error");
   });
 });

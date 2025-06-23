@@ -1,61 +1,57 @@
-import { db } from "@/db/postgres";
-import {
-  notificationRepository as createNotificationRepository,
-  NotificationRepositoryFactory,
-} from "@/db/repositories/notificationRepository";
-import { SelectNotification } from "@/db/repositories/schemas/notificationSchema";
 import { z } from "zod";
+import { NotificationRepository } from "@/db/repositories/notificationRepository";
+import { SelectNotification, selectNotificationSchema } from "@/db/repositories/schemas/notificationSchema";
+import { ZodError } from "zod";
 
-export const listNotificationsInputSchema = z.object({
+export const listNotificationsForUserInputSchema = z.object({
   userId: z.string().uuid("ID do usuário inválido."),
-  page: z.coerce.number().int().positive().optional().default(1),
-  pageSize: z.coerce.number().int().positive().optional().default(10),
+  page: z.number().int().positive("Página deve ser um inteiro positivo.").optional().default(1),
+  pageSize: z.number().int().positive("Tamanho da página deve ser um inteiro positivo.").max(100, "Tamanho máximo da página é 100.").optional().default(10),
 });
 
-export type ListNotificationsInput = z.infer<typeof listNotificationsInputSchema>;
+export type ListNotificationsForUserInput = z.infer<typeof listNotificationsForUserInputSchema>;
 
-export interface PaginatedNotificationsResult {
-  data: SelectNotification[];
-  totalItems: number;
-  totalUnread: number;
-  totalPages: number;
+export interface ListNotificationsForUserOutput {
+  notifications: SelectNotification[];
+  totalCount: number;
   currentPage: number;
+  totalPages: number;
   pageSize: number;
 }
 
-/**
- * @description Use case for listing notifications for a specific user with pagination.
- *
- * @param {ListNotificationsInput} input - The input containing userId and pagination options.
- * @param {NotificationRepositoryFactory} [notificationRepoFactory=createNotificationRepository] - Optional factory.
- * @returns {Promise<PaginatedNotificationsResult>} Paginated list of notifications and counts.
- * @throws {ZodError} If input validation fails.
- */
-export default async function listNotificationsForUserUseCase(
-  input: ListNotificationsInput,
-  notificationRepoFactory: NotificationRepositoryFactory = createNotificationRepository
-): Promise<PaginatedNotificationsResult> {
-  const { userId, page, pageSize } = listNotificationsInputSchema.parse(input);
+export class ListNotificationsForUserUseCase {
+  constructor(private notificationRepository: NotificationRepository) {}
 
-  const notificationRepo = notificationRepoFactory(db);
+  async execute(input: ListNotificationsForUserInput): Promise<ListNotificationsForUserOutput> {
+    const validationResult = listNotificationsForUserInputSchema.safeParse(input);
+    if (!validationResult.success) {
+      throw new ZodError(validationResult.error.issues);
+    }
 
-  const limit = pageSize;
-  const offset = (page - 1) * pageSize;
+    const { userId, page, pageSize } = validationResult.data;
 
-  const [data, totalItems, totalUnread] = await Promise.all([
-    notificationRepo.findByUserId(userId, limit, offset),
-    notificationRepo.countByUserId(userId),
-    notificationRepo.countByUserId(userId, true), // true for onlyUnread
-  ]);
+    const limit = pageSize;
+    const offset = (page - 1) * pageSize;
 
-  const totalPages = Math.ceil(totalItems / pageSize);
+    // Assuming findByUserId in repository now accepts an object with userId, limit, offset
+    const notificationsPromise = this.notificationRepository.findByUserId({
+      userId,
+      limit,
+      offset
+    });
 
-  return {
-    data,
-    totalItems,
-    totalUnread,
-    totalPages,
-    currentPage: page,
-    pageSize,
-  };
+    const totalCountPromise = this.notificationRepository.countByUserId(userId);
+
+    const [notifications, totalCount] = await Promise.all([notificationsPromise, totalCountPromise]);
+
+    const totalPages = Math.ceil(totalCount / pageSize);
+
+    return {
+      notifications: notifications.map(n => selectNotificationSchema.parse(n)), // Ensure conformity after fetching
+      totalCount,
+      currentPage: page,
+      totalPages,
+      pageSize,
+    };
+  }
 }

@@ -1,53 +1,44 @@
-import { db } from "@/db/postgres";
-import {
-  notificationRepository as createNotificationRepository,
-  NotificationRepositoryFactory,
-} from "@/db/repositories/notificationRepository";
-import { NotFoundError } from "@/lib/errors/domainErrors"; // Assuming AuthorizationError is not yet defined, will use Error for now or add later
 import { z } from "zod";
+import { NotificationRepository } from "@/db/repositories/notificationRepository";
+import { SelectNotification, selectNotificationSchema } from "@/db/repositories/schemas/notificationSchema";
+import { ZodError } from "zod";
+import { NotFoundError, ForbiddenError } from "@/lib/errors/domainErrors";
 
 export const markNotificationAsReadInputSchema = z.object({
   notificationId: z.string().uuid("ID da notificação inválido."),
-  userId: z.string().uuid("ID do usuário inválido."),
+  userId: z.string().uuid("ID do usuário inválido."), // To ensure user owns the notification
 });
 
 export type MarkNotificationAsReadInput = z.infer<typeof markNotificationAsReadInputSchema>;
 
-/**
- * @description Use case for marking a single notification as read for a user.
- * It ensures the notification exists and belongs to the user before marking it as read.
- *
- * @param {MarkNotificationAsReadInput} input - The input containing notificationId and userId.
- * @param {NotificationRepositoryFactory} [notificationRepoFactory=createNotificationRepository] - Optional factory.
- * @returns {Promise<void>}
- * @throws {ZodError} If input validation fails.
- * @throws {NotFoundError} If the notification with the given ID is not found.
- * @throws {Error} If the notification does not belong to the user (Authorization-like error).
- * @throws {Error} If there's an issue with the repository or other unexpected errors.
- */
-export default async function markNotificationAsReadUseCase(
-  input: MarkNotificationAsReadInput,
-  notificationRepoFactory: NotificationRepositoryFactory = createNotificationRepository
-): Promise<void> {
-  const { notificationId, userId } = markNotificationAsReadInputSchema.parse(input);
+export class MarkNotificationAsReadUseCase {
+  constructor(private notificationRepository: NotificationRepository) {}
 
-  const notificationRepo = notificationRepoFactory(db);
+  async execute(input: MarkNotificationAsReadInput): Promise<SelectNotification> {
+    const validationResult = markNotificationAsReadInputSchema.safeParse(input);
+    if (!validationResult.success) {
+      throw new ZodError(validationResult.error.issues);
+    }
 
-  // 1. Verify notification exists and belongs to the user
-  const notification = await notificationRepo.findById(notificationId);
-  if (!notification) {
-    throw new NotFoundError(`Notificação com ID ${notificationId} não encontrada.`);
-  }
+    const { notificationId, userId } = validationResult.data;
 
-  if (notification.userId !== userId) {
-    // TODO: Consider creating a specific AuthorizationError or AccessDeniedError
-    throw new Error(
-      "Usuário não autorizado a marcar esta notificação como lida."
-    );
-  }
+    const notification = await this.notificationRepository.findById(notificationId);
 
-  // 2. Mark as read (repository method already ensures it's for this user if designed well, but explicit check is good)
-  if (!notification.isRead) { // Only update if not already read
-    await notificationRepo.markAsRead(notificationId, userId);
+    if (!notification) {
+      throw new NotFoundError("Notificação");
+    }
+
+    if (notification.userId !== userId) {
+      throw new ForbiddenError("Você não tem permissão para marcar esta notificação como lida.");
+    }
+
+    // If already read, we can return it directly to avoid an unnecessary update.
+    if (notification.isRead) {
+      return selectNotificationSchema.parse(notification);
+    }
+
+    const updatedNotification = await this.notificationRepository.markAsRead(notificationId);
+
+    return selectNotificationSchema.parse(updatedNotification);
   }
 }

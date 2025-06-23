@@ -1,10 +1,10 @@
 import { describe, it, expect, vi, beforeEach } from "vitest";
-import markAllNotificationsAsReadUseCase, { MarkAllNotificationsAsReadInput } from "./markAllNotificationsAsReadUseCase";
-import { NotificationRepositoryFactory } from "@/db/repositories/notificationRepository";
+import { MarkAllNotificationsAsReadUseCase, MarkAllNotificationsAsReadInput, MarkAllNotificationsAsReadOutput } from "./markAllNotificationsAsReadUseCase";
+import { NotificationRepository } from "@/db/repositories/notificationRepository";
 import { ZodError } from "zod";
 import { faker } from "@faker-js/faker";
 
-const mockNotificationRepository = {
+const mockNotificationRepository: NotificationRepository = {
   insert: vi.fn(),
   findById: vi.fn(),
   findByUserId: vi.fn(),
@@ -13,38 +13,47 @@ const mockNotificationRepository = {
   markAllAsReadForUser: vi.fn(),
 };
 
-const mockNotificationRepoFactory: NotificationRepositoryFactory = () => mockNotificationRepository;
-
+const useCase = new MarkAllNotificationsAsReadUseCase(mockNotificationRepository);
 const sampleUserId = faker.string.uuid();
 
-describe("markAllNotificationsAsReadUseCase", () => {
+describe("MarkAllNotificationsAsReadUseCase", () => {
   beforeEach(() => {
     vi.resetAllMocks();
   });
 
-  it("should call repository.markAllAsReadForUser with the correct userId", async () => {
-    const input: MarkAllNotificationsAsReadInput = { userId: sampleUserId };
-    mockNotificationRepository.markAllAsReadForUser.mockResolvedValueOnce(undefined);
+  const validInput: MarkAllNotificationsAsReadInput = {
+    userId: sampleUserId,
+  };
 
-    await markAllNotificationsAsReadUseCase(input, mockNotificationRepoFactory);
+  it("should successfully mark all notifications as read and return the count", async () => {
+    const expectedMarkedCount = 5;
+    (mockNotificationRepository.markAllAsReadForUser as vi.Mock).mockResolvedValueOnce({ count: expectedMarkedCount });
+
+    const result = await useCase.execute(validInput);
 
     expect(mockNotificationRepository.markAllAsReadForUser).toHaveBeenCalledWith(sampleUserId);
+    expect(result.success).toBe(true);
+    expect(result.markedCount).toBe(expectedMarkedCount);
+  });
+
+  it("should return markedCount as 0 if no notifications were updated", async () => {
+    (mockNotificationRepository.markAllAsReadForUser as vi.Mock).mockResolvedValueOnce({ count: 0 });
+
+    const result = await useCase.execute(validInput);
+
+    expect(mockNotificationRepository.markAllAsReadForUser).toHaveBeenCalledWith(sampleUserId);
+    expect(result.success).toBe(true);
+    expect(result.markedCount).toBe(0);
   });
 
   it("should throw ZodError for invalid userId", async () => {
-    const input = { userId: "not-a-uuid" } as MarkAllNotificationsAsReadInput;
-    await expect(markAllNotificationsAsReadUseCase(input, mockNotificationRepoFactory))
-      .rejects.toThrow(ZodError);
-    expect(mockNotificationRepository.markAllAsReadForUser).not.toHaveBeenCalled();
+    const invalidInput = { userId: "not-a-uuid" };
+     // @ts-expect-error testing invalid type
+    await expect(useCase.execute(invalidInput)).rejects.toThrow(ZodError);
   });
 
-  it("should propagate error from repository.markAllAsReadForUser if it occurs", async () => {
-    const input: MarkAllNotificationsAsReadInput = { userId: sampleUserId };
-    const dbError = new Error("DB markAllAsReadForUser error");
-    mockNotificationRepository.markAllAsReadForUser.mockRejectedValueOnce(dbError);
-
-    await expect(markAllNotificationsAsReadUseCase(input, mockNotificationRepoFactory))
-      .rejects.toThrow(dbError);
-    expect(mockNotificationRepository.markAllAsReadForUser).toHaveBeenCalledWith(sampleUserId);
+  it("should propagate errors from notificationRepository.markAllAsReadForUser", async () => {
+    (mockNotificationRepository.markAllAsReadForUser as vi.Mock).mockRejectedValueOnce(new Error("DB update error"));
+    await expect(useCase.execute(validInput)).rejects.toThrow("DB update error");
   });
 });
