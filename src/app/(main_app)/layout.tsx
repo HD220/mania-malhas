@@ -1,4 +1,5 @@
 import React from "react";
+import { MainAppHeader } from "@/components/layout/main-app-header";
 
 export default function MainAppLayout({
   children,
@@ -7,12 +8,7 @@ export default function MainAppLayout({
 }) {
   return (
     <div className="flex flex-col min-h-screen">
-      <header className="bg-muted/40 p-4 border-b">
-        {/* TODO: Implement Main App Header (F06.3) */}
-        <p className="text-center font-semibold">
-          [Main App Header Placeholder]
-        </p>
-      </header>
+      <MainAppHeader />
       <main className="flex-grow p-6 bg-background">
         {children}
       </main>
