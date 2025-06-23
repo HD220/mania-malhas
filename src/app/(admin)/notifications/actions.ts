@@ -22,7 +22,16 @@ import { notificationRepository } from "@/db/repositories";
 import { userRepository } from "@/db/repositories"; // Needed for session placeholder
 import { ForbiddenError, NotFoundError } from "@/lib/errors/domainErrors";
 
-// Placeholder for session management - replace with actual implementation
+/**
+ * Placeholder for session management.
+ * @async
+ * @private
+ * @function internalGetUserIdFromSession
+ * @returns {Promise<string>} The user ID from the session.
+ * @throws {Error} If no users are found in the database (in a scenario where it tries to fetch one).
+ * @remarks This is a placeholder and should be replaced with actual session logic.
+ * Currently, it returns a hardcoded user ID for development and testing.
+ */
 async function internalGetUserIdFromSession(): Promise<string> {
   // This is a placeholder. In a real app, this would get the user ID from the session.
   // For development and testing without full auth, we might use a fixed ID.
@@ -52,6 +61,14 @@ const listNotificationsUseCase = new ListNotificationsForUserUseCase(notificatio
 const markNotificationAsReadUseCase = new MarkNotificationAsReadUseCase(notificationRepository);
 const markAllNotificationsAsReadUseCase = new MarkAllNotificationsAsReadUseCase(notificationRepository);
 
+/**
+ * Represents the standardized response structure for server actions.
+ * @template T The type of data included in a successful response.
+ * @property {boolean} success - Indicates if the action was successful.
+ * @property {T} [data] - The data returned by the action on success.
+ * @property {string} [error] - A general error message if the action failed.
+ * @property {Record<string, string[]>} [fieldErrors] - Specific field error messages if validation failed.
+ */
 export interface ActionResponse<T> {
   success: boolean;
   data?: T;
@@ -59,9 +76,21 @@ export interface ActionResponse<T> {
   fieldErrors?: Record<string, string[]>;
 }
 
-// For listNotificationsAction, the input should be Partial because userId will be injected
+/**
+ * Defines the input type for the `listNotificationsAction`.
+ * It omits `userId` from the use case schema as it's injected from the session,
+ * but allows it to be optionally passed (though it will be overridden).
+ */
 export type ListNotificationsActionInput = Omit<z.infer<typeof listNotificationsForUserInputSchema>, 'userId'> & { userId?: string };
 
+/**
+ * Server action to list notifications for the currently authenticated user.
+ * @async
+ * @function listNotificationsAction
+ * @param {ListNotificationsActionInput} input - The input parameters for listing notifications (e.g., pagination, filters).
+ * The `userId` is automatically injected from the current session.
+ * @returns {Promise<ActionResponse<ListNotificationsForUserOutput>>} The list of notifications or an error response.
+ */
 export async function listNotificationsAction(
   input: ListNotificationsActionInput
 ): Promise<ActionResponse<ListNotificationsForUserOutput>> {
@@ -91,13 +120,30 @@ export async function listNotificationsAction(
   }
 }
 
-// For markAsReadAction, the input from the client is just the notificationId
+/**
+ * Zod schema for validating the client input for `markAsReadAction`.
+ * Expects only the `notificationId`.
+ */
 export const markAsReadActionClientInputSchema = z.object({
   notificationId: z.string().uuid("ID da notificação inválido."),
 });
+
+/**
+ * Type inferred from `markAsReadActionClientInputSchema`.
+ * Represents the input expected from the client for marking a notification as read.
+ */
 export type MarkAsReadActionClientInput = z.infer<typeof markAsReadActionClientInputSchema>;
 
 
+/**
+ * Server action to mark a specific notification as read for the currently authenticated user.
+ * @async
+ * @function markAsReadAction
+ * @param {MarkAsReadActionClientInput} input - Contains the `notificationId` to be marked as read.
+ * The `userId` is automatically injected from the current session.
+ * @returns {Promise<ActionResponse<null>>} A success or error response.
+ * @throws {z.ZodError} If client input validation fails.
+ */
 export async function markAsReadAction(
   input: MarkAsReadActionClientInput
 ): Promise<ActionResponse<null>> {
@@ -141,6 +187,13 @@ export async function markAsReadAction(
   }
 }
 
+/**
+ * Server action to mark all notifications as read for the currently authenticated user.
+ * @async
+ * @function markAllAsReadAction
+ * @returns {Promise<ActionResponse<MarkAllNotificationsAsReadOutput>>} The result of the operation (e.g., count of notifications marked as read) or an error response.
+ * The `userId` is automatically injected from the current session.
+ */
 export async function markAllAsReadAction(): Promise<ActionResponse<MarkAllNotificationsAsReadOutput>> {
   try {
     const sessionUserId = await internalGetUserIdFromSession();

@@ -20,9 +20,26 @@ export type UserRepositoryFactory = (dbInstance?: DBConnection) => {
   updatePassword: (id: string, newPasswordHash: string) => Promise<void>;
 };
 
+/**
+ * Factory function for creating a user repository instance.
+ * This repository provides methods to interact with user data in the database,
+ * including finding users, inserting new users, and updating user profiles and passwords.
+ *
+ * @param {DBConnection} [dbInstance] - Optional Drizzle database connection instance.
+ *                                      If not provided, a default instance is used.
+ * @returns {ReturnType<UserRepositoryFactory>} An object containing methods for user data operations.
+ */
 export const userRepository: UserRepositoryFactory = (dbInstance) => {
   const db = dbInstance || defaultDb;
 
+  /**
+   * Inserts a new user into the database.
+   * @async
+   * @function insert
+   * @param {InsertUser} data - The user data to insert (should not include ID, createdAt, updatedAt).
+   *                            Password should be pre-hashed.
+   * @returns {Promise<{ id: string }>} The ID of the newly created user.
+   */
   const insert = async (data: InsertUser): Promise<{ id: string }> => {
     const [newUser] = await db
       .insert(userTable)
@@ -31,6 +48,15 @@ export const userRepository: UserRepositoryFactory = (dbInstance) => {
     return newUser;
   };
 
+  /**
+   * Finds a user by their ID.
+   * Excludes the `passwordHash` from the returned user object.
+   * @async
+   * @function findById
+   * @param {string} id - The UUID of the user to find.
+   * @returns {Promise<SelectUser | null>} The user object (without password hash) if found, otherwise null.
+   *                                       The result is parsed by `selectUserSchema`.
+   */
   const findById = async (id: string): Promise<SelectUser | null> => {
     const result = await db
       .select({ // Explicitly list columns to exclude passwordHash by default
@@ -48,6 +74,16 @@ export const userRepository: UserRepositoryFactory = (dbInstance) => {
     return result.length > 0 ? selectUserSchema.parse(result[0]) : null;
   };
 
+  /**
+   * Finds a user by their email address.
+   * Excludes the `passwordHash` from the returned user object.
+   * Useful for checking if an email exists or retrieving profile data.
+   * @async
+   * @function findByEmail
+   * @param {string} email - The email address of the user to find.
+   * @returns {Promise<SelectUser | null>} The user object (without password hash) if found, otherwise null.
+   *                                       The result is parsed by `selectUserSchema`.
+   */
   const findByEmail = async (email: string): Promise<SelectUser | null> => {
     const result = await db
       .select({ // Exclude passwordHash
@@ -65,6 +101,16 @@ export const userRepository: UserRepositoryFactory = (dbInstance) => {
     return result.length > 0 ? selectUserSchema.parse(result[0]) : null;
   };
 
+  /**
+   * Finds a user by their email address and includes the `passwordHash`.
+   * Primarily used for authentication purposes (e.g., during login to verify a password).
+   * @async
+   * @function findByEmailWithPassword
+   * @param {string} email - The email address of the user to find.
+   * @returns {Promise<ReturnType<typeof selectUserWithPasswordSchema.parse> | null>}
+   *          The user object including the password hash if found, otherwise null.
+   *          The result is parsed by `selectUserWithPasswordSchema`.
+   */
   const findByEmailWithPassword = async (email: string): Promise<ReturnType<typeof selectUserWithPasswordSchema.parse> | null> => {
     const result = await db
       .select() // Select all columns including passwordHash
@@ -74,6 +120,16 @@ export const userRepository: UserRepositoryFactory = (dbInstance) => {
     return result.length > 0 ? selectUserWithPasswordSchema.parse(result[0]) : null;
   };
 
+  /**
+   * Updates a user's profile information (name, email, image).
+   * Only updates fields that are provided in the `data` object.
+   * Manually sets the `updatedAt` timestamp.
+   * @async
+   * @function updateProfile
+   * @param {string} id - The UUID of the user to update.
+   * @param {UpdateUserProfile} data - An object containing the profile fields to update (name, email, image).
+   * @returns {Promise<SelectUser | null>} The updated user object (without password hash) if successful, otherwise null.
+   */
   const updateProfile = async (id: string, data: UpdateUserProfile): Promise<SelectUser | null> => {
     // Filter out undefined values to only update provided fields
     const updateData: Partial<typeof userTable.$inferInsert> = {};
@@ -95,6 +151,15 @@ export const userRepository: UserRepositoryFactory = (dbInstance) => {
     return findById(id); // Return updated user data
   };
 
+  /**
+   * Updates a user's password hash.
+   * Manually sets the `updatedAt` timestamp.
+   * @async
+   * @function updatePassword
+   * @param {string} id - The UUID of the user whose password is to be updated.
+   * @param {string} newPasswordHash - The new, pre-hashed password.
+   * @returns {Promise<void>}
+   */
   const updatePassword = async (id: string, newPasswordHash: string): Promise<void> => {
     await db
       .update(userTable)

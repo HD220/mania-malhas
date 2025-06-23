@@ -50,14 +50,25 @@ export type TransactionRepositoryFactory = (dbInstance?: DBConnection) => {
   deleteById: (id: string) => Promise<void>;
 };
 
+/**
+ * Factory function for creating a transaction repository instance.
+ * This repository provides methods to interact with transaction data in the database,
+ * including CRUD operations, querying with filters, pagination, and sorting.
+ *
+ * @param {DBConnection} [dbInstance] - Optional Drizzle database connection instance.
+ *                                      If not provided, a default instance is used.
+ * @returns {ReturnType<TransactionRepositoryFactory>} An object containing methods for transaction data operations.
+ */
 export const transactionRepository: TransactionRepositoryFactory = (dbInstance) => {
   const db = dbInstance || defaultDb;
 
   /**
    * Helper function to build an array of Drizzle filter conditions
    * based on the provided filter criteria.
-   * @param {TransactionFiltersForRepo} [filters] - The filters to apply.
-   * @returns {SQL<unknown>[]} An array of Drizzle conditions.
+   * @private
+   * @function buildFilterConditions
+   * @param {TransactionFiltersForRepo} [filters] - The filters to apply (type, status, date range, partnerId, description).
+   * @returns {import("drizzle-orm").SQL<unknown>[]} An array of Drizzle `SQL` condition objects.
    */
   const buildFilterConditions = (filters?: TransactionFiltersForRepo) => {
     const conditions = [];

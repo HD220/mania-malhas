@@ -3,28 +3,53 @@ import { paymentTable } from "@/db/postgres/schema/payment";
 import { InsertPayment, SelectPayment } from "./schemas/paymentSchema";
 import { eq, desc } from "drizzle-orm";
 
+/**
+ * Type alias for the Drizzle database connection instance.
+ */
 export type DBConnection = dbType["db"];
 
+/**
+ * Defines the interface for a payment repository.
+ * This factory function returns an object with methods to interact with payment data.
+ * @param {DBConnection} [dbInstance] - Optional Drizzle database instance. If not provided, a default instance is used.
+ * @returns {object} An object containing methods for payment data manipulation.
+ */
 export type PaymentRepositoryFactory = (dbInstance?: DBConnection) => {
+  /**
+   * Inserts a new payment into the database.
+   * @param {InsertPayment} data - The payment data to insert.
+   * @returns {Promise<{ id: string }>} The ID of the newly created payment.
+   */
   insert: (data: InsertPayment) => Promise<{ id: string }>;
+  /**
+   * Finds all payments associated with a specific transaction ID.
+   * @param {string} transactionId - The ID of the transaction.
+   * @returns {Promise<SelectPayment[]>} A list of payments for the transaction.
+   */
   findByTransactionId: (transactionId: string) => Promise<SelectPayment[]>;
   // TODO: Add update and delete methods later if needed
 };
 
 /**
  * Factory function for creating a payment repository instance.
- * Contains methods for inserting and querying payment data.
- * @param {DBConnection} [dbInstance] - Optional Drizzle database connection instance. Uses a default if not provided.
- * @returns {Object} An object containing payment repository methods.
+ * This repository provides methods to interact with payment data in the database,
+ * primarily for inserting new payments and retrieving payments associated with transactions.
+ *
+ * @param {DBConnection} [dbInstance] - Optional Drizzle database connection instance.
+ *                                      If not provided, a default instance is used.
+ * @returns {ReturnType<PaymentRepositoryFactory>} An object containing payment repository methods.
  */
 export const paymentRepository: PaymentRepositoryFactory = (dbInstance) => {
   const db = dbInstance || defaultDb;
 
   /**
    * Inserts a new payment record into the database.
-   * Ensures a date is set for the payment, defaulting to the current date if not provided.
+   * If the `date` field in the input data is not provided, it defaults to the current date.
+   *
+   * @async
+   * @function insert
    * @param {InsertPayment} data - The payment data to insert.
-   * @returns {Promise<{ id: string }>} An object containing the ID of the newly created payment.
+   * @returns {Promise<{ id: string }>} A promise that resolves to an object containing the ID of the newly created payment.
    */
   const insert = async (data: InsertPayment): Promise<{ id: string }> => {
     const [newPayment] = await db

@@ -15,20 +15,32 @@ export type PartnerRepository = (db: DBConnection) => {
   findBySearch: (search: string, status: boolean) => Promise<SelectPartner[]>;
   findById: (id: string) => Promise<SelectPartner>;
   update: (id: string, data: InsertPartner) => Promise<void>;
+  /**
+   * Inserts a new partner into the database.
+   * @param {InsertPartner} data - The data for the new partner.
+   * @returns {Promise<{ id: string }>} The ID of the newly created partner.
+   */
   insert: (data: InsertPartner) => Promise<{ id: string }>;
 };
 
 /**
  * Factory function for creating a partner repository instance.
- * Contains methods for CRUD operations and querying partner data.
+ * This repository provides methods to interact with partner data in the database,
+ * including CRUD operations and various search functionalities.
+ *
  * @param {DBConnection} db - The Drizzle database connection instance.
- * @returns {Object} An object containing partner repository methods.
+ * @returns {ReturnType<PartnerRepository>} An object containing methods for partner data operations.
  */
 export const partnerRepository: PartnerRepository = (db) => {
   /**
-   * Retrieves all partners, optionally filtered by status.
-   * @param {boolean} [status=true] - The status of partners to retrieve (true for active, false for inactive).
-   * @returns {Promise<SelectPartner[]>} A list of partners.
+   * Retrieves all partners, optionally filtered by their active status.
+   * Results are ordered by creation date in descending order.
+   *
+   * @async
+   * @function findAll
+   * @param {boolean} [status=true] - The active status of partners to retrieve.
+   *                                  `true` for active partners, `false` for inactive. Defaults to `true`.
+   * @returns {Promise<SelectPartner[]>} A promise that resolves to an array of partner objects.
    */
   const findAll = async (status = true): Promise<SelectPartner[]> => {
     const partnersDb = await db

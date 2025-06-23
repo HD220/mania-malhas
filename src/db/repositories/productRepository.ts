@@ -21,11 +21,27 @@ export type ProductRepository = (db: DBConnection) => {
   findImageById: (
     productId: string,
     imageId: string
-  ) => Promise<SelectProductImage>;
+  ) => Promise<SelectProductImage | null>; // Corrected return type
+  /**
+   * Updates an existing product and its associated images.
+   * @param {string} id - The UUID of the product to update.
+   * @param {InsertProductWithImages} data - The product data to update, including images.
+   * @returns {Promise<void>}
+   */
   update: (id: string, data: InsertProductWithImages) => Promise<void>;
+  /**
+   * Inserts a new product along with its associated images.
+   * @param {InsertProductWithImages} data - The product data to insert, including images.
+   * @returns {Promise<{ id: string }>} An object containing the ID of the newly created product.
+   */
   insert: (data: InsertProductWithImages) => Promise<{ id: string }>;
 };
 
+/**
+ * Represents the flat structure of a product joined with one of its images,
+ * as returned by a database query before processing.
+ * @private
+ */
 type JoinProductWithImage = {
   product: {
     id: string;

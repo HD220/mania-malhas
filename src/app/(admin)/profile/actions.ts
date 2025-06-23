@@ -11,8 +11,17 @@ import { ChangeUserPasswordUseCase, changeUserPasswordUseCaseInputSchema } from 
 import { SelectUser, UpdateUserProfile as UpdateUserProfileData } from "@/db/repositories/schemas/userSchema";
 
 import { ForbiddenError, NotFoundError } from "@/lib/errors/domainErrors";
-// Placeholder for session management - replace with actual implementation from a shared auth library
-// For now, using the same placeholder as in notification actions.
+
+/**
+ * Placeholder for session management.
+ * @async
+ * @private
+ * @function internalGetUserIdFromSession
+ * @returns {Promise<string>} The user ID from the session.
+ * @remarks This is a placeholder and should be replaced with actual session logic.
+ * Currently, it returns a hardcoded user ID for development and testing.
+ * This function is duplicated in other action files and should be centralized.
+ */
 async function internalGetUserIdFromSession(): Promise<string> {
   const placeholderUserId = "00000000-0000-0000-0000-000000000001"; // Standard test user ID
   console.warn(
@@ -21,7 +30,14 @@ async function internalGetUserIdFromSession(): Promise<string> {
   return placeholderUserId;
 }
 
-// Generic Action Response Interface
+/**
+ * Represents the standardized response structure for server actions.
+ * @template T The type of data included in a successful response.
+ * @property {boolean} success - Indicates if the action was successful.
+ * @property {T} [data] - The data returned by the action on success.
+ * @property {string} [error] - A general error message if the action failed.
+ * @property {Record<string, string[]>} [fieldErrors] - Specific field error messages if validation failed.
+ */
 export interface ActionResponse<T> {
   success: boolean;
   data?: T;
@@ -36,7 +52,13 @@ const updateUserProfileUseCase = new UpdateUserProfileUseCase();
 const changeUserPasswordUseCase = new ChangeUserPasswordUseCase();
 
 
-// --- getUserProfileAction ---
+/**
+ * Server action to retrieve the profile of the currently authenticated user.
+ * @async
+ * @function getUserProfileAction
+ * @returns {Promise<ActionResponse<SelectUser>>} The user's profile data or an error response.
+ * The `userId` is automatically injected from the current session.
+ */
 export async function getUserProfileAction(): Promise<ActionResponse<SelectUser>> {
   try {
     const userId = await internalGetUserIdFromSession();
@@ -56,13 +78,28 @@ export async function getUserProfileAction(): Promise<ActionResponse<SelectUser>
   }
 }
 
-// --- updateUserProfileAction ---
-// Input schema for the action itself, which is just the data part of the use case input.
-// UserId will be injected from session.
+/**
+ * Zod schema for the input data of the `updateUserProfileAction`.
+ * This schema represents the fields that can be updated in a user's profile.
+ * The `userId` is handled internally by the action.
+ */
 export const updateUserProfileActionSchema = updateUserProfileUseCaseInputSchema.shape.data;
+
+/**
+ * Type definition for the input of the `updateUserProfileAction`.
+ * Inferred from `updateUserProfileActionSchema`.
+ */
 export type UpdateUserProfileActionInput = z.infer<typeof updateUserProfileActionSchema>;
 
 
+/**
+ * Server action to update the profile of the currently authenticated user.
+ * @async
+ * @function updateUserProfileAction
+ * @param {UpdateUserProfileActionInput} data - The profile data to update.
+ * @returns {Promise<ActionResponse<SelectUser>>} The updated user profile data or an error response.
+ * The `userId` is automatically injected from the current session.
+ */
 export async function updateUserProfileAction(
   data: UpdateUserProfileActionInput
 ): Promise<ActionResponse<SelectUser>> {
@@ -98,12 +135,27 @@ export async function updateUserProfileAction(
 }
 
 
-// --- changeUserPasswordAction ---
-// Action input schema, similar to use case but userId injected.
-// Assuming client sends newPasswordHash directly as per simplified plan.
+/**
+ * Zod schema for the input data of the `changeUserPasswordAction`.
+ * This schema defines the structure for changing a user's password, typically including the new password.
+ * The `userId` is handled internally by the action.
+ */
 export const changeUserPasswordActionSchema = changeUserPasswordUseCaseInputSchema.omit({ userId: true });
+
+/**
+ * Type definition for the input of the `changeUserPasswordAction`.
+ * Inferred from `changeUserPasswordActionSchema`.
+ */
 export type ChangeUserPasswordActionInput = z.infer<typeof changeUserPasswordActionSchema>;
 
+/**
+ * Server action to change the password for the currently authenticated user.
+ * @async
+ * @function changeUserPasswordAction
+ * @param {ChangeUserPasswordActionInput} data - The data required to change the password (e.g., new password hash).
+ * @returns {Promise<ActionResponse<{ success: boolean }>>} A success or error response.
+ * The `userId` is automatically injected from the current session.
+ */
 export async function changeUserPasswordAction(
   data: ChangeUserPasswordActionInput
 ): Promise<ActionResponse<{ success: boolean }>> {
