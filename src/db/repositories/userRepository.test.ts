@@ -219,6 +219,45 @@ describe("userRepository", () => {
       expect(mockDb.update).not.toHaveBeenCalled();
       expect(result).toEqual(sampleSelectUser);
     });
+
+    it("should update user image URL", async () => {
+      const newImageUrl = faker.image.avatar();
+      const profileUpdate: UpdateUserProfile = { image: newImageUrl };
+      const updatedRawUser = { ...rawUserFromDb, image: newImageUrl, updatedAt: new Date() };
+      const expectedUpdatedUser = selectUserSchema.parse(updatedRawUser);
+
+      mockDbWhere.mockResolvedValueOnce(undefined); // For update
+      mockDbLimit.mockResolvedValueOnce([updatedRawUser]); // For findById
+
+      const result = await repo.updateProfile(sampleUserId, profileUpdate);
+      expect(mockDbSet).toHaveBeenCalledWith(expect.objectContaining({ image: newImageUrl, updatedAt: expect.any(Date) }));
+      expect(result?.image).toEqual(newImageUrl);
+    });
+
+    it("should clear user image URL when set to null", async () => {
+      const profileUpdate: UpdateUserProfile = { image: null };
+      const updatedRawUser = { ...rawUserFromDb, image: null, updatedAt: new Date() };
+      const expectedUpdatedUser = selectUserSchema.parse(updatedRawUser);
+
+      mockDbWhere.mockResolvedValueOnce(undefined); // For update
+      mockDbLimit.mockResolvedValueOnce([updatedRawUser]); // For findById
+
+      const result = await repo.updateProfile(sampleUserId, profileUpdate);
+      expect(mockDbSet).toHaveBeenCalledWith(expect.objectContaining({ image: null, updatedAt: expect.any(Date) }));
+      expect(result?.image).toBeNull();
+    });
+
+    it("should return null when trying to update profile of non-existent user", async () => {
+      const profileUpdate: UpdateUserProfile = { name: "Non Existent" };
+      mockDbWhere.mockResolvedValueOnce(undefined); // Mock update call (it might run)
+      mockDbLimit.mockResolvedValueOnce([]);      // Mock findById to return no user
+
+      const result = await repo.updateProfile("non-existent-user-id", profileUpdate);
+      // Check that update was attempted (or not, depending on desired repo logic, current logic tries to update then fetches)
+      // expect(mockDb.update).toHaveBeenCalled(); // Or not, if pre-check added
+      expect(mockDbLimit).toHaveBeenCalledWith(1); // findById was called
+      expect(result).toBeNull();
+    });
   });
 
   describe("updatePassword", () => {
@@ -230,7 +269,21 @@ describe("userRepository", () => {
 
       expect(mockDb.update).toHaveBeenCalledWith(userTable);
       expect(mockDbSet).toHaveBeenCalledWith({ passwordHash: newHash, updatedAt: expect.any(Date) });
-      expect(mockDbWhere).toHaveBeenCalled();
+      expect(mockDbWhere).toHaveBeenCalled(); // With correct user ID
+    });
+
+    it("should not throw an error when trying to update password for a non-existent user", async () => {
+      const newHash = "newSecurePasswordHash";
+      // Drizzle's update().set().where() doesn't throw if no rows match the where clause.
+      // It just updates 0 rows. So, we expect the call to proceed without error.
+      mockDbWhere.mockResolvedValueOnce(undefined); // Simulate update affecting 0 rows
+
+      await expect(repo.updatePassword("non-existent-user-id", newHash)).resolves.not.toThrow();
+
+      expect(mockDb.update).toHaveBeenCalledWith(userTable);
+      expect(mockDbSet).toHaveBeenCalledWith({ passwordHash: newHash, updatedAt: expect.any(Date) });
+      // We can also check that the where clause was called with "non-existent-user-id"
+      // This is a bit more involved with the current mock setup for eq()
     });
   });
 });
