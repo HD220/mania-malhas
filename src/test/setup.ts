@@ -41,20 +41,20 @@ import '@testing-library/jest-dom/vitest'; // Para estender expect com matchers 
 
 // Tentativa de definir valores mínimos para process.env ANTES da importação de env.ts
 // Isto é uma tentativa, pode não funcionar devido à ordem de importação/execução dos módulos.
-if (process.env.NODE_ENV === 'test') {
+// if (process.env.NODE_ENV === 'test') {
     // console.log("Setting up mock env vars for test environment in setup.ts");
-    process.env.DB_HOST = 'test_db_host';
-    process.env.DB_USER = 'test_db_user';
-    process.env.DB_PASSWORD = 'test_db_password';
-    process.env.DB_NAME = 'test_db_name';
-    process.env.DB_PORT = '5433';
-    process.env.DATABASE_URL = 'postgresql://test_user:test_password@test_host:5433/test_db';
-    process.env.MINIO_URL = 'test_minio_url';
-    process.env.MINIO_ACCESSKEY = 'test_minio_key';
-    process.env.MINIO_SECRETKEY = 'test_minio_secret';
-    process.env.MINIO_BUCKET_PRODUCTS = 'test_products_bucket';
+    // process.env.DB_HOST = 'test_db_host';
+    // process.env.DB_USER = 'test_db_user';
+    // process.env.DB_PASSWORD = 'test_db_password';
+    // process.env.DB_NAME = 'test_db_name';
+    // process.env.DB_PORT = '5433';
+    // process.env.DATABASE_URL = 'postgresql://test_user:test_password@test_host:5433/test_db';
+    // process.env.MINIO_URL = 'test_minio_url';
+    // process.env.MINIO_ACCESSKEY = 'test_minio_key';
+    // process.env.MINIO_SECRETKEY = 'test_minio_secret';
+    // process.env.MINIO_BUCKET_PRODUCTS = 'test_products_bucket';
     // Adicione outras variáveis que seu env.ts valida
-}
+// }
 
 // Mock global para ResizeObserver para evitar erros com componentes Radix/Shadcn em JSDOM
 const MockResizeObserver = vi.fn(() => ({
