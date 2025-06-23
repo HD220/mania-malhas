@@ -5,61 +5,63 @@ import { ZodError } from "zod";
 import { NotFoundError } from "@/lib/errors/domainErrors"; // Assuming AuthorizationError might be needed later
 
 // Import Use Cases
-import listNotificationsForUserUseCase, {
-  PaginatedNotificationsResult,
-  ListNotificationsInput
+import {
+  ListNotificationsForUserUseCase,
+  ListNotificationsForUserInput,
+  ListNotificationsForUserOutput
 } from "@/usecases/notification/listNotificationsForUserUseCase";
-import markNotificationAsReadUseCase, {
+import {
+  MarkNotificationAsReadUseCase,
   MarkNotificationAsReadInput
 } from "@/usecases/notification/markNotificationAsReadUseCase";
-import markAllNotificationsAsReadUseCase, {
+import {
+  MarkAllNotificationsAsReadUseCase,
   MarkAllNotificationsAsReadInput
 } from "@/usecases/notification/markAllNotificationsAsReadUseCase";
-
-// TODO: Replace with actual user session logic
-const getUserIdFromSession = async (): Promise<string | null> => {
-  // Placeholder: In a real app, this would get the user ID from the session (e.g., NextAuth.js)
-  // For now, returning a hardcoded UUID for testing purposes or null if no user.
-  // This needs to be replaced with actual authentication logic.
-  // return "00000000-0000-0000-0000-000000000000"; // Example static UUID for testing
-  return null; // Default to no user for safety until auth is integrated
-};
-
-// Export for testing purposes, allowing spyOn to work.
-// In a real app, this would likely come from a dedicated auth module.
-export const internalGetUserIdFromSession = getUserIdFromSession;
+import { notificationRepository } from "@/db/repositories/notificationRepository"; // For instantiation
+import { db } from "@/db/postgres"; // For repository instantiation
+import { DomainError, ForbiddenError, NotFoundError } from "@/lib/errors/domainErrors"; // Added ForbiddenError, NotFoundError
+import { internalGetUserIdFromSession } from "@/lib/auth/session"; // Import from new location
 
 
 // ---- List Notifications Action ----
 export type ListNotificationsServerResponse = {
   success: boolean;
-  data?: PaginatedNotificationsResult;
+  data?: ListNotificationsForUserOutput; // Use the correct output type
   message?: string;
+  // fieldErrors could be added if we parse input directly here, but use case handles it
 };
 
 export async function listNotificationsAction(
   paginationOptions: { page?: number; pageSize?: number }
 ): Promise<ListNotificationsServerResponse> {
-  const userId = await getUserIdFromSession();
+  const userId = await internalGetUserIdFromSession(); // Use the exported one for consistency if needed for tests
   if (!userId) {
     return { success: false, message: "Usuário não autenticado." };
   }
 
   try {
-    // Directly pass pagination options. Use case defaults will apply if undefined.
-    const input: ListNotificationsInput = {
+    const repo = notificationRepository(db);
+    const useCase = new ListNotificationsForUserUseCase(repo);
+
+    const input: ListNotificationsForUserInput = {
       userId,
       page: paginationOptions.page,
       pageSize: paginationOptions.pageSize
     };
-    const result = await listNotificationsForUserUseCase(input);
+    // Input validation for paginationOptions happens inside the use case schema
+    const result = await useCase.execute(input);
     return { success: true, data: result };
   } catch (error: any) {
-    console.error("listNotificationsAction Error:", error);
-    if (error instanceof ZodError) { // Should ideally not happen if types are correct from client
-      return { success: false, message: "Dados de paginação inválidos." };
+    console.error("listNotificationsAction Error:", error.stack);
+    if (error instanceof ZodError) {
+      // This error is from the use case's input schema validation
+      return { success: false, message: "Dados de entrada inválidos.", fieldErrors: error.flatten().fieldErrors };
     }
-    return { success: false, message: error.message || "Falha ao buscar notificações." };
+    if (error instanceof DomainError) { // Catch specific domain errors if any are thrown by this use case
+        return { success: false, message: error.message };
+    }
+    return { success: false, message: "Falha ao buscar notificações. Tente novamente mais tarde." };
   }
 }
 
@@ -67,62 +69,73 @@ export async function listNotificationsAction(
 // ---- Mark Notification as Read Action ----
 export type MarkAsReadServerResponse = {
   success: boolean;
+  data?: SelectNotification; // Return the updated notification
   message?: string;
+  fieldErrors?: Record<string, string[] | undefined>;
 };
 
 export async function markAsReadAction(notificationId: string): Promise<MarkAsReadServerResponse> {
-  const userId = await getUserIdFromSession();
+  const userId = await internalGetUserIdFromSession();
   if (!userId) {
     return { success: false, message: "Usuário não autenticado." };
   }
 
   try {
+    const repo = notificationRepository(db);
+    const useCase = new MarkNotificationAsReadUseCase(repo);
     const input: MarkNotificationAsReadInput = { notificationId, userId };
-    await markNotificationAsReadUseCase(input);
-    // TODO: Determine which paths to revalidate.
-    // Example: revalidatePath("/(admin)/notifications");
-    // Or if there's a header component showing unread count: revalidateTag("unread_notifications_count");
-    return { success: true, message: "Notificação marcada como lida." };
+
+    const updatedNotification = await useCase.execute(input);
+
+    revalidatePath("/(admin)/notifications"); // Example revalidation
+    revalidateTag("user-notifications-count");   // Example revalidation for a potential counter
+
+    return { success: true, data: updatedNotification, message: "Notificação marcada como lida." };
   } catch (error: any) {
-    console.error("markAsReadAction Error:", error);
+    console.error("markAsReadAction Error:", error.stack);
     if (error instanceof ZodError) {
-      return { success: false, message: "ID da notificação inválido."};
+      return { success: false, message: "Dados de entrada inválidos.", fieldErrors: error.flatten().fieldErrors };
     }
-    if (error instanceof NotFoundError) {
+    if (error instanceof NotFoundError || error instanceof ForbiddenError || error instanceof DomainError) {
       return { success: false, message: error.message };
     }
-    // Catching generic Error for unauthorized access from use case
-    if (error.message.includes("Usuário não autorizado")) {
-        return { success: false, message: error.message };
-    }
-    return { success: false, message: error.message || "Falha ao marcar notificação como lida." };
+    return { success: false, message: "Falha ao marcar notificação como lida. Tente novamente mais tarde." };
   }
 }
 
 // ---- Mark All Notifications as Read Action ----
 export type MarkAllAsReadServerResponse = {
   success: boolean;
+  markedCount?: number;
   message?: string;
+  fieldErrors?: Record<string, string[] | undefined>;
 };
 
 export async function markAllAsReadAction(): Promise<MarkAllAsReadServerResponse> {
-  const userId = await getUserIdFromSession();
+  const userId = await internalGetUserIdFromSession();
   if (!userId) {
     return { success: false, message: "Usuário não autenticado." };
   }
 
   try {
+    const repo = notificationRepository(db);
+    const useCase = new MarkAllNotificationsAsReadUseCase(repo);
     const input: MarkAllNotificationsAsReadInput = { userId };
-    await markAllNotificationsAsReadUseCase(input);
-    // TODO: Determine which paths to revalidate.
-    // Example: revalidatePath("/(admin)/notifications");
-    // revalidateTag("unread_notifications_count");
-    return { success: true, message: "Todas as notificações foram marcadas como lidas." };
+
+    const result = await useCase.execute(input); // This returns { success: boolean, markedCount: number }
+
+    revalidatePath("/(admin)/notifications");
+    revalidateTag("user-notifications-count");
+
+    return { success: true, markedCount: result.markedCount, message: "Todas as notificações foram marcadas como lidas." };
   } catch (error: any) {
-    console.error("markAllAsReadAction Error:", error);
-     if (error instanceof ZodError) { // Should not happen if userId from session is always valid
-      return { success: false, message: "ID do usuário inválido."};
+    console.error("markAllAsReadAction Error:", error.stack);
+     if (error instanceof ZodError) { // From use case input validation (userId)
+      return { success: false, message: "Dados de entrada inválidos.", fieldErrors: error.flatten().fieldErrors };
     }
-    return { success: false, message: error.message || "Falha ao marcar todas as notificações como lidas." };
+    if (error instanceof DomainError) {
+        return { success: false, message: error.message };
+    }
+    return { success: false, message: "Falha ao marcar todas as notificações como lidas. Tente novamente mais tarde." };
   }
 }
