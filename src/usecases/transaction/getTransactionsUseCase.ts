@@ -2,34 +2,56 @@ import { db } from "@/db/postgres";
 import { transactionRepository as createTransactionRepository, TransactionWithPartner } from "@/db/repositories/transactionRepository"; // Import TransactionWithPartner
 import { SelectTransaction } from "@/db/repositories/schemas/transactionSchema"; // SelectTransaction ainda pode ser útil para outros contextos
 
-// Tipos para filtros (podem ser expandidos)
+/**
+ * Defines the available filters for fetching transactions.
+ * All properties are optional.
+ */
 export interface GetTransactionsFilters {
+  /** Filter by transaction status (e.g., "Pendente", "Pago"). */
   status?: string;
+  /** Filter by transaction type ('E' for Entrada/Income, 'S' for Saída/Expense). */
   type?: "E" | "S";
+  /** Filter by the ID of the associated partner. */
   partnerId?: string;
+  /** Filter transactions from this date onwards. */
   dateFrom?: Date;
+  /** Filter transactions up to this date. */
   dateTo?: Date;
-  description?: string; // Adicionar filtro de descrição
+  /** Filter by a search term in the transaction description. */
+  description?: string;
 }
 
-// Interface para os parâmetros de paginação do caso de uso
+/**
+ * Defines pagination parameters for use cases.
+ */
 export interface UseCasePaginationParams {
+  /** The page number to retrieve (1-indexed). */
   page?: number;
+  /** The number of items to retrieve per page. */
   pageSize?: number;
 }
 
 // Importar OrderByParams do repositório ou redefinir/adaptar aqui
 import { OrderByParams as RepoOrderByParams, TransactionSortBy } from "@/db/repositories/transactionRepository";
 
+/**
+ * Defines ordering parameters for fetching transactions in use cases.
+ */
 export interface UseCaseOrderByParams {
-  column?: TransactionSortBy; // Usar o mesmo tipo de coluna
+  /** The column to sort by (e.g., "date", "value"). */
+  column?: TransactionSortBy;
+  /** The direction of sorting ("asc" for ascending, "desc" for descending). */
   direction?: "asc" | "desc";
 }
 
-
-// Interface para o resultado paginado
+/**
+ * Defines the structure of the paginated result for transactions.
+ * Includes the transaction data along with pagination metadata.
+ */
 export interface PaginatedTransactionsResult {
+  /** An array of transactions for the current page, including partner names. */
   data: TransactionWithPartner[];
+  /** The total number of items matching the filters. */
   totalItems: number;
   totalPages: number;
   currentPage: number;

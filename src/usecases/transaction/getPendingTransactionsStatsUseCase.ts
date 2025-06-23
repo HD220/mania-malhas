@@ -1,8 +1,13 @@
 import { db } from "@/db/postgres";
 import { transactionRepository as createTransactionRepository } from "@/db/repositories/transactionRepository";
 
+/**
+ * Defines the structure for statistics about pending transactions.
+ */
 interface PendingTransactionsStats {
+  /** The total number of pending transactions. */
   count: number;
+  /** The sum of the values of all pending transactions. */
   totalValue: number;
 }
 
