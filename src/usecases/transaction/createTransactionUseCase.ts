@@ -9,6 +9,10 @@ import {
   insertTransactionSchema
 } from "@/db/repositories/schemas/transactionSchema";
 import { ZodError } from "zod";
+import createNotificationUseCase, { CreateNotificationInput } from "@/usecases/notification/createNotificationUseCase";
+// Assuming internalGetUserIdFromSession is the way to get current user for notification.
+// This might be better passed in or handled by a higher-level service that orchestrates both.
+import { internalGetUserIdFromSession } from "@/app/(admin)/notifications/actions"; // Temporary direct import
 
 /**
  * Input data type for creating a transaction.
@@ -52,6 +56,35 @@ export default async function createTransactionUseCase(
     // This case should ideally not happen if insert was successful and ID is correct.
     // But it's good to handle it defensively.
     throw new Error("Failed to retrieve the created transaction after insertion.");
+  }
+
+  // 4. Attempt to create a notification (best effort)
+  try {
+    const currentUserId = await internalGetUserIdFromSession(); // Or determine target user differently
+    if (currentUserId) {
+      const notificationData: CreateNotificationInput = {
+        userId: currentUserId, // Notify the user who created it (or specific admin)
+        type: "new_transaction",
+        message: `Nova transação "${newTransaction.description}" (${
+          newTransaction.type === "E" ? "Entrada" : "Saída"
+        }) no valor de ${newTransaction.value.toLocaleString("pt-BR", { style: "currency", currency: "BRL"})} foi criada.`,
+        relatedEntityId: newTransaction.id,
+        relatedEntityType: "transaction",
+      };
+      // Not awaiting this intentionally if it's not critical for the transaction flow
+      createNotificationUseCase(notificationData).catch(error => {
+        console.error("Failed to create notification for new transaction:", error);
+        // Do not let notification failure fail the transaction creation
+      });
+    } else {
+      console.warn("No user ID found to create notification for new transaction.");
+    }
+  } catch (error) {
+    console.error(
+      "Error during notification creation for new transaction:",
+      error
+    );
+    // Do not re-throw; notification is secondary
   }
 
   return newTransaction;

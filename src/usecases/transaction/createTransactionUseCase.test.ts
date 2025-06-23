@@ -1,38 +1,79 @@
 import { describe, it, expect, vi, beforeEach } from 'vitest';
-import createTransactionUseCase, { CreateTransactionInput } from './createTransactionUseCase';
-import { transactionRepository } from '@/db/repositories/transactionRepository';
-import { insertTransactionSchema, SelectTransaction } from '@/db/repositories/schemas/transactionSchema';
 import { ZodError } from 'zod';
 import { faker } from '@faker-js/faker';
 
-// Mock do transactionRepository factory
+// --- START MOCKS ---
+// Mock the entire transactionRepository factory to return an object of vi.fn()
 vi.mock('@/db/repositories/transactionRepository', () => ({
-  transactionRepository: vi.fn().mockReturnValue({
+  transactionRepository: vi.fn(() => ({
     insert: vi.fn(),
     findById: vi.fn(),
-  }),
+    findAll: vi.fn(),
+    countAll: vi.fn(),
+    update: vi.fn(),
+    deleteById: vi.fn(),
+  })),
 }));
 
+// Mock the default export of createNotificationUseCase module
+vi.mock('@/usecases/notification/createNotificationUseCase', () => ({
+  default: vi.fn(),
+}));
+
+// Mock internalGetUserIdFromSession from the actions module
+vi.mock('@/app/(admin)/notifications/actions', async (importOriginal) => {
+  const actual = await importOriginal<typeof import('@/app/(admin)/notifications/actions')>();
+  return {
+    ...actual, // Spread actual exports from the module
+    internalGetUserIdFromSession: vi.fn(), // Override this specific export with a mock
+  };
+});
+// --- END MOCKS ---
+
+
+// --- START IMPORTS (after mocks are defined) ---
+import createTransactionUseCase, { CreateTransactionInput } from './createTransactionUseCase';
+import { transactionRepository } from '@/db/repositories/transactionRepository'; // Will be the mocked factory
+import createNotificationUseCaseActual from '@/usecases/notification/createNotificationUseCase'; // Will be the vi.fn() from the mock
+import { internalGetUserIdFromSession as internalGetUserIdFromSessionActual } from '@/app/(admin)/notifications/actions'; // Will be the vi.fn()
+import { insertTransactionSchema, SelectTransaction } from '@/db/repositories/schemas/transactionSchema';
+// --- END IMPORTS ---
+
+// Get typed handles to the mocked functions/methods for use in tests
+const mockTransactionRepoFactory = transactionRepository as vi.MockedFunction<typeof transactionRepository>;
+// We'll get the specific repo method mocks from the factory's return value in beforeEach
+const mockCreateNotificationUseCase = createNotificationUseCaseActual as vi.Mock;
+const mockInternalGetUserIdFromSession = internalGetUserIdFromSessionActual as vi.Mock;
+
 describe('createTransactionUseCase', () => {
-  let mockRepo: ReturnType<ReturnType<typeof transactionRepository>>;
+  // Define a variable to hold the mocked repository methods for each test
+  let currentMockRepoMethods: {
+    insert: vi.Mock;
+    findById: vi.Mock;
+    findAll: vi.Mock;
+    countAll: vi.Mock;
+    update: vi.Mock;
+    deleteById: vi.Mock;
+  };
 
   beforeEach(() => {
-    vi.clearAllMocks();
-    // Como transactionRepository é uma factory, obtemos a instância mockada assim
-    // e podemos reatribuir para mockRepo para ter o tipo correto.
-    const factory = transactionRepository as vi.MockedFunction<typeof transactionRepository>;
-    mockRepo = {
-      insert: vi.fn(),
-      findById: vi.fn(),
-      // Adicione outros métodos se forem usados ou para completar o tipo
-      findAll: vi.fn(),
-      countAll: vi.fn(),
-      update: vi.fn(),
-    };
-    factory.mockReturnValue(mockRepo);
+    vi.clearAllMocks(); // Clears call history and resets implementations of all mocks
+
+    // Get a fresh set of mocked repository methods for each test by calling the mocked factory
+    currentMockRepoMethods = mockTransactionRepoFactory();
+    // Ensure the factory itself is also cleared of previous return values if it was called multiple times across test files (though here it's simple)
+    mockTransactionRepoFactory.mockClear();
+    // Re-assign it for this specific test run if needed, or ensure it returns the fresh currentMockRepoMethods
+    mockTransactionRepoFactory.mockReturnValue(currentMockRepoMethods);
+
+
+    // Set default mock implementations for dependencies for this test suite
+    mockInternalGetUserIdFromSession.mockResolvedValue(sampleUserId);
+    mockCreateNotificationUseCase.mockResolvedValue({} as SelectNotification); // Default success for notification
   });
 
-  const validTransactionData: CreateTransactionInput = {
+  const sampleUserId = faker.string.uuid();
+  const validTransactionData: CreateTransactionInput & { status?: string } = {
     description: 'Nova Transação de Teste',
     value: "123.45",
     type: 'E',
@@ -40,73 +81,102 @@ describe('createTransactionUseCase', () => {
     partnerId: faker.string.uuid(),
     date: new Date(),
     due_date: faker.date.future(),
-    // transactionId (para pagamentos) é opcional e não parte do input direto de criação de transação
   };
 
   const createdTransactionId = faker.string.uuid();
   const mockCreatedTransaction: SelectTransaction = {
-    ...validTransactionData,
     id: createdTransactionId,
-    value: "123.45", // Zod schema para select pode ter transformado ou validado
+    description: validTransactionData.description,
+    value: 123.45,
+    type: validTransactionData.type,
+    partnerId: validTransactionData.partnerId,
+    date: validTransactionData.date as Date,
+    due_date: validTransactionData.due_date as Date | null,
     createdAt: new Date(),
     updatedAt: new Date(),
-    transactionId: null, // Exemplo
+    transactionId: null,
   };
 
-  it('should create a transaction successfully and return the created transaction', async () => {
-    mockRepo.insert.mockResolvedValue({ id: createdTransactionId });
-    mockRepo.findById.mockResolvedValue(mockCreatedTransaction);
+  it('should create a transaction, attempt notification, and return the transaction', async () => {
+    currentMockRepoMethods.insert.mockResolvedValue({ id: createdTransactionId });
+    currentMockRepoMethods.findById.mockResolvedValue(mockCreatedTransaction);
 
     const result = await createTransactionUseCase(validTransactionData);
 
-    const expectedParsedData = insertTransactionSchema.parse(validTransactionData); // Zod fará a coerção de Date
+    expect(currentMockRepoMethods.insert).toHaveBeenCalledTimes(1);
+    const expectedInsertArg = insertTransactionSchema.parse(validTransactionData); // This will strip 'status'
+    expect(currentMockRepoMethods.insert).toHaveBeenCalledWith(expectedInsertArg);
 
-    expect(mockRepo.insert).toHaveBeenCalledTimes(1);
-    // Comparar os dados passados para insert após o parse do Zod
-    // Zod pode transformar datas em objetos Date, então é importante comparar com o resultado do parse.
-    expect(mockRepo.insert).toHaveBeenCalledWith(
+    expect(currentMockRepoMethods.findById).toHaveBeenCalledTimes(1);
+    expect(currentMockRepoMethods.findById).toHaveBeenCalledWith(createdTransactionId);
+    expect(result).toEqual(mockCreatedTransaction);
+
+    expect(mockInternalGetUserIdFromSession).toHaveBeenCalled();
+    expect(mockCreateNotificationUseCase).toHaveBeenCalledTimes(1);
+    expect(mockCreateNotificationUseCase).toHaveBeenCalledWith(
       expect.objectContaining({
-        ...expectedParsedData,
-        // As datas no objeto Date podem ter problemas de comparação direta devido a milissegundos ou timezone.
-        // É mais seguro verificar se são instâncias de Date se a precisão exata não for crítica para este mock.
-        date: expect.any(Date),
-        due_date: expect.any(Date),
+        userId: sampleUserId,
+        type: "new_transaction",
+        message: expect.stringContaining(validTransactionData.description as string),
+        relatedEntityId: createdTransactionId,
+        relatedEntityType: "transaction",
       })
     );
-
-    expect(mockRepo.findById).toHaveBeenCalledTimes(1);
-    expect(mockRepo.findById).toHaveBeenCalledWith(createdTransactionId);
-    expect(result).toEqual(mockCreatedTransaction);
   });
 
-  it('should throw ZodError if input data is invalid', async () => {
-    const invalidData = { ...validTransactionData, value: "not-a-number" } as any;
+  it('should create transaction even if notification user ID is not found', async () => {
+    currentMockRepoMethods.insert.mockResolvedValue({ id: createdTransactionId });
+    currentMockRepoMethods.findById.mockResolvedValue(mockCreatedTransaction);
+    mockInternalGetUserIdFromSession.mockResolvedValue(null);
 
+    const result = await createTransactionUseCase(validTransactionData);
+    expect(result).toEqual(mockCreatedTransaction);
+    expect(mockCreateNotificationUseCase).not.toHaveBeenCalled();
+  });
+
+  it('should create transaction even if notification creation fails', async () => {
+    currentMockRepoMethods.insert.mockResolvedValue({ id: createdTransactionId });
+    currentMockRepoMethods.findById.mockResolvedValue(mockCreatedTransaction);
+    mockCreateNotificationUseCase.mockRejectedValue(new Error("Notification service down"));
+
+    const consoleErrorSpy = vi.spyOn(console, 'error').mockImplementation(() => {});
+
+    const result = await createTransactionUseCase(validTransactionData);
+    expect(result).toEqual(mockCreatedTransaction);
+    expect(mockCreateNotificationUseCase).toHaveBeenCalledTimes(1);
+    expect(consoleErrorSpy).toHaveBeenCalledWith("Failed to create notification for new transaction:", expect.any(Error));
+
+    consoleErrorSpy.mockRestore();
+  });
+
+  it('should throw ZodError if input data is invalid (e.g., value)', async () => {
+    const invalidData = { ...validTransactionData, value: "not-a-number-at-all" };
     await expect(createTransactionUseCase(invalidData)).rejects.toThrow(ZodError);
-    expect(mockRepo.insert).not.toHaveBeenCalled();
-    expect(mockRepo.findById).not.toHaveBeenCalled();
+    expect(currentMockRepoMethods.insert).not.toHaveBeenCalled();
+  });
+
+  it('should throw ZodError if input data is invalid (e.g., missing description)', async () => {
+    const invalidData = { ...validTransactionData, description: "" } as any;
+    await expect(createTransactionUseCase(invalidData)).rejects.toThrow(ZodError);
+    expect(currentMockRepoMethods.insert).not.toHaveBeenCalled();
   });
 
   it('should throw an error if repository.insert fails', async () => {
     const dbError = new Error('Database insert failed');
-    mockRepo.insert.mockRejectedValue(dbError);
-
+    currentMockRepoMethods.insert.mockRejectedValue(dbError);
     await expect(createTransactionUseCase(validTransactionData)).rejects.toThrow(dbError);
-    expect(mockRepo.findById).not.toHaveBeenCalled();
   });
 
   it('should throw an error if repository.findById fails after successful insert', async () => {
-    mockRepo.insert.mockResolvedValue({ id: createdTransactionId });
+    currentMockRepoMethods.insert.mockResolvedValue({ id: createdTransactionId });
     const findError = new Error('Database findById failed');
-    mockRepo.findById.mockRejectedValue(findError);
-
+    currentMockRepoMethods.findById.mockRejectedValue(findError);
     await expect(createTransactionUseCase(validTransactionData)).rejects.toThrow(findError);
   });
 
   it('should throw an error if repository.findById returns null after successful insert', async () => {
-    mockRepo.insert.mockResolvedValue({ id: createdTransactionId });
-    mockRepo.findById.mockResolvedValue(null); // Simula não encontrar a transação
-
+    currentMockRepoMethods.insert.mockResolvedValue({ id: createdTransactionId });
+    currentMockRepoMethods.findById.mockResolvedValue(null);
     await expect(createTransactionUseCase(validTransactionData)).rejects.toThrow(
       "Failed to retrieve the created transaction after insertion."
     );
