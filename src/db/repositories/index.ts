@@ -1,15 +1,18 @@
-import { db } from "@/db/postgres"; // Assuming db instance is exported from here
-import { UserRepository } from "./userRepository";
-import { NotificationRepository } from "./notificationRepository";
-import { ProductRepository } from "./productRepository";
-import { PartnerRepository } from "./partnerRepository";
-import { TransactionRepository } from "./transactionRepository";
-import { PaymentRepository } from "./paymentRepository";
+import { db } from "@/db/postgres";
 
-// Instantiate repositories with the db instance
-export const userRepository = new UserRepository(db);
-export const notificationRepository = new NotificationRepository(db);
-export const productRepository = new ProductRepository(db);
-export const partnerRepository = new PartnerRepository(db);
-export const transactionRepository = new TransactionRepository(db);
-export const paymentRepository = new PaymentRepository(db);
+// Import the factory functions, potentially aliasing them if their exported names
+// are the same as the constants we want to export here.
+import { userRepository as userRepositoryFactory } from "./userRepository";
+import { notificationRepository as notificationRepositoryFactory } from "./notificationRepository";
+import { productRepository as productRepositoryFactory } from "./productRepository";
+import { partnerRepository as partnerRepositoryFactory } from "./partnerRepository";
+import { transactionRepository as transactionRepositoryFactory } from "./transactionRepository";
+import { paymentRepository as paymentRepositoryFactory } from "./paymentRepository";
+
+// Instantiate repositories by calling their factory functions with the db instance
+export const userRepository = userRepositoryFactory(db);
+export const notificationRepository = notificationRepositoryFactory(db);
+export const productRepository = productRepositoryFactory(db);
+export const partnerRepository = partnerRepositoryFactory(db);
+export const transactionRepository = transactionRepositoryFactory(db);
+export const paymentRepository = paymentRepositoryFactory(db);
