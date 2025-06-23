@@ -7,22 +7,42 @@ import getPendingTransactionsStatsUseCase from "@/usecases/transaction/getPendin
 import { unstable_noStore as noStore } from "next/cache";
 
 /**
+ * Represents the successful data structure returned by `getDashboardStats`.
+ */
+export interface DashboardStatsData {
+  activeProductsCount: number;
+  activePartnersCount: number;
+  pendingTransactionsCount: number;
+  pendingTransactionsTotalValue: number;
+}
+
+/**
+ * Represents the structure of the response from `getDashboardStats`.
+ * It can indicate success with data or failure with a message.
+ */
+export type DashboardStatsResponse =
+  | {
+      success: true;
+      data: DashboardStatsData;
+    }
+  | {
+      success: false;
+      message: string;
+      data: DashboardStatsData; // Includes default/zeroed data on error
+    };
+
+/**
  * Fetches statistics for the admin dashboard.
  * This includes counts of active products, active partners,
  * and stats about pending transactions.
  *
  * Uses `unstable_noStore` to ensure data is fetched dynamically on each request.
  *
- * @returns {Promise<Object>} An object containing:
- *  - `success` (boolean): Indicates if the data fetching was successful.
- *  - `data` (object, optional): Contains the dashboard statistics:
- *    - `activeProductsCount` (number): Count of active products.
- *    - `activePartnersCount` (number): Count of active partners.
- *    - `pendingTransactionsCount` (number): Count of pending transactions.
- *    - `pendingTransactionsTotalValue` (number): Total value of pending transactions.
- *  - `message` (string, optional): An error message if `success` is false.
+ * @returns {Promise<DashboardStatsResponse>} A promise that resolves to an object
+ *  containing either the successfully fetched dashboard statistics or an error message.
+ *  On error, `data` will contain default zeroed values.
  */
-export async function getDashboardStats() {
+export async function getDashboardStats(): Promise<DashboardStatsResponse> {
   noStore(); // Ensure fresh data on each load
 
   try {
