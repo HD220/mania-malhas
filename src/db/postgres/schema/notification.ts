@@ -1,4 +1,5 @@
-import { pgTable, uuid, varchar, text, boolean, timestamp, pgEnum } from "drizzle-orm/pg-core";
+import { pgTable, uuid, varchar, text, boolean, timestamp, pgEnum, foreignKey } from "drizzle-orm/pg-core";
+import { userTable } from "./user"; // Import userTable
 
 // Optional: Define an enum for notification types if they are strictly predefined
 export const notificationTypeEnum = pgEnum("notification_type_enum", [
@@ -12,7 +13,7 @@ export const notificationTypeEnum = pgEnum("notification_type_enum", [
 
 export const notificationTable = pgTable("notification", {
   id: uuid("id").defaultRandom().primaryKey(),
-  userId: uuid("userId").notNull(), // ID of the user this notification is for
+  userId: uuid("userId").notNull().references(() => userTable.id, { onDelete: "cascade" }), // Added FK
   type: notificationTypeEnum("type").default("generic").notNull(),
   message: text("message").notNull(),
   isRead: boolean("isRead").default(false).notNull(),
