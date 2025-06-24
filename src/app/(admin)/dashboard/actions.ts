@@ -3,7 +3,7 @@
 import countActivePartnersUseCase from "@/features/partner/usecases/countActivePartnersUseCase";
 // import countActivePartnersUseCase from "@/usecases/partner/countActivePartnersUseCase"; // Duplicate import removed
 import countActiveProductsUseCase from "@/usecases/product/countActiveProductsUseCase";
-import getPendingTransactionsStatsUseCase from "@/usecases/transaction/getPendingTransactionsStatsUseCase"; // Import new use case
+import getPendingTransactionsStatsUseCase from "@/features/transaction/usecases/getPendingTransactionsStatsUseCase"; // Import new use case
 import { unstable_noStore as noStore } from "next/cache";
 
 /**

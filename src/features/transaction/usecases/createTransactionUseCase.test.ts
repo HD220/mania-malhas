@@ -3,8 +3,7 @@ import { ZodError } from 'zod';
 import { faker } from '@faker-js/faker';
 
 // --- START MOCKS ---
-// Mock the entire transactionRepository factory to return an object of vi.fn()
-vi.mock('@/db/repositories/transactionRepository', () => ({
+vi.mock('@/features/transaction/db/transactionRepository', () => ({
   transactionRepository: vi.fn(() => ({
     insert: vi.fn(),
     findById: vi.fn(),
@@ -15,17 +14,15 @@ vi.mock('@/db/repositories/transactionRepository', () => ({
   })),
 }));
 
-// Mock the default export of createNotificationUseCase module
 vi.mock('@/usecases/notification/createNotificationUseCase', () => ({
   default: vi.fn(),
 }));
 
-// Mock internalGetUserIdFromSession from the actions module
 vi.mock('@/app/(admin)/notifications/actions', async (importOriginal) => {
   const actual = await importOriginal<typeof import('@/app/(admin)/notifications/actions')>();
   return {
-    ...actual, // Spread actual exports from the module
-    internalGetUserIdFromSession: vi.fn(), // Override this specific export with a mock
+    ...actual,
+    internalGetUserIdFromSession: vi.fn(),
   };
 });
 // --- END MOCKS ---
@@ -33,20 +30,18 @@ vi.mock('@/app/(admin)/notifications/actions', async (importOriginal) => {
 
 // --- START IMPORTS (after mocks are defined) ---
 import createTransactionUseCase, { CreateTransactionInput } from './createTransactionUseCase';
-import { transactionRepository } from '@/db/repositories/transactionRepository'; // Will be the mocked factory
-import createNotificationUseCaseActual from '@/usecases/notification/createNotificationUseCase'; // Will be the vi.fn() from the mock
-import { internalGetUserIdFromSession as internalGetUserIdFromSessionActual } from '@/app/(admin)/notifications/actions'; // Will be the vi.fn()
-import { insertTransactionSchema, SelectTransaction } from '@/db/repositories/schemas/transactionSchema';
+import { transactionRepository } from '@/features/transaction/db/transactionRepository';
+import createNotificationUseCaseActual from '@/usecases/notification/createNotificationUseCase';
+import { internalGetUserIdFromSession as internalGetUserIdFromSessionActual } from '@/app/(admin)/notifications/actions';
+import { insertTransactionSchema, SelectTransaction } from '@/features/transaction/schemas/transactionSchema';
+import { SelectNotification } from '@/features/notification/schemas/notificationSchema'; // Added this import
 // --- END IMPORTS ---
 
-// Get typed handles to the mocked functions/methods for use in tests
 const mockTransactionRepoFactory = transactionRepository as vi.MockedFunction<typeof transactionRepository>;
-// We'll get the specific repo method mocks from the factory's return value in beforeEach
 const mockCreateNotificationUseCase = createNotificationUseCaseActual as vi.Mock;
 const mockInternalGetUserIdFromSession = internalGetUserIdFromSessionActual as vi.Mock;
 
 describe('createTransactionUseCase', () => {
-  // Define a variable to hold the mocked repository methods for each test
   let currentMockRepoMethods: {
     insert: vi.Mock;
     findById: vi.Mock;
@@ -57,19 +52,13 @@ describe('createTransactionUseCase', () => {
   };
 
   beforeEach(() => {
-    vi.clearAllMocks(); // Clears call history and resets implementations of all mocks
-
-    // Get a fresh set of mocked repository methods for each test by calling the mocked factory
+    vi.clearAllMocks();
     currentMockRepoMethods = mockTransactionRepoFactory();
-    // Ensure the factory itself is also cleared of previous return values if it was called multiple times across test files (though here it's simple)
     mockTransactionRepoFactory.mockClear();
-    // Re-assign it for this specific test run if needed, or ensure it returns the fresh currentMockRepoMethods
     mockTransactionRepoFactory.mockReturnValue(currentMockRepoMethods);
 
-
-    // Set default mock implementations for dependencies for this test suite
     mockInternalGetUserIdFromSession.mockResolvedValue(sampleUserId);
-    mockCreateNotificationUseCase.mockResolvedValue({} as SelectNotification); // Default success for notification
+    mockCreateNotificationUseCase.mockResolvedValue({} as SelectNotification);
   });
 
   const sampleUserId = faker.string.uuid();
@@ -87,7 +76,7 @@ describe('createTransactionUseCase', () => {
   const mockCreatedTransaction: SelectTransaction = {
     id: createdTransactionId,
     description: validTransactionData.description,
-    value: 123.45,
+    value: 123.45, // Assuming schema coerces string "123.45" to number
     type: validTransactionData.type,
     partnerId: validTransactionData.partnerId,
     date: validTransactionData.date as Date,
@@ -95,6 +84,7 @@ describe('createTransactionUseCase', () => {
     createdAt: new Date(),
     updatedAt: new Date(),
     transactionId: null,
+    status: validTransactionData.status as string, // Added status to match SelectTransaction
   };
 
   it('should create a transaction, attempt notification, and return the transaction', async () => {
@@ -104,7 +94,7 @@ describe('createTransactionUseCase', () => {
     const result = await createTransactionUseCase(validTransactionData);
 
     expect(currentMockRepoMethods.insert).toHaveBeenCalledTimes(1);
-    const expectedInsertArg = insertTransactionSchema.parse(validTransactionData); // This will strip 'status'
+    const expectedInsertArg = insertTransactionSchema.parse(validTransactionData);
     expect(currentMockRepoMethods.insert).toHaveBeenCalledWith(expectedInsertArg);
 
     expect(currentMockRepoMethods.findById).toHaveBeenCalledTimes(1);

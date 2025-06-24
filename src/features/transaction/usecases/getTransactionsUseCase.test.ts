@@ -1,22 +1,21 @@
 import { describe, it, expect, vi, beforeEach } from 'vitest';
 import getTransactionsUseCase from './getTransactionsUseCase';
-import { transactionRepository } from '@/db/repositories/transactionRepository';
-import { TransactionWithPartner } from '@/db/repositories/transactionRepository';
-import { faker } from '@faker-js/faker'; // Importar faker
+import { transactionRepository } from '@/features/transaction/db/transactionRepository';
+import { TransactionWithPartner } from '@/features/transaction/db/transactionRepository';
+import { faker } from '@faker-js/faker';
 
 // Mock do transactionRepository
-vi.mock('@/db/repositories/transactionRepository', () => ({
+vi.mock('@/features/transaction/db/transactionRepository', () => ({
   transactionRepository: vi.fn().mockReturnValue({
     findAll: vi.fn(),
     countAll: vi.fn(),
   }),
 }));
 
-// Exemplo de dados de transação para os mocks
 const mockTransaction: TransactionWithPartner = {
   id: 'txn_1',
   description: 'Test Transaction',
-  value: "100.00", // Schemas Drizzle retornam string para decimal
+  value: "100.00",
   type: 'E',
   status: 'Pendente',
   partnerId: 'partner_1',
@@ -25,7 +24,7 @@ const mockTransaction: TransactionWithPartner = {
   due_date: new Date('2023-01-20'),
   createdAt: new Date(),
   updatedAt: new Date(),
-  transactionId: null, // Exemplo, pode ser string ou null
+  transactionId: null,
 };
 
 describe('getTransactionsUseCase', () => {
@@ -33,7 +32,6 @@ describe('getTransactionsUseCase', () => {
 
   beforeEach(() => {
     vi.clearAllMocks();
-    // Como transactionRepository é uma factory, obtemos a instância mockada assim
     mockTransactionRepo = transactionRepository(vi.fn() as any);
   });
 
@@ -44,9 +42,9 @@ describe('getTransactionsUseCase', () => {
     const result = await getTransactionsUseCase();
 
     expect(mockTransactionRepo.findAll).toHaveBeenCalledWith(
-      {}, // repoFilters (vazio)
-      { offset: 0, limit: 10 }, // default pagination
-      undefined // orderBy
+      {},
+      { offset: 0, limit: 10 },
+      undefined
     );
     expect(mockTransactionRepo.countAll).toHaveBeenCalledWith({});
     expect(result.data).toEqual([mockTransaction]);
@@ -67,7 +65,7 @@ describe('getTransactionsUseCase', () => {
     expect(mockTransactionRepo.findAll).toHaveBeenCalledWith(
       expectedRepoFilters,
       { offset: 0, limit: 10 },
-      undefined // orderBy
+      undefined
     );
     expect(mockTransactionRepo.countAll).toHaveBeenCalledWith(expectedRepoFilters);
   });
@@ -82,40 +80,39 @@ describe('getTransactionsUseCase', () => {
     const expectedRepoFilters = { description: 'Test Transaction' };
     expect(mockTransactionRepo.findAll).toHaveBeenCalledWith(
       expectedRepoFilters,
-      { offset: 0, limit: 10 }, // default pagination
-      undefined // orderBy
+      { offset: 0, limit: 10 },
+      undefined
     );
     expect(mockTransactionRepo.countAll).toHaveBeenCalledWith(expectedRepoFilters);
   });
 
   it('should fetch transactions with specified pagination', async () => {
     (mockTransactionRepo.findAll as ReturnType<typeof vi.fn>).mockResolvedValue([]);
-    (mockTransactionRepo.countAll as ReturnType<typeof vi.fn>).mockResolvedValue(25); // Ex: 25 itens no total
+    (mockTransactionRepo.countAll as ReturnType<typeof vi.fn>).mockResolvedValue(25);
 
     const pagination = { page: 2, pageSize: 5 };
     const result = await getTransactionsUseCase(undefined, pagination);
 
     expect(mockTransactionRepo.findAll).toHaveBeenCalledWith(
       {},
-      { offset: 5, limit: 5 }, // (page 2 - 1) * 5 = 5
-      undefined // orderBy
+      { offset: 5, limit: 5 },
+      undefined
     );
     expect(result.currentPage).toBe(2);
     expect(result.pageSize).toBe(5);
-    expect(result.totalPages).toBe(5); // 25 / 5 = 5
+    expect(result.totalPages).toBe(5);
   });
 
   it('should apply application-level filters for partnerId and dates', async () => {
-    // Redefinir mockTransaction base para cada item para evitar contaminação de partnerId ou date original
     const createBaseMockTransaction = (): TransactionWithPartner => ({
       id: faker.string.uuid(),
       description: 'Base Test Transaction',
       value: "100.00",
       type: 'E',
       status: 'Pendente',
-      partnerId: faker.string.uuid(), // Default diferente para cada
+      partnerId: faker.string.uuid(),
       partnerName: 'Base Partner',
-      date: new Date('2023-01-01'), // Default diferente para cada
+      date: new Date('2023-01-01'),
       due_date: new Date('2023-01-05'),
       createdAt: new Date(),
       updatedAt: new Date(),
@@ -124,13 +121,12 @@ describe('getTransactionsUseCase', () => {
 
     const transactionsFromRepo = [
       { ...createBaseMockTransaction(), id: 'txn_1', partnerId: 'partner_A', date: new Date('2023-01-10') },
-      { ...createBaseMockTransaction(), id: 'txn_2', partnerId: 'partner_B', date: new Date('2023-01-15') }, // Será filtrado por partnerId no app-level
-      { ...createBaseMockTransaction(), id: 'txn_3', partnerId: 'partner_A', date: new Date('2023-01-20') }, // Será filtrado por data no repo-level (mock)
+      { ...createBaseMockTransaction(), id: 'txn_2', partnerId: 'partner_B', date: new Date('2023-01-15') },
+      { ...createBaseMockTransaction(), id: 'txn_3', partnerId: 'partner_A', date: new Date('2023-01-20') },
     ];
 
-    // Simular que o repositório agora filtra por data E partnerId
-    const mockRepoImplementation = async (repoFilters: any) => { // 'any' para simplificar o mock dos filtros
-      let data = [...transactionsFromRepo]; // Copiar para não modificar o original entre chamadas
+    const mockRepoImplementation = async (repoFilters: any) => {
+      let data = [...transactionsFromRepo];
       if (repoFilters?.dateFrom) {
         data = data.filter(t => t.date.getTime() >= repoFilters.dateFrom!.getTime());
       }
@@ -160,14 +156,10 @@ describe('getTransactionsUseCase', () => {
     expect(mockTransactionRepo.countAll).toHaveBeenCalledWith(expectedRepoFilters);
     expect(mockTransactionRepo.findAll).toHaveBeenCalledWith(
       expect.objectContaining(expectedRepoFilters),
-      expect.objectContaining({ offset: 0, limit: 10 }), // Default pagination
-      undefined // orderBy
+      expect.objectContaining({ offset: 0, limit: 10 }),
+      undefined
     );
   });
-
-  // Removido: it('should apply application-level date filters correctly', async () => { ... });
-  // Este cenário agora está coberto pelo teste combinado 'should apply application-level filters for partnerId and dates'
-  // e pela expectativa de que o repositório (mockado) filtre por data.
 
   it('should filter by partnerId (via repo)', async () => {
     const createBase = (): TransactionWithPartner => ({
@@ -199,8 +191,8 @@ describe('getTransactionsUseCase', () => {
     expect(result.data[0].id).toBe('partner_ok');
     expect(mockTransactionRepo.findAll).toHaveBeenCalledWith(
       expect.objectContaining({ partnerId: 'partner_A_test' }),
-      expect.any(Object), // pagination
-      undefined // orderBy
+      expect.any(Object),
+      undefined
     );
     expect(mockTransactionRepo.countAll).toHaveBeenCalledWith(
       expect.objectContaining({ partnerId: 'partner_A_test' })
@@ -210,14 +202,8 @@ describe('getTransactionsUseCase', () => {
   it('should return empty data and correct pagination if repository throws error', async () => {
     const repositoryError = new Error('DB Query Failed');
     (mockTransactionRepo.countAll as ReturnType<typeof vi.fn>).mockRejectedValue(repositoryError);
-    // findAll não será chamado se countAll falhar primeiro, mas podemos mockar para o caso
     (mockTransactionRepo.findAll as ReturnType<typeof vi.fn>).mockRejectedValue(repositoryError);
 
-    // Vitest não tem toThrowWithMessage diretamente como Jest, mas podemos verificar a mensagem no catch
-    // ou esperar que o caso de uso trate e retorne uma estrutura de erro.
-    // O caso de uso atual propaga o erro.
-    // Para testar a estrutura de retorno da action em caso de erro, precisaríamos testar a action.
-    // Aqui, testamos o comportamento do caso de uso.
     await expect(getTransactionsUseCase()).rejects.toThrow(repositoryError);
   });
 
@@ -226,11 +212,11 @@ describe('getTransactionsUseCase', () => {
     (mockTransactionRepo.countAll as ReturnType<typeof vi.fn>).mockResolvedValue(23);
     const pagination = { pageSize: 10 };
     const result = await getTransactionsUseCase(undefined, pagination);
-    expect(result.totalPages).toBe(3); // Math.ceil(23 / 10)
+    expect(result.totalPages).toBe(3);
 
     (mockTransactionRepo.countAll as ReturnType<typeof vi.fn>).mockResolvedValue(20);
     const result2 = await getTransactionsUseCase(undefined, pagination);
-    expect(result2.totalPages).toBe(2); // Math.ceil(20 / 10)
+    expect(result2.totalPages).toBe(2);
 
     (mockTransactionRepo.countAll as ReturnType<typeof vi.fn>).mockResolvedValue(0);
     const result3 = await getTransactionsUseCase(undefined, pagination);

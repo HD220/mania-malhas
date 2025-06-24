@@ -3,7 +3,7 @@ import { db } from "@/db/postgres";
 import {
   transactionRepository as createTransactionRepository,
   TransactionRepositoryFactory,
-} from "@/db/repositories/transactionRepository";
+} from "@/features/transaction/db/transactionRepository";
 import {
   paymentRepository as createPaymentRepository,
   PaymentRepositoryFactory,
@@ -43,9 +43,6 @@ export default async function deleteTransactionUseCase(
   const paymentRepo = paymentRepoFactory(db);
 
   // 2. Attempt to find the transaction first to ensure it exists before deletion
-  // This helps in providing a more specific NotFoundError.
-  // The actual deleteById in the repository might not throw if the record doesn't exist,
-  // depending on its implementation (ours currently doesn't).
   const existingTransaction = await transactionRepo.findById(id);
   if (!existingTransaction) {
     throw new NotFoundError(`Transaction with ID ${id} not found.`);

@@ -1,17 +1,16 @@
 import { describe, it, expect, vi, beforeEach } from 'vitest';
 import updateTransactionUseCase, { UpdateTransactionInput, updateTransactionSchema } from './updateTransactionUseCase';
-import { transactionRepository } from '@/db/repositories/transactionRepository';
-import { SelectTransaction } from '@/db/repositories/schemas/transactionSchema';
+import { transactionRepository } from '@/features/transaction/db/transactionRepository';
+import { SelectTransaction } from '@/features/transaction/schemas/transactionSchema';
 import { ZodError } from 'zod';
 import { NotFoundError } from '@/lib/errors/domainErrors';
 import { faker } from '@faker-js/faker';
 
 // Mock do transactionRepository factory
-vi.mock('@/db/repositories/transactionRepository', () => ({
+vi.mock('@/features/transaction/db/transactionRepository', () => ({
   transactionRepository: vi.fn().mockReturnValue({
     findById: vi.fn(),
-    update: vi.fn(), // Will be used in UC-TX-UPDATE.2
-    // Add other methods if needed for type completion
+    update: vi.fn(),
     insert: vi.fn(),
     findAll: vi.fn(),
     countAll: vi.fn(),
@@ -26,7 +25,7 @@ describe('updateTransactionUseCase', () => {
   const mockExistingTransaction: SelectTransaction = {
     id: transactionId,
     description: 'Transação Original',
-    value: "100.00",
+    value: 100.00, // Schema coerces this
     type: 'E',
     status: 'Pendente',
     partnerId: faker.string.uuid(),
@@ -39,9 +38,6 @@ describe('updateTransactionUseCase', () => {
 
   beforeEach(() => {
     vi.clearAllMocks();
-    // Correctly get the mocked repository instance
-    // The mock for transactionRepository returns an object with mocked methods (findById, update etc.)
-    // So, we re-assign it to mockRepo to ensure it's fresh for each test.
     mockRepo = transactionRepository(vi.fn() as any) as ReturnType<ReturnType<typeof transactionRepository>>;
   });
 
@@ -59,13 +55,13 @@ describe('updateTransactionUseCase', () => {
       ...mockExistingTransaction,
       description: updatedDescription,
       status: updatedStatus,
-      updatedAt: new Date(Date.now() + 1000), // Simular que updatedAt mudou
+      updatedAt: new Date(Date.now() + 1000),
     };
 
     (mockRepo.findById as vi.Mock)
-      .mockResolvedValueOnce(mockExistingTransaction) // Primeira chamada para buscar
-      .mockResolvedValueOnce(mockUpdatedTransaction);  // Segunda chamada para retornar após update
-    (mockRepo.update as vi.Mock).mockResolvedValue(undefined); // update não retorna nada
+      .mockResolvedValueOnce(mockExistingTransaction)
+      .mockResolvedValueOnce(mockUpdatedTransaction);
+    (mockRepo.update as vi.Mock).mockResolvedValue(undefined);
 
     const result = await updateTransactionUseCase(transactionId, dataToUpdate);
 
@@ -82,14 +78,14 @@ describe('updateTransactionUseCase', () => {
 
   it('should not call update if update data is empty or only contains undefined values', async () => {
     (mockRepo.findById as vi.Mock).mockResolvedValue(mockExistingTransaction);
-    const emptyUpdateData: UpdateTransactionInput = { description: undefined }; // Or just {}
+    const emptyUpdateData: UpdateTransactionInput = { description: undefined };
 
     const result = await updateTransactionUseCase(transactionId, emptyUpdateData);
 
-    expect(mockRepo.findById).toHaveBeenCalledTimes(1); // Only the initial find
+    expect(mockRepo.findById).toHaveBeenCalledTimes(1);
     expect(mockRepo.findById).toHaveBeenCalledWith(transactionId);
     expect(mockRepo.update).not.toHaveBeenCalled();
-    expect(result).toEqual(mockExistingTransaction); // Should return the original transaction
+    expect(result).toEqual(mockExistingTransaction);
   });
 
 
@@ -105,7 +101,6 @@ describe('updateTransactionUseCase', () => {
   });
 
   it('should throw ZodError if update data is invalid', async () => {
-    // findById will be called once before validation.
     (mockRepo.findById as vi.Mock).mockResolvedValue(mockExistingTransaction);
     const invalidUpdateData = { ...validUpdateData, value: "not-a-valid-number" } as any;
 
@@ -123,8 +118,8 @@ describe('updateTransactionUseCase', () => {
     };
 
     (mockRepo.findById as vi.Mock)
-      .mockResolvedValueOnce(mockExistingTransaction) // Initial find
-      .mockResolvedValueOnce(mockUpdatedTransaction); // Find after update
+      .mockResolvedValueOnce(mockExistingTransaction)
+      .mockResolvedValueOnce(mockUpdatedTransaction);
     (mockRepo.update as vi.Mock).mockResolvedValue(undefined);
 
     const result = await updateTransactionUseCase(transactionId, partialUpdate);
@@ -160,7 +155,7 @@ describe('updateTransactionUseCase', () => {
 
   it('should throw ZodError for invalid type', async () => {
     (mockRepo.findById as vi.Mock).mockResolvedValue(mockExistingTransaction);
-    const invalidData = { type: 'X' } as any; // Invalid type
+    const invalidData = { type: 'X' } as any;
 
     await expect(updateTransactionUseCase(transactionId, invalidData))
       .rejects.toThrow(ZodError);
@@ -168,7 +163,7 @@ describe('updateTransactionUseCase', () => {
 
   it('should throw ZodError for invalid status', async () => {
     (mockRepo.findById as vi.Mock).mockResolvedValue(mockExistingTransaction);
-    const invalidData = { status: 'Muito Atrasado' } as any; // Invalid status
+    const invalidData = { status: 'Muito Atrasado' } as any;
 
     await expect(updateTransactionUseCase(transactionId, invalidData))
       .rejects.toThrow(ZodError);

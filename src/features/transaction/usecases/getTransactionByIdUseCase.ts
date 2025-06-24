@@ -2,8 +2,8 @@ import { db } from "@/db/postgres";
 import {
   transactionRepository as createTransactionRepository,
   TransactionRepositoryFactory,
-} from "@/db/repositories/transactionRepository";
-import { SelectTransaction } from "@/db/repositories/schemas/transactionSchema";
+} from "@/features/transaction/db/transactionRepository";
+import { SelectTransaction } from "@/features/transaction/schemas/transactionSchema";
 import { NotFoundError } from "@/lib/errors/domainErrors";
 import { z } from "zod";
 

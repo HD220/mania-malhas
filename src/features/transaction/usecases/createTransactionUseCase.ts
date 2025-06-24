@@ -2,12 +2,12 @@ import { db } from "@/db/postgres";
 import {
   transactionRepository as createTransactionRepository,
   TransactionRepositoryFactory
-} from "@/db/repositories/transactionRepository";
+} from "@/features/transaction/db/transactionRepository";
 import {
   InsertTransaction,
   SelectTransaction,
   insertTransactionSchema
-} from "@/db/repositories/schemas/transactionSchema";
+} from "@/features/transaction/schemas/transactionSchema";
 import { ZodError } from "zod";
 import createNotificationUseCase, { CreateNotificationInput } from "@/usecases/notification/createNotificationUseCase";
 // Assuming internalGetUserIdFromSession is the way to get current user for notification.
@@ -39,10 +39,6 @@ export default async function createTransactionUseCase(
   transactionRepoFactory: TransactionRepositoryFactory = createTransactionRepository
 ): Promise<SelectTransaction> {
   // 1. Validate input data
-  // insertTransactionSchema already expects fields like description, value, type, status, partnerId, date, due_date
-  // It omits id, createdAt, updatedAt by default.
-  // We need to ensure our CreateTransactionInput matches what insertTransactionSchema can parse
-  // to become a valid InsertTransaction.
   const parsedData = insertTransactionSchema.parse(transactionData);
 
   const transactionRepo = transactionRepoFactory(db);
@@ -51,22 +47,18 @@ export default async function createTransactionUseCase(
   const { id: newId } = await transactionRepo.insert(parsedData);
 
   // 3. Fetch the complete transaction object
-  // It's good practice to fetch the entity after creation to get DB-generated fields (like createdAt, default values)
-  // and to confirm successful insertion.
   const newTransaction = await transactionRepo.findById(newId);
 
   if (!newTransaction) {
-    // This case should ideally not happen if insert was successful and ID is correct.
-    // But it's good to handle it defensively.
     throw new Error("Failed to retrieve the created transaction after insertion.");
   }
 
   // 4. Attempt to create a notification (best effort)
   try {
-    const currentUserId = await internalGetUserIdFromSession(); // Or determine target user differently
+    const currentUserId = await internalGetUserIdFromSession();
     if (currentUserId) {
       const notificationData: CreateNotificationInput = {
-        userId: currentUserId, // Notify the user who created it (or specific admin)
+        userId: currentUserId,
         type: "new_transaction",
         message: `Nova transação "${newTransaction.description}" (${
           newTransaction.type === "E" ? "Entrada" : "Saída"
@@ -74,10 +66,8 @@ export default async function createTransactionUseCase(
         relatedEntityId: newTransaction.id,
         relatedEntityType: "transaction",
       };
-      // Not awaiting this intentionally if it's not critical for the transaction flow
       createNotificationUseCase(notificationData).catch(error => {
         console.error("Failed to create notification for new transaction:", error);
-        // Do not let notification failure fail the transaction creation
       });
     } else {
       console.warn("No user ID found to create notification for new transaction.");
@@ -87,7 +77,6 @@ export default async function createTransactionUseCase(
       "Error during notification creation for new transaction:",
       error
     );
-    // Do not re-throw; notification is secondary
   }
 
   return newTransaction;

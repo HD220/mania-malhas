@@ -2,10 +2,10 @@
 
 import * as React from "react";
 import { useState, useTransition } from "react";
-import { Trash2, Loader2 } from "lucide-react"; // Added Loader2
+import { Trash2, Loader2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
-import { deleteTransactionAction } from "@/app/(admin)/transactions/actions"; // Import the server action
-import { toast } from "sonner"; // Import toast
+import { deleteTransactionAction } from "@/features/transaction/actions";
+import { toast } from "sonner";
 import {
   AlertDialog,
   AlertDialogAction,
@@ -20,7 +20,7 @@ import {
 
 interface DeleteTransactionButtonProps {
   transactionId: string;
-  transactionDescription?: string; // Optional: for a more specific message
+  transactionDescription?: string;
 }
 
 export function DeleteTransactionButton({
@@ -38,11 +38,11 @@ export function DeleteTransactionButton({
       } else {
         toast.error(response.message || "Falha ao excluir transação.");
       }
-      setIsDialogOpen(false); // Close dialog regardless of outcome
+      setIsDialogOpen(false);
     });
   };
 
-  const descriptionText = transactionDescription // Renamed to avoid conflict
+  const description = transactionDescription
     ? `Tem certeza que deseja excluir a transação "${transactionDescription}"? Esta ação não pode ser desfeita.`
     : "Tem certeza que deseja excluir esta transação? Esta ação não pode ser desfeita.";
 

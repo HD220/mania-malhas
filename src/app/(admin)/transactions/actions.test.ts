@@ -1,40 +1,40 @@
 import { describe, it, expect, vi, beforeEach } from 'vitest';
 import { listTransactionsAction, TransactionServerResponse } from './actions';
-import getTransactionsUseCase, { PaginatedTransactionsResult, GetTransactionsFilters, UseCasePaginationParams, UseCaseOrderByParams } from '@/usecases/transaction/getTransactionsUseCase';
-import { TransactionWithPartner } from '@/db/repositories/transactionRepository';
+import getTransactionsUseCase, { PaginatedTransactionsResult, GetTransactionsFilters, UseCasePaginationParams, UseCaseOrderByParams } from '@/features/transaction/usecases/getTransactionsUseCase';
+import { TransactionWithPartner } from '@/features/transaction/db/transactionRepository';
 import { faker } from '@faker-js/faker';
 
 import { unstable_noStore } from 'next/cache'; // Importar diretamente
 
-import createTransactionUseCase, { CreateTransactionInput } from '@/usecases/transaction/createTransactionUseCase';
-import { SelectTransaction } from '@/db/repositories/schemas/transactionSchema';
+import createTransactionUseCase, { CreateTransactionInput } from '@/features/transaction/usecases/createTransactionUseCase';
+import { SelectTransaction } from '@/features/transaction/schemas/transactionSchema';
 import { ZodError, ZodIssue } from 'zod';
 import { revalidatePath } from 'next/cache';
 import { createTransactionAction, CreateTransactionServerResponse } from './actions';
 
 
 // Mock dos use cases
-import updateTransactionUseCase, { UpdateTransactionInput } from '@/usecases/transaction/updateTransactionUseCase';
+import updateTransactionUseCase, { UpdateTransactionInput } from '@/features/transaction/usecases/updateTransactionUseCase';
 import { updateTransactionAction, UpdateTransactionServerResponse } from './actions';
 
 // Import deleteTransactionUseCase with its input schema
-import deleteTransactionUseCase, { deleteTransactionInputSchema } from '@/usecases/transaction/deleteTransactionUseCase';
+import deleteTransactionUseCase, { deleteTransactionInputSchema } from '@/features/transaction/usecases/deleteTransactionUseCase';
 import { deleteTransactionAction, DeleteTransactionServerResponse } from './actions';
 
 // Import getTransactionByIdUseCase and its types/action
-import getTransactionByIdUseCase, { getTransactionByIdInputSchema } from '@/usecases/transaction/getTransactionByIdUseCase';
+import getTransactionByIdUseCase, { getTransactionByIdInputSchema } from '@/features/transaction/usecases/getTransactionByIdUseCase';
 import { getTransactionByIdAction, GetTransactionByIdServerResponse } from './actions';
 
 // Specific error types (NotFoundError, DomainConflictError, ZodError) will be imported via vi.importActual or are standard
 
 // Mock dos use cases
-vi.mock('@/usecases/transaction/getTransactionsUseCase');
-vi.mock('@/usecases/transaction/createTransactionUseCase');
-vi.mock('@/usecases/transaction/updateTransactionUseCase');
+vi.mock('@/features/transaction/usecases/getTransactionsUseCase');
+vi.mock('@/features/transaction/usecases/createTransactionUseCase');
+vi.mock('@/features/transaction/usecases/updateTransactionUseCase');
 
 // Mock deleteTransactionUseCase (default export) but keep named exports (like schema) real
-vi.mock('@/usecases/transaction/deleteTransactionUseCase', async () => {
-  const actual = await vi.importActual<typeof import('@/usecases/transaction/deleteTransactionUseCase')>('@/usecases/transaction/deleteTransactionUseCase');
+vi.mock('@/features/transaction/usecases/deleteTransactionUseCase', async () => {
+  const actual = await vi.importActual<typeof import('@/features/transaction/usecases/deleteTransactionUseCase')>('@/features/transaction/usecases/deleteTransactionUseCase');
   return {
     ...actual, // Includes actual deleteTransactionInputSchema
     default: vi.fn(), // Mocks the default export (deleteTransactionUseCase function)
@@ -42,8 +42,8 @@ vi.mock('@/usecases/transaction/deleteTransactionUseCase', async () => {
 });
 
 // Mock getTransactionByIdUseCase (default export) but keep named exports (like schema) real
-vi.mock('@/usecases/transaction/getTransactionByIdUseCase', async () => {
-  const actual = await vi.importActual<typeof import('@/usecases/transaction/getTransactionByIdUseCase')>('@/usecases/transaction/getTransactionByIdUseCase');
+vi.mock('@/features/transaction/usecases/getTransactionByIdUseCase', async () => {
+  const actual = await vi.importActual<typeof import('@/features/transaction/usecases/getTransactionByIdUseCase')>('@/features/transaction/usecases/getTransactionByIdUseCase');
   return {
     ...actual, // Includes actual getTransactionByIdInputSchema
     default: vi.fn(), // Mocks the default export (getTransactionByIdUseCase function)

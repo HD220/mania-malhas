@@ -1,7 +1,7 @@
 import { describe, it, expect, vi, beforeEach } from "vitest";
 import getTransactionByIdUseCase, { getTransactionByIdInputSchema } from "./getTransactionByIdUseCase";
-import { TransactionRepositoryFactory } from "@/db/repositories/transactionRepository";
-import { SelectTransaction } from "@/db/repositories/schemas/transactionSchema";
+import { TransactionRepositoryFactory } from "@/features/transaction/db/transactionRepository";
+import { SelectTransaction } from "@/features/transaction/schemas/transactionSchema";
 import { NotFoundError } from "@/lib/errors/domainErrors";
 import { ZodError } from "zod";
 import { faker } from "@faker-js/faker";
@@ -21,12 +21,12 @@ const validTransactionId = faker.string.uuid();
 const sampleTransaction: SelectTransaction = {
   id: validTransactionId,
   description: "Test Transaction",
-  value: 100.50,
+  value: 100.50, // Schema coerces to number
   type: "E",
   status: "Pendente",
   partnerId: faker.string.uuid(),
   date: new Date(),
-  dueDate: new Date(),
+  due_date: new Date(), // Corrected to due_date
   createdAt: new Date(),
   updatedAt: new Date(),
   transactionId: null,
@@ -67,8 +67,7 @@ describe("getTransactionByIdUseCase", () => {
   });
 
   it("should throw ZodError if the input ID is missing", async () => {
-    // @ts-expect-error Testing invalid input
-    const input = {};
+    const input = {} as GetTransactionByIdInput; // Cast for test
     await expect(
         getTransactionByIdUseCase(input, mockTransactionRepoFactory)
     ).rejects.toThrow(ZodError);

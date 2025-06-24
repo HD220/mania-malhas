@@ -10,8 +10,8 @@ import {
   CardTitle,
 } from "@/components/ui/card";
 import { useEffect, useState, useCallback } from "react";
-import { listTransactionsAction } from "../actions"; // CORRECTED PATH
-import { TransactionWithPartner } from "@/db/repositories/transactionRepository";
+import { listTransactionsAction } from "@/features/transaction/actions"; // CORRECTED PATH
+import { TransactionWithPartner } from "@/features/transaction/db/transactionRepository";
 import { TransactionPaymentsModal } from "@/components/transaction-payments-modal";
 import { useToast } from "@/components/ui/use-toast";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
@@ -24,7 +24,7 @@ import { Calendar } from "@/components/ui/calendar";
 import { format, isValid as isValidDate } from "date-fns";
 import { ptBR } from "date-fns/locale";
 import { cn } from "@/utils";
-import { UseCaseOrderByParams } from "@/usecases/transaction/getTransactionsUseCase";
+import { UseCaseOrderByParams } from "@/features/transaction/usecases/getTransactionsUseCase";
 
 interface TransactionFilters {
   type?: "E" | "S";

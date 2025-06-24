@@ -1,7 +1,7 @@
 "use client";
 
 import * as React from "react";
-import { useState, useEffect, useTransition } from "react"; // Added useTransition
+import { useState, useEffect, useTransition } from "react";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { z } from "zod";
@@ -14,13 +14,10 @@ import {
   DialogHeader,
   DialogTitle,
   DialogTrigger,
-  DialogClose, // Added DialogClose
+  DialogClose,
 } from "@/components/ui/dialog";
 import {
   Form,
-  // FormField,
-  // FormItem,
-  // FormLabel,
   FormField,
   FormItem,
   FormLabel,
@@ -43,11 +40,11 @@ import {
 } from "@/components/ui/popover";
 import { Calendar } from "@/components/ui/calendar";
 import { cn } from "@/lib/utils";
-import { CalendarIcon, ChevronsUpDown, Check } from "lucide-react"; // Added ChevronsUpDown, Check
+import { CalendarIcon, ChevronsUpDown, Check } from "lucide-react";
 import { format } from "date-fns";
-import { ptBR } from "date-fns/locale"; // For date formatting
-import { getPartners } from "@/features/partner/actions"; // Import server action
-import { type SelectPartner } from "@/features/partner/schemas/partnerSchema"; // Import type
+import { ptBR } from "date-fns/locale";
+import { getPartners } from "@/features/partner/actions";
+import { type SelectPartner } from "@/features/partner/schemas/partnerSchema";
 import {
   Command,
   CommandEmpty,
@@ -56,20 +53,14 @@ import {
   CommandItem,
   CommandList,
 } from "@/components/ui/command";
-import { createTransactionAction, CreateTransactionServerResponse } from "@/app/(admin)/transactions/actions"; // Import server action
-import { toast } from "sonner"; // Import toast
-import { Loader2 } from "lucide-react"; // For loading indicator
+import { createTransactionAction, CreateTransactionServerResponse } from "@/features/transaction/actions";
+import { toast } from "sonner";
+import { Loader2 } from "lucide-react";
 
-// Define the Zod schema for form validation (based on previous step's analysis)
-// This will be refined with actual field components later.
 const createTransactionFormSchema = z.object({
   description: z.string().min(1, "Descrição é obrigatória."),
-  // Using z.string() for value as InputMoneyField provides a string.
-  // The action will handle conversion/validation before passing to the use case,
-  // which expects a number or can coerce a numeric string.
-  // The refine here is for client-side feedback.
   value: z.string().min(1, "Valor é obrigatório.").refine(val => {
-    const num = parseFloat(val.replace('.', '').replace(',', '.')); // Handle both , and . as decimal, remove thousands separators for parsing
+    const num = parseFloat(val.replace('.', '').replace(',', '.'));
     return !isNaN(num) && num > 0;
   }, {
     message: "Valor deve ser um número positivo. Ex: 123,45 ou 123.45",
@@ -78,10 +69,10 @@ const createTransactionFormSchema = z.object({
     required_error: "Tipo é obrigatório.",
     errorMap: () => ({ message: "Tipo deve ser 'E' (Entrada) ou 'S' (Saída)." })
   }),
-  status: z.enum(["Pendente", "Pago", "Cancelado"], { // Assuming these statuses
+  status: z.enum(["Pendente", "Pago", "Cancelado"], {
     required_error: "Status é obrigatório.",
   }),
-  partnerId: z.string().uuid("ID do Parceiro inválido."), // Placeholder, will be a select/combobox
+  partnerId: z.string().uuid("ID do Parceiro inválido."),
   date: z.date({ required_error: "Data da transação é obrigatória." }),
   dueDate: z.date().optional(),
 });
@@ -100,39 +91,36 @@ export function CreateTransactionDialog() {
     defaultValues: {
       description: "",
       value: "",
-      type: undefined, // To ensure placeholder is shown for select
-      status: "Pendente", // Default status
-      partnerId: "", // Will be handled by a selector
+      type: undefined,
+      status: "Pendente",
+      partnerId: "",
       date: new Date(),
       dueDate: undefined,
     },
   });
 
   useEffect(() => {
-    if (isOpen && partners.length === 0 && !partnersLoading) { // Fetch only if dialog is open and partners not loaded
+    if (isOpen && partners.length === 0 && !partnersLoading) {
       const fetchPartners = async () => {
         setPartnersLoading(true);
         try {
-          const fetchedPartners = await getPartners("", true); // Fetch all active partners
+          const fetchedPartners = await getPartners("", true);
           setPartners(fetchedPartners);
         } catch (error) {
           console.error("Failed to fetch partners:", error);
-          // Optionally, show a toast error here
         } finally {
           setPartnersLoading(false);
         }
       };
       fetchPartners();
     }
-  }, [isOpen, partners.length, partnersLoading]); // Added dependencies
+  }, [isOpen, partners.length, partnersLoading]);
 
   const onSubmit = (data: CreateTransactionFormValues) => {
     startTransition(async () => {
-      // Ensure value is a string representation of a number for the action
-      // The use case's Zod schema will coerce it to a number.
       const formData = {
         ...data,
-        value: String(data.value).replace(',', '.'), // Ensure dot for decimal
+        value: String(data.value).replace(',', '.'),
       };
 
       try {
@@ -169,7 +157,7 @@ export function CreateTransactionDialog() {
       <DialogTrigger asChild>
         <Button variant="outline">Nova Transação</Button>
       </DialogTrigger>
-      <DialogContent className="sm:max-w-[480px]"> {/* Adjust width as needed */}
+      <DialogContent className="sm:max-w-[480px]">
         <DialogHeader>
           <DialogTitle>Criar Nova Transação</DialogTitle>
           <DialogDescription>
@@ -196,19 +184,7 @@ export function CreateTransactionDialog() {
               control={form.control}
               name="value"
               render={({ field }) => (
-                // Using InputMoneyField requires careful handling of its props if it's not fully RHF compatible
-                // For now, let's use a standard Input and handle currency formatting/parsing manually or via Zod refine
-                // Or, if InputMoneyField is RHF-compatible via `field` prop, it can be used directly.
-                // Assuming InputMoneyField is designed to be spread with `field` from RHF:
                 <InputMoneyField label="Valor" placeholder="0,00" {...field} />
-                // If not, it would be:
-                // <FormItem>
-                //   <FormLabel>Valor</FormLabel>
-                //   <FormControl>
-                //     <Input type="text" placeholder="0,00" {...field} onChange={e => field.onChange(e.target.value.replace('.', '').replace(',', '.'))} />
-                //   </FormControl>
-                //   <FormMessage />
-                // </FormItem>
               )}
             />
 
@@ -291,11 +267,11 @@ export function CreateTransactionDialog() {
                         {partnersLoading && <div className="p-4 text-sm text-center">Carregando...</div>}
                         {!partnersLoading && <CommandEmpty>Nenhum parceiro encontrado.</CommandEmpty>}
                         {!partnersLoading && partners.length > 0 && (
-                          <CommandList> {/* Use CommandList for scrolling if many items */}
+                          <CommandList>
                             <CommandGroup>
                               {partners.map((partner) => (
                                 <CommandItem
-                                  value={partner.id} // Use partner.id for value
+                                  value={partner.id}
                                   key={partner.id}
                                   onSelect={(currentValue) => {
                                     form.setValue("partnerId", currentValue === field.value ? "" : currentValue);
@@ -405,7 +381,7 @@ export function CreateTransactionDialog() {
             </div>
           </form>
         </Form>
-        <DialogFooter className="pt-4"> {/* Added pt-4 for spacing */}
+        <DialogFooter className="pt-4">
           <DialogClose asChild>
             <Button type="button" variant="outline" disabled={isPending}>
               Cancelar
