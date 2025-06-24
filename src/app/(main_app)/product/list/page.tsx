@@ -1,5 +1,5 @@
 import { TabsContent } from "@/components/ui/tabs";
-import { getProducts } from "./actions";
+import { getProducts } from "@/features/product/actions/listProductActions";
 import Tab from "./tabs";
 import { ProductCard } from "@/components/product-card";
 
