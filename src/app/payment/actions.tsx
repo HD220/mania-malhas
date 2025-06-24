@@ -1,6 +1,6 @@
 "use server";
 
-import { InsertPayment } from "@/db/repositories/schemas/paymentSchema";
+import { InsertPayment } from "@/features/payment/schemas/paymentSchema";
 import createPaymentUseCase from "@/usecases/payment/createPaymentUseCase";
 import getPaymentsByTransactionIdUseCase from "@/usecases/payment/getPaymentsByTransactionIdUseCase";
 import { revalidatePath } from "next/cache";
@@ -48,7 +48,7 @@ export async function addPaymentAction(
   }
 }
 
-import { SelectPayment } from "@/db/repositories/schemas/paymentSchema"; // Import SelectPayment
+import { SelectPayment } from "@/features/payment/schemas/paymentSchema"; // Import SelectPayment
 
 export async function listPaymentsByTransactionAction(
   transactionId: string

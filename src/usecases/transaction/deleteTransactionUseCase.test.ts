@@ -7,7 +7,7 @@ import deleteTransactionUseCase, {
 import { TransactionRepositoryFactory } from "@/db/repositories/transactionRepository";
 import { PaymentRepositoryFactory } from "@/db/repositories/paymentRepository";
 import { SelectTransaction } from "@/db/repositories/schemas/transactionSchema";
-import { SelectPayment } from "@/db/repositories/schemas/paymentSchema";
+import { SelectPayment } from "@/features/payment/schemas/paymentSchema";
 
 // Mock the transaction repository
 const mockTransactionRepository = {

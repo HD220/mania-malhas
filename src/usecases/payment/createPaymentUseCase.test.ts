@@ -2,7 +2,7 @@ import { describe, it, expect, vi, beforeEach } from 'vitest';
 import createPaymentUseCase from './createPaymentUseCase';
 import { db } from '@/db/postgres';
 import { paymentRepository } from '@/db/repositories/paymentRepository';
-import { InsertPayment, insertPaymentSchema } from '@/db/repositories/schemas/paymentSchema';
+import { InsertPayment, insertPaymentSchema } from '@/features/payment/schemas/paymentSchema';
 import { transactionTable } from '@/db/postgres/schema/transaction';
 import { ZodError } from 'zod';
 

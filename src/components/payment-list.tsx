@@ -1,6 +1,6 @@
 "use client";
 
-import { SelectPayment } from "@/db/repositories/schemas/paymentSchema";
+import { SelectPayment } from "@/features/payment/schemas/paymentSchema";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { format } from "date-fns";
 import { ptBR } from "date-fns/locale";

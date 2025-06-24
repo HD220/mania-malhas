@@ -1,7 +1,7 @@
 import { describe, it, expect, vi, beforeEach } from 'vitest';
 import getPaymentsByTransactionIdUseCase from './getPaymentsByTransactionIdUseCase';
 import { paymentRepository } from '@/db/repositories/paymentRepository';
-import { SelectPayment } from '@/db/repositories/schemas/paymentSchema';
+import { SelectPayment } from '@/features/payment/schemas/paymentSchema';
 import { faker } from '@faker-js/faker';
 
 // Mock do paymentRepository

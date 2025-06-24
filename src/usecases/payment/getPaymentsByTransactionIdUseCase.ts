@@ -1,6 +1,6 @@
 import { db } from "@/db/postgres";
 import { paymentRepository } from "@/db/repositories/paymentRepository";
-import { SelectPayment } from "@/db/repositories/schemas/paymentSchema";
+import { SelectPayment } from "@/features/payment/schemas/paymentSchema";
 
 /**
  * Fetches all payments associated with a specific transaction ID.
