@@ -34,41 +34,34 @@ const EnvSchema = z.object({
 
 export type EnvSchema = z.infer<typeof EnvSchema>;
 
+// Load .env files into process.env. This should happen once.
+// Vitest also handles .env file loading, so this ensures it's done if not already.
 expand(config());
 
-// Ensure process.env is mutable for test environment defaults
-const envSource = { ...process.env };
-
-if (envSource.NODE_ENV === 'test') {
-  envSource.DB_HOST = envSource.DB_HOST || 'test_db_host_from_env_ts';
-  envSource.DB_USER = envSource.DB_USER || 'test_db_user_from_env_ts';
-  envSource.DB_PASSWORD = envSource.DB_PASSWORD || 'test_db_password_from_env_ts';
-  envSource.DB_NAME = envSource.DB_NAME || 'test_db_name_from_env_ts';
-  envSource.DB_PORT = envSource.DB_PORT || '5437'; // Different port to check source
-  envSource.DATABASE_URL = envSource.DATABASE_URL || 'postgresql://test_user_envts:test_password_envts@test_host_envts:5437/test_db_name_envts';
-  envSource.MINIO_URL = envSource.MINIO_URL || 'http://test_minio_from_env_ts:9000';
-  envSource.MINIO_ACCESSKEY = envSource.MINIO_ACCESSKEY || 'test_minio_key_from_env_ts';
-  envSource.MINIO_SECRETKEY = envSource.MINIO_SECRETKEY || 'test_minio_secret_from_env_ts';
-  // MINIO_BUCKET_PRODUCTS has a default in schema
-  // DB_MIGRATING and DB_SEEDING have defaults in schema
-}
-
-expand(config());
-
+// Validate process.env after dotenv (and potentially Vitest's loader) has populated it.
+// This try-catch is crucial for early feedback on missing env variables.
 try {
   EnvSchema.parse(process.env);
 } catch (error) {
   if (error instanceof ZodError) {
-    let message = "Missing required values in .env:\n";
+    let message = "ERROR: Missing or invalid environment variables (validated in env.ts):\n";
     error.issues.forEach((issue) => {
-      message += issue.path[0] + "\n";
+      const path = issue.path.join(".");
+      message += `- ${path}: ${issue.message}\n`;
     });
     const e = new Error(message);
-    e.stack = "";
-    throw e;
+    e.stack = ""; // Reduce noise in console output
+    throw e; // Throw to prevent application startup with invalid config
   } else {
-    console.error(error);
+    // Catch any other unexpected errors during the initial parse attempt
+    console.error(
+      "CRITICAL: Unexpected error during initial environment variable parsing in env.ts:",
+      error
+    );
+    throw error; // Re-throw to halt execution
   }
 }
 
+// Export the validated and parsed environment variables.
+// This parse operation also serves as the definitive check if the try-catch above were removed.
 export default EnvSchema.parse(process.env);
