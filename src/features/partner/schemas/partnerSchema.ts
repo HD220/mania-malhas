@@ -1,6 +1,6 @@
 import { createInsertSchema, createSelectSchema } from "drizzle-zod";
 import { z } from "zod";
-import { partnerTable } from "../../postgres/schema/partner";
+import { partnerTable } from "@/db/postgres/schema/partner";
 
 export const insertPartnerSchema = createInsertSchema(partnerTable, {
   name: z.string().min(1),
