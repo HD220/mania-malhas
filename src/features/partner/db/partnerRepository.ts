@@ -5,16 +5,16 @@ import {
   SelectPartner,
   insertPartnerSchema,
   selectPartnerSchema,
-} from "./schemas/partnerSchema";
-import { partnerTable } from "../postgres/schema/partner";
+} from "../schemas/partnerSchema"; // Adjusted import path for partnerSchema
+import { partnerTable } from "@/db/postgres/schema/partner"; // Kept as @ alias
 
 export type DBConnection = dbType["db"];
 
 export type PartnerRepository = (db: DBConnection) => {
   findAll: (status?: boolean) => Promise<SelectPartner[]>;
   findBySearch: (search: string, status: boolean) => Promise<SelectPartner[]>;
-  findById: (id: string) => Promise<SelectPartner>;
-  update: (id: string, data: InsertPartner) => Promise<void>;
+  findById: (id: string) => Promise<SelectPartner | null>; // Adjusted return type
+  update: (id: string, data: InsertPartner) => Promise<void>; // Should it return SelectPartner | null?
   /**
    * Inserts a new partner into the database.
    * @param {InsertPartner} data - The data for the new partner.
@@ -100,10 +100,8 @@ export const partnerRepository: PartnerRepository = (db) => {
       return null; // Parceiro não encontrado
     }
 
-    const [result] = partnersDb; // Agora sabemos que partnersDb tem pelo menos um item
+    const [result] = partnersDb;
 
-    // Não é estritamente necessário verificar !result aqui se partnersDb.length > 0 já foi checado,
-    // mas por segurança, caso a query retorne [null] ou [undefined] por algum motivo exótico.
     if (!result) {
       return null;
     }
@@ -113,7 +111,6 @@ export const partnerRepository: PartnerRepository = (db) => {
       return parsed.data;
     }
 
-    // Se o parceiro foi encontrado mas a estrutura é inválida
     console.error(
       `Erro de parsing Zod para parceiro ID ${id}:`,
       parsed.error.flatten()
@@ -128,7 +125,7 @@ export const partnerRepository: PartnerRepository = (db) => {
    * @param {InsertPartner} data - The partner data to update.
    * @returns {Promise<void>}
    */
-  const update = async (id: string, { ...data }: InsertPartner): Promise<void> => {
+  const update = async (id: string, { ...data }: InsertPartner): Promise<void> => { // Consider returning SelectPartner | null
     await db
       .update(partnerTable)
       .set({

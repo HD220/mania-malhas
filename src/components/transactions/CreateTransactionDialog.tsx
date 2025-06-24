@@ -46,7 +46,7 @@ import { cn } from "@/lib/utils";
 import { CalendarIcon, ChevronsUpDown, Check } from "lucide-react"; // Added ChevronsUpDown, Check
 import { format } from "date-fns";
 import { ptBR } from "date-fns/locale"; // For date formatting
-import { getPartners } from "@/app/partner/list/actions"; // Import server action
+import { getPartners } from "@/features/partner/actions"; // Import server action
 import { type SelectPartner } from "@/features/partner/schemas/partnerSchema"; // Import type
 import {
   Command,

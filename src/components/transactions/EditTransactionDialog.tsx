@@ -43,7 +43,7 @@ import { cn } from "@/lib/utils";
 import { CalendarIcon, ChevronsUpDown, Check, Pencil, Loader2 } from "lucide-react";
 import { format } from "date-fns";
 import { ptBR } from "date-fns/locale";
-import { getPartners } from "@/app/partner/list/actions";
+import { getPartners } from "@/features/partner/actions";
 import { type SelectPartner } from "@/features/partner/schemas/partnerSchema";
 import {
   Command,

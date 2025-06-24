@@ -1,9 +1,9 @@
 import { describe, it, expect, vi, beforeEach } from 'vitest';
-import { createPartner, CreatePartnerServerResponse } from './actions';
+import { createPartner, CreatePartnerServerResponse } from './index'; // Updated import
 import createPartnerUseCase from '@/features/partner/usecases/createPartnerUseCase';
 import { InsertPartner } from '@/features/partner/schemas/partnerSchema';
 import { ZodError } from 'zod';
-import { revalidatePath } from 'next/cache'; // Importar diretamente
+import { revalidatePath } from 'next/cache';
 
 vi.mock('@/features/partner/usecases/createPartnerUseCase');
 vi.mock('next/cache', async (importOriginal) => {
@@ -13,12 +13,11 @@ vi.mock('next/cache', async (importOriginal) => {
     revalidatePath: vi.fn(),
   };
 });
-// redirect não é usado, mock pode ser removido ou mantido se houver planos
 vi.mock('next/navigation', async (importOriginal) => {
   const actual = await importOriginal<typeof import('next/navigation')>();
   return {
     ...actual,
-    redirect: vi.fn(),
+    redirect: vi.fn(), // Though not used by createPartner, good to keep if other actions might use it
   };
 });
 
@@ -32,7 +31,7 @@ describe('createPartner Server Action', () => {
 
   const validPartnerData: InsertPartner = {
     name: 'Test Action Partner',
-    phone: '1234567890', // 10 digits
+    phone: '1234567890',
     active: true,
   };
 
@@ -47,15 +46,15 @@ describe('createPartner Server Action', () => {
     expect(response.message).toBe('Parceiro criado com sucesso!');
     expect(response.partner).toEqual(createdPartner);
     expect(response.errors).toBeUndefined();
-    expect(revalidatePath).toHaveBeenCalledWith('/partner/list'); // Usar importado
+    expect(revalidatePath).toHaveBeenCalledWith('/partner/list');
   });
 
   it('should return success false and Zod errors if use case throws ZodError', async () => {
     const fieldErrors = { name: ['Nome é obrigatório'] };
     const mockZodError = new ZodError([{ path: ['name'], message: 'Nome é obrigatório', code: 'custom' }]);
-    mockCreatePartnerUseCase.mockRejectedValue(mockZodError); // Simular erro vindo do use case
+    mockCreatePartnerUseCase.mockRejectedValue(mockZodError);
 
-    const response: CreatePartnerServerResponse = await createPartner(validPartnerData); // Usar dados válidos, pois o erro vem do use case
+    const response: CreatePartnerServerResponse = await createPartner(validPartnerData);
 
     expect(response.success).toBe(false);
     expect(response.errors).toEqual(expect.objectContaining({ name: expect.any(Array) }));

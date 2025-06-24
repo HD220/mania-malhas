@@ -20,7 +20,7 @@ import { InputField } from "@/components/ui/input-field";
 import {
   UsePartnerFormProps,
   usePartnerForm,
-} from "@/components/forms/partner-form/usePartnerForm";
+} from "./usePartnerForm"; // Updated import path
 import { Checkbox } from "@/components/ui/checkbox";
 import { Textarea } from "@/components/ui/textarea";
 import { formatterPhoneNumber } from "@/utils";

@@ -4,8 +4,8 @@ import {
   InsertPartner,
   insertPartnerSchema,
 } from "@/features/partner/schemas/partnerSchema";
-import alterPartnerUseCase from "@/usecases/partner/alterPartnerUseCase";
-import getPartnerByIdUseCase from "@/usecases/partner/getPartnerByIdUseCase";
+import alterPartnerUseCase from "@/features/partner/usecases/alterPartnerUseCase";
+import getPartnerByIdUseCase from "@/features/partner/usecases/getPartnerByIdUseCase";
 import { revalidatePath, unstable_noStore as noStore } from "next/cache";
 import { redirect } from "next/navigation";
 import { ZodError } from "zod";

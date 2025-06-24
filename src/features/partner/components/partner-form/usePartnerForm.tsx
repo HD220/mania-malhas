@@ -8,15 +8,13 @@ import {
   insertPartnerSchema,
 } from "@/features/partner/schemas/partnerSchema";
 import { useToast } from "@/components/ui/use-toast";
-import { useRouter } from "next/navigation"; // Import useRouter
-import { CreatePartnerServerResponse } from "@/app/partner/new/actions"; // Adjust path as necessary
-import { UpdatePartnerServerResponse } from "@/app/partner/[id]/edit/actions"; // Adjust path as necessary
+import { useRouter } from "next/navigation";
+import { CreatePartnerServerResponse, UpdatePartnerServerResponse } from "@/features/partner/actions"; // Updated import paths
 
 export const formPartnerSchema = insertPartnerSchema;
 
 export type FormPartner = z.infer<typeof formPartnerSchema>;
 
-// Update onSubmit prop to expect a function that returns the server response type
 export type UsePartnerFormProps = {
   initialValues: FormPartner;
   onSubmit: (
@@ -32,21 +30,19 @@ export function usePartnerForm({
     resolver: zodResolver(formPartnerSchema),
     defaultValues: {
       ...initialValues,
-      active: initialValues.active ?? true, // Ensure active defaults to true
+      active: initialValues.active ?? true,
     },
   });
 
   const { toast } = useToast();
-  const router = useRouter(); // Initialize router
+  const router = useRouter();
 
   const submit = async (formData: FormPartner) => {
-    form.clearErrors(); // Clear previous errors
+    form.clearErrors();
     try {
-      // Ensure 'active' has a boolean value.
-      // The schema should handle other default values if necessary.
       const dataToSubmit: InsertPartner = {
         ...formData,
-        id: formData.id || undefined, // Ensure id is string or undefined
+        id: formData.id || undefined,
         active: formData.active ?? true,
       };
 
@@ -57,12 +53,12 @@ export function usePartnerForm({
           title: "Sucesso!",
           description: result.message || "Parceiro salvo com sucesso!",
         });
-        router.push("/partner/list"); // Redirect to partner list on success
+        router.push("/partner/list");
       } else {
         if (result.errors) {
           for (const [fieldName, fieldErrors] of Object.entries(result.errors)) {
             if (fieldErrors && fieldErrors.length > 0) {
-              form.setError(fieldName as any, { // Use 'any' for fieldName for simplicity
+              form.setError(fieldName as any, {
                 type: "server",
                 message: fieldErrors.join(", "),
               });
@@ -76,7 +72,6 @@ export function usePartnerForm({
         });
       }
     } catch (error: any) {
-      // This catch block handles unexpected errors (e.g., network issues, server crashes)
       toast({
         variant: "destructive",
         title: "Ops! Erro inesperado",

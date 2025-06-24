@@ -1,5 +1,5 @@
 import { db } from "@/db/postgres";
-import { partnerRepository } from "@/db/repositories/partnerRepository";
+import { partnerRepository } from "@/features/partner/db/partnerRepository";
 import { SelectPartner } from "@/features/partner/schemas/partnerSchema";
 
 /**

@@ -1,12 +1,12 @@
 import { describe, it, expect, vi, beforeEach } from 'vitest';
 import alterPartnerUseCase from './alterPartnerUseCase';
-import { partnerRepository } from '@/db/repositories/partnerRepository';
+import { partnerRepository } from '@/features/partner/db/partnerRepository';
 import { InsertPartner, insertPartnerSchema } from '@/features/partner/schemas/partnerSchema';
 import { ZodError } from 'zod';
 import { faker } from '@faker-js/faker';
 
 // Mock do partnerRepository
-vi.mock('@/db/repositories/partnerRepository', () => ({
+vi.mock('@/features/partner/db/partnerRepository', () => ({
   partnerRepository: vi.fn().mockReturnValue({
     update: vi.fn(),
   }),

@@ -1,5 +1,5 @@
-import { PartnerForm } from "@/components/forms/partner-form";
-import { createPartner } from "./actions";
+import { PartnerForm } from "@/features/partner/components/partner-form";
+import { createPartner } from "@/features/partner/actions";
 
 export default function Page() {
   return (

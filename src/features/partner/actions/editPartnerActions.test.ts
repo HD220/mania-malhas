@@ -1,9 +1,9 @@
 import { describe, it, expect, vi, beforeEach } from 'vitest';
-import { updatePartner, UpdatePartnerServerResponse } from './actions';
+import { updatePartner, UpdatePartnerServerResponse } from './index'; // Updated import
 import alterPartnerUseCase from '@/features/partner/usecases/alterPartnerUseCase';
 import { InsertPartner } from '@/features/partner/schemas/partnerSchema';
 import { ZodError } from 'zod';
-import { revalidatePath } from 'next/cache'; // Importar diretamente
+import { revalidatePath } from 'next/cache';
 
 vi.mock('@/features/partner/usecases/alterPartnerUseCase');
 vi.mock('next/cache', async (importOriginal) => {
@@ -38,8 +38,8 @@ describe('updatePartner Server Action', () => {
     expect(response.message).toBe('Parceiro atualizado com sucesso!');
     expect(response.partner).toEqual({ id: partnerId, ...validPartnerData });
     expect(response.errors).toBeUndefined();
-    expect(revalidatePath).toHaveBeenCalledWith('/partner/list'); // Usar importado
-    expect(revalidatePath).toHaveBeenCalledWith(`/partner/${partnerId}/edit`); // Usar importado
+    expect(revalidatePath).toHaveBeenCalledWith('/partner/list');
+    expect(revalidatePath).toHaveBeenCalledWith(`/partner/${partnerId}/edit`);
   });
 
   it('should return success false if ID is not provided', async () => {

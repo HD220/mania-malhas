@@ -1,11 +1,11 @@
 import { describe, it, expect, vi, beforeEach } from 'vitest';
 import listActivePartnersUseCase from './listActivePartnersUseCase';
-import { partnerRepository } from '@/db/repositories/partnerRepository';
+import { partnerRepository } from '@/features/partner/db/partnerRepository';
 import { SelectPartner } from '@/features/partner/schemas/partnerSchema';
 import { faker } from '@faker-js/faker';
 
 // Mock do partnerRepository
-vi.mock('@/db/repositories/partnerRepository', () => ({
+vi.mock('@/features/partner/db/partnerRepository', () => ({
   partnerRepository: vi.fn().mockReturnValue({
     findAll: vi.fn(), // Mocking findAll
   }),
