@@ -70,4 +70,22 @@ describe('getUrlUploadUseCase', () => {
     );
     expect(result).toEqual({ url: mockPresignedUrl });
   });
+
+  it('T01.4.2.2: should throw an error if MinIO service call fails', async () => {
+    const minioError = new Error('MinIO service unavailable');
+    mockGetPresignedUrlPutObject.mockRejectedValue(minioError);
+
+    const input: GetUrlUploadInput = { fileExt: mockFileExt };
+
+    // Expect the use case to throw (or reject with) the error from the service
+    await expect(getUrlUploadUseCase(input)).rejects.toThrow(minioError);
+
+    expect(mockRandomUUID).toHaveBeenCalledTimes(1); // Still called before the service
+    expect(mockGetPresignedUrlPutObject).toHaveBeenCalledTimes(1);
+    expect(mockGetPresignedUrlPutObject).toHaveBeenCalledWith(
+      mockBucketName,
+      expectedObjectName,
+      10 * 60
+    );
+  });
 });
