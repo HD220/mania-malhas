@@ -1,12 +1,12 @@
 import { describe, it, expect, vi, beforeEach } from 'vitest';
 import { addPaymentAction, PaymentServerResponse } from './actions'; // listPaymentsByTransactionAction não será testada aqui
-import createPaymentUseCase from '@/usecases/payment/createPaymentUseCase';
+import createPaymentUseCase from '@/features/payment/usecases/createPaymentUseCase';
 import { InsertPayment } from '@/features/payment/schemas/paymentSchema';
 import { ZodError } from 'zod';
 import { faker } from '@faker-js/faker';
 
 // Mock do createPaymentUseCase
-vi.mock('@/usecases/payment/createPaymentUseCase');
+vi.mock('@/features/payment/usecases/createPaymentUseCase');
 
 // Mock de revalidatePath (se usado, embora esteja comentado na action)
 vi.mock('next/cache', () => ({
