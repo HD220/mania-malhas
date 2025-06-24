@@ -41,20 +41,21 @@ import '@testing-library/jest-dom/vitest'; // Para estender expect com matchers 
 
 // Tentativa de definir valores mínimos para process.env ANTES da importação de env.ts
 // Isto é uma tentativa, pode não funcionar devido à ordem de importação/execução dos módulos.
-// if (process.env.NODE_ENV === 'test') {
+if (process.env.NODE_ENV === 'test') {
     // console.log("Setting up mock env vars for test environment in setup.ts");
-    // process.env.DB_HOST = 'test_db_host';
-    // process.env.DB_USER = 'test_db_user';
-    // process.env.DB_PASSWORD = 'test_db_password';
-    // process.env.DB_NAME = 'test_db_name';
-    // process.env.DB_PORT = '5433';
-    // process.env.DATABASE_URL = 'postgresql://test_user:test_password@test_host:5433/test_db';
-    // process.env.MINIO_URL = 'test_minio_url';
-    // process.env.MINIO_ACCESSKEY = 'test_minio_key';
-    // process.env.MINIO_SECRETKEY = 'test_minio_secret';
-    // process.env.MINIO_BUCKET_PRODUCTS = 'test_products_bucket';
-    // Adicione outras variáveis que seu env.ts valida
-// }
+    process.env.DB_HOST = process.env.DB_HOST ?? 'test_db_host';
+    process.env.DB_USER = process.env.DB_USER ?? 'test_db_user';
+    process.env.DB_PASSWORD = process.env.DB_PASSWORD ?? 'test_db_password';
+    process.env.DB_NAME = process.env.DB_NAME ?? 'test_db_name';
+    process.env.DB_PORT = process.env.DB_PORT ?? '5433';
+    process.env.DATABASE_URL = process.env.DATABASE_URL ?? 'postgresql://test_db_user:test_db_password@test_db_host:5433/test_db_name';
+    process.env.MINIO_URL = process.env.MINIO_URL ?? 'http://test_minio_url:9000';
+    process.env.MINIO_ACCESSKEY = process.env.MINIO_ACCESSKEY ?? 'test_minio_key';
+    process.env.MINIO_SECRETKEY = process.env.MINIO_SECRETKEY ?? 'test_minio_secret';
+    process.env.MINIO_BUCKET_PRODUCTS = process.env.MINIO_BUCKET_PRODUCTS ?? 'test_products_bucket';
+    process.env.DB_MIGRATING = process.env.DB_MIGRATING ?? "false";
+    process.env.DB_SEEDING = process.env.DB_SEEDING ?? "false";
+}
 
 // Mock global para ResizeObserver para evitar erros com componentes Radix/Shadcn em JSDOM
 const MockResizeObserver = vi.fn(() => ({
@@ -63,3 +64,14 @@ const MockResizeObserver = vi.fn(() => ({
   disconnect: vi.fn(),
 }));
 vi.stubGlobal('ResizeObserver', MockResizeObserver);
+
+// Attempt to preload and parse env.ts after process.env should be set up.
+try {
+  console.log('[TEST_SETUP] Attempting to load env from @/db/postgres/env...');
+  const env = await import('@/db/postgres/env');
+  // If it makes it here, env.default should be the parsed EnvSchema output
+  console.log('[TEST_SETUP] Successfully loaded env. NODE_ENV:', env.default.NODE_ENV);
+} catch (e: any) {
+  console.error('[TEST_SETUP] Failed to preload env.ts:', e.message, e.stack);
+  // This might still throw if env vars are not perfectly set up by this point for some reason.
+}
