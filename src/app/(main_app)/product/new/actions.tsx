@@ -3,7 +3,7 @@
 import {
   InsertProductWithImages,
   insertProductWithImagesSchema,
-} from "@/db/repositories/schemas/productImageSchema";
+} from "@/features/product/schemas/productImageSchema";
 import createProductUseCase from "@/usecases/product/createProductUseCase";
 import { revalidatePath } from "next/cache";
 import { redirect } from "next/navigation";

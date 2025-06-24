@@ -1,7 +1,7 @@
-import { insertProductSchema, selectProductSchema } from "./productSchema";
+import { insertProductSchema, selectProductSchema } from "./productSchema"; // Stays the same
 import { createInsertSchema, createSelectSchema } from "drizzle-zod";
 import { z } from "zod";
-import { productImagesTable } from "../../postgres/schema/productImage";
+import { productImagesTable } from "../../../db/postgres/schema/productImage"; // Adjusted path
 
 //Default for table
 const baseInsertProductImagesSchema = createInsertSchema(

@@ -3,7 +3,7 @@ import { productRepository } from "@/db/repositories/productRepository";
 import {
   InsertProductWithImages,
   insertProductWithImagesSchema,
-} from "@/db/repositories/schemas/productImageSchema";
+} from "@/features/product/schemas/productImageSchema";
 import { ZodError } from "zod";
 
 /**

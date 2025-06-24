@@ -1,6 +1,6 @@
 import { db } from "@/db/postgres";
 import { productRepository } from "@/db/repositories/productRepository";
-import { SelectProductWithImages } from "@/db/repositories/schemas/productImageSchema";
+import { SelectProductWithImages } from "@/features/product/schemas/productImageSchema";
 
 /**
  * Fetches products based on a search term and their status (active/inactive).

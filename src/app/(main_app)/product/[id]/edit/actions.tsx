@@ -3,7 +3,7 @@
 import {
   InsertProductWithImages,
   insertProductWithImagesSchema,
-} from "@/db/repositories/schemas/productImageSchema";
+} from "@/features/product/schemas/productImageSchema";
 import alterProductUseCase from "@/usecases/product/alterProductUseCase";
 import getProductByIdUseCase from "@/usecases/product/getProductByIdUseCase";
 import { revalidatePath, unstable_noStore as noStore } from "next/cache";

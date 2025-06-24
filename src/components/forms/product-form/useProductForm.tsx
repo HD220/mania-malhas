@@ -5,7 +5,7 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import { uploadS3 } from "@/utils";
 import { getUrlUpload } from "./actions";
 import { z } from "zod";
-import { InsertProductWithImages } from "@/db/repositories/schemas/productImageSchema";
+import { InsertProductWithImages } from "@/features/product/schemas/productImageSchema";
 import { useToast } from "@/components/ui/use-toast";
 import { CreateProductServerResponse } from "@/app/product/new/actions"; // Assuming this path
 import { UpdateProductServerResponse } from "@/app/product/[id]/edit/actions"; // Assuming this path

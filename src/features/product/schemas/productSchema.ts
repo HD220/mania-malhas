@@ -1,6 +1,6 @@
 import { createInsertSchema, createSelectSchema } from "drizzle-zod";
 import { z } from "zod";
-import { productTable } from "../../postgres/schema/product";
+import { productTable } from "../../../db/postgres/schema/product"; // Adjusted path
 
 export const insertProductSchema = createInsertSchema(productTable, {
   price: z.coerce.number().positive(),
