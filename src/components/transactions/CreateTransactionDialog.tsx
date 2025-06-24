@@ -47,7 +47,7 @@ import { CalendarIcon, ChevronsUpDown, Check } from "lucide-react"; // Added Che
 import { format } from "date-fns";
 import { ptBR } from "date-fns/locale"; // For date formatting
 import { getPartners } from "@/app/partner/list/actions"; // Import server action
-import { type SelectPartner } from "@/db/repositories/schemas/partnerSchema"; // Import type
+import { type SelectPartner } from "@/features/partner/schemas/partnerSchema"; // Import type
 import {
   Command,
   CommandEmpty,

@@ -3,13 +3,29 @@
     "project-structure"
   ],
   "extends": [
-    "next/core-web-vitals",
-    "plugin:project-structure/recommended"
+    "next/core-web-vitals"
   ],
   "rules": {
     "project-structure/independent-modules": [2, {
-      "layers": [
-        {"name": "features", "pattern": "src/features/*", "independent": true}
+      "debugMode": false,
+      "modules": [
+        {
+          "name": "app-features",
+          "pattern": "src/features/*/**",
+          "allowImportsFrom": [
+            "*",
+            "src/lib/**",
+            "src/components/ui/**",
+            "src/components/providers/**",
+            "src/db/postgres/**",
+            "src/services/**",
+            "src/utils.ts",
+            "src/constant.tsx",
+            "src/styles/**",
+            "./**",
+            "../**"
+          ]
+        }
       ]
     }]
   }

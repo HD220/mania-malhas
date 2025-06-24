@@ -6,7 +6,7 @@ import { z } from "zod";
 import {
   InsertPartner,
   insertPartnerSchema,
-} from "@/db/repositories/schemas/partnerSchema";
+} from "@/features/partner/schemas/partnerSchema";
 import { useToast } from "@/components/ui/use-toast";
 import { useRouter } from "next/navigation"; // Import useRouter
 import { CreatePartnerServerResponse } from "@/app/partner/new/actions"; // Adjust path as necessary

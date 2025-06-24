@@ -3,7 +3,7 @@
 import {
   InsertPartner,
   insertPartnerSchema,
-} from "@/db/repositories/schemas/partnerSchema";
+} from "@/features/partner/schemas/partnerSchema";
 import createPartnerUseCase from "@/usecases/partner/createPartnerUseCase";
 import { revalidatePath } from "next/cache";
 import { redirect } from "next/navigation";

@@ -1,6 +1,6 @@
 import { db } from "@/db/postgres";
 import { partnerRepository } from "@/db/repositories/partnerRepository";
-import { SelectPartner } from "@/db/repositories/schemas/partnerSchema";
+import { SelectPartner } from "@/features/partner/schemas/partnerSchema";
 
 /**
  * Fetches a specific partner by their ID.

@@ -1,7 +1,7 @@
 import { describe, it, expect, vi, beforeEach } from 'vitest';
 import searchPartnersUseCase from './searchPartnersUseCase';
 import { partnerRepository } from '@/db/repositories/partnerRepository';
-import { SelectPartner } from '@/db/repositories/schemas/partnerSchema';
+import { SelectPartner } from '@/features/partner/schemas/partnerSchema';
 import { faker } from '@faker-js/faker';
 
 // Mock do partnerRepository

@@ -4,7 +4,7 @@ import {
   InsertPartner,
   insertPartnerSchema,
   SelectPartner,
-} from "@/db/repositories/schemas/partnerSchema";
+} from "@/features/partner/schemas/partnerSchema";
 import { ZodError } from "zod";
 
 /**

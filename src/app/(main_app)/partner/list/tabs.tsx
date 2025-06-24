@@ -4,7 +4,7 @@ import { Search } from "@/components/ui/search";
 import { Button } from "@/components/ui/button";
 import Link from "next/link";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { SelectPartner } from "@/db/repositories/schemas/partnerSchema";
+import { SelectPartner } from "@/features/partner/schemas/partnerSchema";
 import { usePathname, useRouter, useSearchParams } from "next/navigation";
 import { ReactNode } from "react";
 import { ScrollArea, ScrollBar } from "@/components/ui/scroll-area";

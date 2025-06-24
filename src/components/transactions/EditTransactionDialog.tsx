@@ -44,7 +44,7 @@ import { CalendarIcon, ChevronsUpDown, Check, Pencil, Loader2 } from "lucide-rea
 import { format } from "date-fns";
 import { ptBR } from "date-fns/locale";
 import { getPartners } from "@/app/partner/list/actions";
-import { type SelectPartner } from "@/db/repositories/schemas/partnerSchema";
+import { type SelectPartner } from "@/features/partner/schemas/partnerSchema";
 import {
   Command,
   CommandEmpty,

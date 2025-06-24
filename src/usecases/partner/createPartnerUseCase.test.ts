@@ -1,7 +1,7 @@
 import { describe, it, expect, vi, beforeEach } from 'vitest';
 import createPartnerUseCase from './createPartnerUseCase';
 import { partnerRepository } from '@/db/repositories/partnerRepository';
-import { InsertPartner, insertPartnerSchema } from '@/db/repositories/schemas/partnerSchema';
+import { InsertPartner, insertPartnerSchema } from '@/features/partner/schemas/partnerSchema';
 import { ZodError } from 'zod';
 
 // Mock do repositório de parceiros

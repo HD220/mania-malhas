@@ -1,6 +1,6 @@
 "use client";
 
-import { SelectPartner } from "@/db/repositories/schemas/partnerSchema";
+import { SelectPartner } from "@/features/partner/schemas/partnerSchema";
 import { ColumnDef } from "@tanstack/react-table";
 import { MoreHorizontal } from "lucide-react";
 

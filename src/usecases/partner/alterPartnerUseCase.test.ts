@@ -1,7 +1,7 @@
 import { describe, it, expect, vi, beforeEach } from 'vitest';
 import alterPartnerUseCase from './alterPartnerUseCase';
 import { partnerRepository } from '@/db/repositories/partnerRepository';
-import { InsertPartner, insertPartnerSchema } from '@/db/repositories/schemas/partnerSchema';
+import { InsertPartner, insertPartnerSchema } from '@/features/partner/schemas/partnerSchema';
 import { ZodError } from 'zod';
 import { faker } from '@faker-js/faker';
 

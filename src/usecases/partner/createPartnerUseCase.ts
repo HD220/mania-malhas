@@ -3,7 +3,7 @@ import { partnerRepository } from "@/db/repositories/partnerRepository";
 import {
   InsertPartner,
   insertPartnerSchema,
-} from "@/db/repositories/schemas/partnerSchema";
+} from "@/features/partner/schemas/partnerSchema";
 import { ZodError } from "zod";
 
 /**

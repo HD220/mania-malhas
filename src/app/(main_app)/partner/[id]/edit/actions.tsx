@@ -3,7 +3,7 @@
 import {
   InsertPartner,
   insertPartnerSchema,
-} from "@/db/repositories/schemas/partnerSchema";
+} from "@/features/partner/schemas/partnerSchema";
 import alterPartnerUseCase from "@/usecases/partner/alterPartnerUseCase";
 import getPartnerByIdUseCase from "@/usecases/partner/getPartnerByIdUseCase";
 import { revalidatePath, unstable_noStore as noStore } from "next/cache";

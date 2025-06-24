@@ -1,7 +1,7 @@
 import { describe, it, expect, vi, beforeEach } from 'vitest';
 import { updatePartner, UpdatePartnerServerResponse } from './actions';
 import alterPartnerUseCase from '@/usecases/partner/alterPartnerUseCase';
-import { InsertPartner } from '@/db/repositories/schemas/partnerSchema';
+import { InsertPartner } from '@/features/partner/schemas/partnerSchema';
 import { ZodError } from 'zod';
 import { revalidatePath } from 'next/cache'; // Importar diretamente
 

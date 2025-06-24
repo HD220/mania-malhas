@@ -1,18 +1,23 @@
 import { describe, it, expect, vi, beforeEach } from 'vitest';
 import getUrlUploadUseCase, { Input as GetUrlUploadInput, Output as GetUrlUploadOutput } from './getUrlUploadUseCase';
 import { getPresignedUrlPutObject as actualGetPresignedUrlPutObject } from '@/services/minio';
-import * as cryptoModule from 'node:crypto'; // To access the original if needed, but mostly for vi.mock target
+// Import randomUUID from "node:crypto" for explicitness.
+import { randomUUID } from 'node:crypto';
 // import env from '@/db/postgres/env'; // Will be mocked
 
 // Mock env from @/db/postgres/env
-const MOCK_TEST_BUCKET_NAME = 'mocked-test-bucket-for-product-upload';
+// IMPORTANT: Variables used inside the factory must be defined literally or imported,
+// as top-level consts from this file are not initialized yet when the hoisted mock factory runs.
 vi.mock('@/db/postgres/env', () => ({
   default: {
-    MINIO_BUCKET_PRODUCTS: MOCK_TEST_BUCKET_NAME,
+    MINIO_BUCKET_PRODUCTS: 'mocked-test-bucket-for-product-upload', // Use literal string
     // Add other env vars if the use case starts depending on them
     // For now, only MINIO_BUCKET_PRODUCTS is directly used by getUrlUploadUseCase
   },
 }));
+
+// This const is for use within the test file's `describe` and `it` blocks.
+const MOCK_TEST_BUCKET_NAME = 'mocked-test-bucket-for-product-upload';
 
 // Mock the minio service
 vi.mock('@/services/minio', () => ({
@@ -20,12 +25,14 @@ vi.mock('@/services/minio', () => ({
 }));
 
 // Mock crypto.randomUUID
-// We need to ensure that 'crypto.randomUUID' used by the use case is the mocked one.
-// The use case uses 'import { randomUUID } from "crypto";' which resolves to 'node:crypto' in Node env.
+// The use case imports from "crypto", which resolves to 'node:crypto'.
+// We must mock the exact module specifier used by the code under test if not identical.
+// However, for built-ins, 'crypto' and 'node:crypto' should be interchangeable for mocking.
+// Mock 'node:crypto' as it's the canonical name for the built-in module.
 vi.mock('node:crypto', async (importOriginal) => {
-  const originalCrypto = await importOriginal<typeof cryptoModule>();
+  const originalCryptoMod = await importOriginal<typeof import('node:crypto')>();
   return {
-    ...originalCrypto,
+    ...originalCryptoMod,
     randomUUID: vi.fn(),
   };
 });
@@ -33,7 +40,7 @@ vi.mock('node:crypto', async (importOriginal) => {
 // Typed mock functions
 // After vi.mock, the import will yield the mock
 const mockGetPresignedUrlPutObject = actualGetPresignedUrlPutObject as vi.Mock;
-const mockRandomUUID = cryptoModule.randomUUID as vi.Mock; // This now refers to the mocked vi.fn()
+// 'randomUUID' imported at the top is now the mock function.
 
 describe('getUrlUploadUseCase', () => {
   const mockFileExt = 'jpg';
@@ -46,7 +53,8 @@ describe('getUrlUploadUseCase', () => {
   beforeEach(() => {
     vi.clearAllMocks();
     // Set default mock implementations
-    mockRandomUUID.mockReturnValue(mockGeneratedUUID);
+    // Use the imported 'randomUUID' directly, which should be the mock.
+    (randomUUID as vi.Mock).mockReturnValue(mockGeneratedUUID);
     // MINIO_BUCKET_PRODUCTS should be available from .env.test or the fallback in env.ts
     // If env.MINIO_BUCKET_PRODUCTS is not 'test_products_bucket' (from .env.test) or 'products' (schema default),
     // then the test might pick up an unexpected value if env.ts defaults kicked in differently.
@@ -61,7 +69,7 @@ describe('getUrlUploadUseCase', () => {
     const input: GetUrlUploadInput = { fileExt: mockFileExt };
     const result: GetUrlUploadOutput = await getUrlUploadUseCase(input);
 
-    expect(mockRandomUUID).toHaveBeenCalledTimes(1);
+    expect(randomUUID as vi.Mock).toHaveBeenCalledTimes(1);
     expect(mockGetPresignedUrlPutObject).toHaveBeenCalledTimes(1);
     expect(mockGetPresignedUrlPutObject).toHaveBeenCalledWith(
       mockBucketName,
@@ -80,7 +88,7 @@ describe('getUrlUploadUseCase', () => {
     // Expect the use case to throw (or reject with) the error from the service
     await expect(getUrlUploadUseCase(input)).rejects.toThrow(minioError);
 
-    expect(mockRandomUUID).toHaveBeenCalledTimes(1); // Still called before the service
+    expect(randomUUID as vi.Mock).toHaveBeenCalledTimes(1); // Still called before the service
     expect(mockGetPresignedUrlPutObject).toHaveBeenCalledTimes(1);
     expect(mockGetPresignedUrlPutObject).toHaveBeenCalledWith(
       mockBucketName,
@@ -106,7 +114,7 @@ describe('getUrlUploadUseCase', () => {
 
     await expect(getUrlUploadUseCase(input)).rejects.toThrow(invalidObjectNameError);
 
-    expect(mockRandomUUID).toHaveBeenCalledTimes(1);
+    expect(randomUUID as vi.Mock).toHaveBeenCalledTimes(1);
     expect(mockGetPresignedUrlPutObject).toHaveBeenCalledTimes(1);
     expect(mockGetPresignedUrlPutObject).toHaveBeenCalledWith(
       mockBucketName,
@@ -140,7 +148,7 @@ describe('getUrlUploadUseCase', () => {
 
     await expect(getUrlUploadUseCase(input)).rejects.toThrow(undefinedBucketError);
 
-    expect(mockRandomUUID).toHaveBeenCalledTimes(1); // Called to generate objectName
+    expect(randomUUID as vi.Mock).toHaveBeenCalledTimes(1); // Called to generate objectName
 
     // Restore the original mocked env value
     (await import('@/db/postgres/env')).default.MINIO_BUCKET_PRODUCTS = originalBucketName;
