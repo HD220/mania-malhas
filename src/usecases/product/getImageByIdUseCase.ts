@@ -1,5 +1,5 @@
 import { db } from "@/db/postgres";
-import { productRepository } from "@/db/repositories/productRepository";
+import { productRepository } from "@/features/product/db/productRepository";
 import { SelectProductImage } from "@/features/product/schemas/productImageSchema";
 
 /**

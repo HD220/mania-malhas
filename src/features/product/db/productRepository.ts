@@ -5,9 +5,9 @@ import {
   type InsertProductWithImages,
   type SelectProductImage,
   type SelectProductWithImages,
-} from "./schemas/productImageSchema";
-import { productTable } from "../postgres/schema/product";
-import { productImagesTable } from "../postgres/schema/productImage";
+} from "../schemas/productImageSchema"; // Adjusted path
+import { productTable } from "../../../db/postgres/schema/product"; // Adjusted path
+import { productImagesTable } from "../../../db/postgres/schema/productImage"; // Adjusted path
 
 export type DBConnection = dbType["db"];
 
@@ -17,11 +17,11 @@ export type ProductRepository = (db: DBConnection) => {
     search: string,
     status: boolean
   ) => Promise<SelectProductWithImages[]>;
-  findById: (id: string) => Promise<SelectProductWithImages>;
+  findById: (id: string) => Promise<SelectProductWithImages | null >; // Corrected: findById can return null
   findImageById: (
     productId: string,
     imageId: string
-  ) => Promise<SelectProductImage | null>; // Corrected return type
+  ) => Promise<SelectProductImage | null>;
   /**
    * Updates an existing product and its associated images.
    * @param {string} id - The UUID of the product to update.
