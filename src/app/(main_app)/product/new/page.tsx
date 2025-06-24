@@ -1,4 +1,4 @@
-import { ProductForm } from "@/components/forms/product-form";
+import { ProductForm } from "@/features/product/components/ProductForm";
 import { createProduct } from "@/features/product/actions/newProductActions";
 
 export default function Page() {

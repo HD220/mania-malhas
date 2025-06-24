@@ -16,7 +16,7 @@ import { InputMoneyField } from "@/components/ui/input-money-field";
 import {
   UseProductFormProps,
   useProductForm,
-} from "@/components/forms/product-form/useProductForm";
+} from "./useProductForm";
 import { DropzoneImageCarousel } from "@/components/ui/dropzone-image-carousel";
 import { Checkbox } from "@/components/ui/checkbox";
 

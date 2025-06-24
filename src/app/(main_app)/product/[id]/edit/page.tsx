@@ -1,5 +1,5 @@
 import { getProductWithImagesById, updateProduct } from "@/features/product/actions/editProductActions";
-import { ProductForm } from "@/components/forms/product-form";
+import { ProductForm } from "@/features/product/components/ProductForm";
 import { notFound } from "next/navigation"; // Importar notFound
 
 export default async function Page({ params }: { params: { id: string } }) {
