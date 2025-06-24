@@ -88,4 +88,30 @@ describe('getUrlUploadUseCase', () => {
       10 * 60
     );
   });
+
+  it('T01.4.2.3: should throw an error if fileExt leads to an invalid object name for MinIO', async () => {
+    const invalidFileExt = ''; // Results in objectName like "uuid."
+    const potentiallyInvalidObjectName = `${mockGeneratedUUID}.${invalidFileExt}`;
+
+    // Simulate the MinIO service rejecting an invalid object name
+    const invalidObjectNameError = new Error('Invalid object name for MinIO');
+    mockGetPresignedUrlPutObject.mockImplementation(async (bucket, objectName) => {
+      if (objectName === potentiallyInvalidObjectName) {
+        throw invalidObjectNameError;
+      }
+      return mockPresignedUrl; // Fallback for other names, though not expected in this test
+    });
+
+    const input: GetUrlUploadInput = { fileExt: invalidFileExt };
+
+    await expect(getUrlUploadUseCase(input)).rejects.toThrow(invalidObjectNameError);
+
+    expect(mockRandomUUID).toHaveBeenCalledTimes(1);
+    expect(mockGetPresignedUrlPutObject).toHaveBeenCalledTimes(1);
+    expect(mockGetPresignedUrlPutObject).toHaveBeenCalledWith(
+      mockBucketName,
+      potentiallyInvalidObjectName,
+      10 * 60
+    );
+  });
 });
