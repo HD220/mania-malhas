@@ -3,8 +3,8 @@
 import { useState, useEffect, useCallback } from "react";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription, DialogFooter } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
-import { PaymentForm, PaymentFormData } from "@/components/forms/payment-form";
-import { PaymentList } from "@/components/payment-list";
+import { PaymentForm, PaymentFormData } from "@/features/payment/components/payment-form";
+import { PaymentList } from "@/features/payment/components/payment-list";
 import { addPaymentAction, listPaymentsByTransactionAction, PaymentServerResponse } from "@/features/payment/actions"; // Adjust path as needed
 import { SelectPayment } from "@/features/payment/schemas/paymentSchema";
 import { useToast } from "./ui/use-toast";
