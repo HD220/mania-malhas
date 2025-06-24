@@ -3,12 +3,12 @@
 import { z } from "zod";
 import { revalidatePath } from "next/cache";
 
-import { GetUserProfileUseCase } from "@/usecases/user/getUserProfileUseCase";
-import { UpdateUserProfileUseCase, updateUserProfileUseCaseInputSchema } from "@/usecases/user/updateUserProfileUseCase";
-import { ChangeUserPasswordUseCase, changeUserPasswordUseCaseInputSchema } from "@/usecases/user/changeUserPasswordUseCase";
+import { GetUserProfileUseCase } from "@/features/user/usecases/getUserProfileUseCase";
+import { UpdateUserProfileUseCase, updateUserProfileUseCaseInputSchema } from "@/features/user/usecases/updateUserProfileUseCase";
+import { ChangeUserPasswordUseCase, changeUserPasswordUseCaseInputSchema } from "@/features/user/usecases/changeUserPasswordUseCase";
 
 // Assuming SelectUser and UpdateUserProfile are correctly exported and used by use cases
-import { SelectUser, UpdateUserProfile as UpdateUserProfileData } from "@/db/repositories/schemas/userSchema";
+import { SelectUser, UpdateUserProfile as UpdateUserProfileData } from "@/features/user/schemas/userSchema";
 
 import { ForbiddenError, NotFoundError } from "@/lib/errors/domainErrors";
 

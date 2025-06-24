@@ -1,6 +1,6 @@
-import { getUserProfileAction } from "./actions"; // Server action
-import { ProfileForm } from "@/components/forms/profile-form";
-import { ChangePasswordForm } from "@/components/forms/change-password-form";
+import { getUserProfileAction } from "@/features/user/actions"; // Server action
+import { ProfileForm } from "@/features/user/components/profile-form";
+import { ChangePasswordForm } from "@/features/user/components/change-password-form";
 import {
   Card,
   CardContent,
@@ -10,7 +10,7 @@ import {
 } from "@/components/ui/card";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Separator } from "@/components/ui/separator";
-import type { SelectUser } from "@/db/repositories/schemas/userSchema";
+import type { SelectUser } from "@/features/user/schemas/userSchema";
 
 
 export default async function AdminProfilePage() {

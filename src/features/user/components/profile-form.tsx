@@ -17,15 +17,14 @@ import {
   FormMessage,
 } from "@/components/ui/form";
 import { Input } from "@/components/ui/input";
-import { updateUserProfileAction, updateUserProfileActionSchema } from "@/app/(admin)/profile/actions";
-import type { SelectUser, UpdateUserProfile } from "@/db/repositories/schemas/userSchema";
+import { updateUserProfileAction, updateUserProfileActionSchema } from "@/features/user/actions";
+import type { SelectUser, UpdateUserProfile } from "@/features/user/schemas/userSchema";
 
 interface ProfileFormProps {
-  currentUser: SelectUser | null; // Allow null if user data might not be initially available
+  currentUser: SelectUser | null;
 }
 
-// Schema for the form itself, matching the action's input data schema
-const profileFormSchema = updateUserProfileActionSchema; // This is z.object({ name, email, image })
+const profileFormSchema = updateUserProfileActionSchema;
 type ProfileFormValues = z.infer<typeof profileFormSchema>;
 
 export function ProfileForm({ currentUser }: ProfileFormProps) {
@@ -36,12 +35,11 @@ export function ProfileForm({ currentUser }: ProfileFormProps) {
     defaultValues: {
       name: currentUser?.name ?? "",
       email: currentUser?.email ?? "",
-      image: currentUser?.image ?? "", // Ensure this is a string, or handle null if image can be cleared
+      image: currentUser?.image ?? "",
     },
   });
 
   useEffect(() => {
-    // Reset form if currentUser prop changes (e.g., after initial load)
     if (currentUser) {
       form.reset({
         name: currentUser.name ?? "",
@@ -57,8 +55,6 @@ export function ProfileForm({ currentUser }: ProfileFormProps) {
         const result = await updateUserProfileAction(values);
         if (result.success && result.data) {
           toast.success("Perfil atualizado com sucesso!");
-          // Optionally reset form with new data if action returns it and it's desired
-          // form.reset({ name: result.data.name ?? "", email: result.data.email ?? "", image: result.data.image ?? "" });
         } else {
           if (result.fieldErrors) {
             Object.entries(result.fieldErrors).forEach(([field, errors]) => {

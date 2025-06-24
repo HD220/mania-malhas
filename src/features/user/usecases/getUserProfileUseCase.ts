@@ -1,6 +1,6 @@
 import { z } from "zod";
 import { userRepository } from "@/db/repositories";
-import { SelectUser, selectUserSchema } from "@/db/repositories/schemas/userSchema";
+import { SelectUser, selectUserSchema } from "@/features/user/schemas/userSchema";
 import { NotFoundError } from "@/lib/errors/domainErrors";
 
 /**
@@ -61,8 +61,6 @@ export class GetUserProfileUseCase {
       throw new NotFoundError("Usuário");
     }
 
-    // The user object from repo.findById should already conform to SelectUser.
-    // but selectUserSchema.parse ensures it, useful if repo changes or for explicit validation.
     return selectUserSchema.parse(user);
   }
 }

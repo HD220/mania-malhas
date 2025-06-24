@@ -4,7 +4,7 @@ import { userRepository } from "@/db/repositories";
 import { NotFoundError } from "@/lib/errors/domainErrors";
 import { ZodError } from "zod";
 import { faker } from "@faker-js/faker";
-import { selectUserSchema, SelectUser } from "@/db/repositories/schemas/userSchema";
+import { selectUserSchema, SelectUser } from "@/features/user/schemas/userSchema";
 
 
 // Mock the userRepository factory and its methods
@@ -30,15 +30,14 @@ describe("ChangeUserPasswordUseCase", () => {
   });
 
   const mockUserId = faker.string.uuid();
-  const mockNewPasswordHash = faker.internet.password(60); // Simulate a hash
+  const mockNewPasswordHash = faker.internet.password(60);
 
-  // Minimal user object for findById check
   const mockExistingUserObjectToParse = {
     id: mockUserId,
     name: faker.person.fullName(),
     email: faker.internet.email(),
-    emailVerified: null, // Explicitly provide null for nullable fields
-    image: null,         // Explicitly provide null for nullable fields
+    emailVerified: null,
+    image: null,
     createdAt: new Date(),
     updatedAt: new Date(),
   };
@@ -46,8 +45,8 @@ describe("ChangeUserPasswordUseCase", () => {
 
 
   it("should update user password and return success", async () => {
-    mockUserRepoInstance.findById.mockResolvedValue(mockExistingUser); // User exists
-    mockUserRepoInstance.updatePassword.mockResolvedValue(undefined); // updatePassword returns void
+    mockUserRepoInstance.findById.mockResolvedValue(mockExistingUser);
+    mockUserRepoInstance.updatePassword.mockResolvedValue(undefined);
 
     const input = { userId: mockUserId, newPasswordHash: mockNewPasswordHash };
     const result = await useCase.execute(input);
@@ -58,7 +57,7 @@ describe("ChangeUserPasswordUseCase", () => {
   });
 
   it("should throw NotFoundError if user is not found", async () => {
-    mockUserRepoInstance.findById.mockResolvedValue(null); // User does not exist
+    mockUserRepoInstance.findById.mockResolvedValue(null);
 
     const input = { userId: mockUserId, newPasswordHash: mockNewPasswordHash };
 
@@ -95,16 +94,16 @@ describe("ChangeUserPasswordUseCase", () => {
         expect(passwordError?.message).toBe("Hash da nova senha não pode ser vazio.");
       }
     }
-    expect(mockUserRepoInstance.findById).not.toHaveBeenCalled(); // Should fail before findById
+    expect(mockUserRepoInstance.findById).not.toHaveBeenCalled();
     expect(mockUserRepoInstance.updatePassword).not.toHaveBeenCalled();
   });
 
   it("should throw ZodError if newPasswordHash is not provided", async () => {
-    const input = { userId: mockUserId }; // Missing newPasswordHash
+    const input = { userId: mockUserId } as any;
 
-    await expect(useCase.execute(input as any)).rejects.toThrow(ZodError);
+    await expect(useCase.execute(input)).rejects.toThrow(ZodError);
     try {
-      await useCase.execute(input as any);
+      await useCase.execute(input);
     } catch (e) {
       if (e instanceof ZodError) {
         const passwordError = e.errors.find(err => err.path.includes("newPasswordHash"));

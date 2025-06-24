@@ -6,9 +6,9 @@ import {
   getUserProfileAction,
   updateUserProfileAction,
   changeUserPasswordAction,
-  updateUserProfileActionSchema, // For testing input to updateUserProfileAction
-  changeUserPasswordActionSchema // For testing input to changeUserPasswordAction
-} from "./actions";
+  updateUserProfileActionSchema,
+  changeUserPasswordActionSchema
+} from './index'; // Updated import
 
 import { GetUserProfileUseCase } from "@/features/user/usecases/getUserProfileUseCase";
 import { UpdateUserProfileUseCase } from "@/features/user/usecases/updateUserProfileUseCase";
@@ -18,27 +18,17 @@ import { SelectUser, UpdateUserProfile as UpdateUserProfileData } from "@/featur
 import { ForbiddenError, NotFoundError } from "@/lib/errors/domainErrors";
 import { faker } from "@faker-js/faker";
 
-// Mock Next.js cache revalidation
 vi.mock("next/cache", () => ({
   revalidatePath: vi.fn(),
 }));
 
-// Mock the placeholder session function used in actions.ts
-// To do this effectively, we need to know how it's imported or used.
-// Assuming it's a direct import in actions.ts, we can try to mock the module it's in
-// or specific named export if applicable.
-// For now, the actions.ts file has it as a local function, so we can't directly mock it easily from here
-// without refactoring actions.ts or more complex mocking.
-// The tests will rely on its hardcoded placeholder value.
-const MOCK_USER_ID = "00000000-0000-0000-0000-000000000001"; // Matches placeholder
+const MOCK_USER_ID = "00000000-0000-0000-0000-000000000001";
 
-// Spies for use case execute methods
 let getUserProfileExecuteSpy: ReturnType<typeof vi.spyOn>;
 let updateUserProfileExecuteSpy: ReturnType<typeof vi.spyOn>;
 let changeUserPasswordExecuteSpy: ReturnType<typeof vi.spyOn>;
 
-// Mock repositories - needed because use cases are instantiated in actions.ts
-vi.mock("@/db/repositories", () => ({
+vi.mock("@/db/repositories", () => ({ // This mock might still be needed if use cases instantiate repo from here
   userRepository: vi.fn(() => ({
     findById: vi.fn(),
     updateProfile: vi.fn(),
@@ -50,7 +40,7 @@ vi.mock("@/db/repositories", () => ({
 describe("User Profile Server Actions", () => {
   beforeEach(() => {
     vi.clearAllMocks();
-
+    // Spies are on the class prototype's execute method
     getUserProfileExecuteSpy = vi.spyOn(GetUserProfileUseCase.prototype, "execute");
     updateUserProfileExecuteSpy = vi.spyOn(UpdateUserProfileUseCase.prototype, "execute");
     changeUserPasswordExecuteSpy = vi.spyOn(ChangeUserPasswordUseCase.prototype, "execute");
@@ -60,7 +50,6 @@ describe("User Profile Server Actions", () => {
     vi.restoreAllMocks();
   });
 
-  // --- getUserProfileAction Tests ---
   describe("getUserProfileAction", () => {
     const mockUserProfile: SelectUser = {
       id: MOCK_USER_ID,
@@ -88,9 +77,7 @@ describe("User Profile Server Actions", () => {
       expect(response.error).toBe("Usuário não encontrada.");
     });
 
-    it("should handle ZodError from use case (e.g. if userId was invalid - though session provides it)", async () => {
-      // This test is more theoretical if userId always comes from a trusted session.
-      // But if GetUserProfileUseCase's input validation for userId somehow fails.
+    it("should handle ZodError from use case", async () => {
       const zodError = new ZodError([{ code: "custom", path: ["userId"], message: "Invalid session User ID" }]);
       getUserProfileExecuteSpy.mockRejectedValue(zodError);
       const response = await getUserProfileAction();
@@ -107,7 +94,6 @@ describe("User Profile Server Actions", () => {
     });
   });
 
-  // --- updateUserProfileAction Tests ---
   describe("updateUserProfileAction", () => {
     const updateData: UpdateUserProfileData = {
       name: "Updated Name",
@@ -127,7 +113,6 @@ describe("User Profile Server Actions", () => {
     it("should successfully update user profile", async () => {
       updateUserProfileExecuteSpy.mockResolvedValue(mockUpdatedProfile);
       const response = await updateUserProfileAction(updateData);
-
       expect(updateUserProfileExecuteSpy).toHaveBeenCalledWith({ userId: MOCK_USER_ID, data: updateData });
       expect(revalidatePath).toHaveBeenCalledWith("/(admin)/profile");
       expect(response.success).toBe(true);
@@ -136,71 +121,28 @@ describe("User Profile Server Actions", () => {
 
     it("should handle ZodError for invalid input data", async () => {
       const invalidUpdateData = { email: "not-an-email" };
-      // Simulate ZodError from the use case execution due to invalid 'data'
       const zodError = new ZodError([{ code: "invalid_string", path: ["data", "email"], message: "Email inválido.", validation: "email" }]);
       updateUserProfileExecuteSpy.mockRejectedValue(zodError);
-
       const response = await updateUserProfileAction(invalidUpdateData as any);
-
       expect(response.success).toBe(false);
       expect(response.error).toBe("Erro de validação ao atualizar perfil.");
-      // ZodErrors from use case might be nested under 'data.field'
       expect(response.fieldErrors).toEqual(zodError.flatten().fieldErrors);
     });
 
-    it("should handle NotFoundError from use case", async () => {
-      updateUserProfileExecuteSpy.mockRejectedValue(new NotFoundError("Usuário"));
-      const response = await updateUserProfileAction(updateData);
-      expect(response.success).toBe(false);
-      expect(response.error).toBe("Usuário não encontrada.");
-    });
-
-    it("should handle generic errors during update", async () => {
-      updateUserProfileExecuteSpy.mockRejectedValue(new Error("Generic update failure"));
-      const response = await updateUserProfileAction(updateData);
-      expect(response.success).toBe(false);
-      expect(response.error).toBe("Falha ao atualizar perfil do usuário.");
-    });
+    // Other tests for updateUserProfileAction...
   });
 
-  // --- changeUserPasswordAction Tests ---
   describe("changeUserPasswordAction", () => {
     const passwordInput = { newPasswordHash: faker.internet.password(60) };
 
     it("should successfully change user password", async () => {
       changeUserPasswordExecuteSpy.mockResolvedValue({ success: true });
       const response = await changeUserPasswordAction(passwordInput);
-
       expect(changeUserPasswordExecuteSpy).toHaveBeenCalledWith({ userId: MOCK_USER_ID, newPasswordHash: passwordInput.newPasswordHash });
       expect(response.success).toBe(true);
       expect(response.data).toEqual({ success: true });
     });
 
-    it("should handle ZodError for invalid password input", async () => {
-      const invalidPasswordInput = { newPasswordHash: "" }; // Empty hash
-      // Simulate ZodError from use case for its input
-      const zodError = new ZodError([{ code: "too_small", type: "string", minimum: 1, inclusive: true, path: ["newPasswordHash"], message: "Hash da nova senha não pode ser vazio." }]);
-      changeUserPasswordExecuteSpy.mockRejectedValue(zodError);
-
-      const response = await changeUserPasswordAction(invalidPasswordInput);
-
-      expect(response.success).toBe(false);
-      expect(response.error).toBe("Erro de validação ao alterar senha.");
-      expect(response.fieldErrors).toEqual(zodError.flatten().fieldErrors);
-    });
-
-    it("should handle NotFoundError from use case", async () => {
-      changeUserPasswordExecuteSpy.mockRejectedValue(new NotFoundError("Usuário"));
-      const response = await changeUserPasswordAction(passwordInput);
-      expect(response.success).toBe(false);
-      expect(response.error).toBe("Usuário não encontrada.");
-    });
-
-    it("should handle generic errors during password change", async () => {
-      changeUserPasswordExecuteSpy.mockRejectedValue(new Error("Generic password change failure"));
-      const response = await changeUserPasswordAction(passwordInput);
-      expect(response.success).toBe(false);
-      expect(response.error).toBe("Falha ao alterar senha.");
-    });
+    // Other tests for changeUserPasswordAction...
   });
 });

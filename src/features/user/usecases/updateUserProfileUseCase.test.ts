@@ -3,7 +3,7 @@ import { UpdateUserProfileUseCase, updateUserProfileUseCaseInputSchema } from ".
 import { userRepository } from "@/db/repositories";
 import { NotFoundError } from "@/lib/errors/domainErrors";
 import { ZodError } from "zod";
-import { SelectUser, UpdateUserProfile, selectUserSchema } from "@/db/repositories/schemas/userSchema";
+import { SelectUser, UpdateUserProfile, selectUserSchema } from "@/features/user/schemas/userSchema";
 import { faker } from "@faker-js/faker";
 
 // Mock the userRepository factory and its methods
@@ -49,10 +49,10 @@ describe("UpdateUserProfileUseCase", () => {
     const expectedUpdatedUser: SelectUser = {
       ...originalUserProfile,
       ...updateData,
-      updatedAt: new Date(), // Assuming repo updates this
+      updatedAt: new Date(),
     };
 
-    mockUserRepoInstance.findById.mockResolvedValue(originalUserProfile); // User exists
+    mockUserRepoInstance.findById.mockResolvedValue(originalUserProfile);
     mockUserRepoInstance.updateProfile.mockResolvedValue(expectedUpdatedUser);
 
     const input = { userId: mockUserId, data: updateData };
@@ -79,7 +79,7 @@ describe("UpdateUserProfileUseCase", () => {
 
     expect(mockUserRepoInstance.updateProfile).toHaveBeenCalledWith(mockUserId, updateData);
     expect(result.name).toBe(updateData.name);
-    expect(result.email).toBe(originalUserProfile.email); // Email should be original
+    expect(result.email).toBe(originalUserProfile.email);
   });
 
   it("should handle clearing the image (image: null)", async () => {
@@ -101,7 +101,7 @@ describe("UpdateUserProfileUseCase", () => {
 
 
   it("should throw NotFoundError if user to update is not found", async () => {
-    mockUserRepoInstance.findById.mockResolvedValue(null); // User does not exist
+    mockUserRepoInstance.findById.mockResolvedValue(null);
 
     const updateData: UpdateUserProfile = { name: "Any Name" };
     const input = { userId: mockUserId, data: updateData };
@@ -129,7 +129,7 @@ describe("UpdateUserProfileUseCase", () => {
   });
 
   it("should throw ZodError for invalid data (e.g., invalid email in data)", async () => {
-    const updateData = { email: "invalid-email" }; // name and image are optional
+    const updateData = { email: "invalid-email" };
     const input = { userId: mockUserId, data: updateData as any };
 
     await expect(useCase.execute(input)).rejects.toThrow(ZodError);
@@ -146,14 +146,11 @@ describe("UpdateUserProfileUseCase", () => {
   });
 
   it("should throw ZodError if data is empty object and schema requires fields", async () => {
-    // updateUserProfileSchema allows all fields to be optional, so an empty object is valid for the 'data' part.
-    // The use case's combined input schema (updateUserProfileUseCaseInputSchema) requires 'data' object itself.
-    // Let's test if 'data' is missing.
-    const inputWithoutData = { userId: mockUserId };
+    const inputWithoutData = { userId: mockUserId } as any;
 
-    await expect(useCase.execute(inputWithoutData as any)).rejects.toThrow(ZodError);
+    await expect(useCase.execute(inputWithoutData)).rejects.toThrow(ZodError);
      try {
-      await useCase.execute(inputWithoutData as any);
+      await useCase.execute(inputWithoutData);
     } catch (e) {
       if (e instanceof ZodError) {
         const dataError = e.errors.find(err => err.path.includes("data"));
@@ -163,8 +160,8 @@ describe("UpdateUserProfileUseCase", () => {
   });
 
   it("should re-throw error if updateProfile unexpectedly returns null after user was found", async () => {
-    mockUserRepoInstance.findById.mockResolvedValue(originalUserProfile); // User exists
-    mockUserRepoInstance.updateProfile.mockResolvedValue(null); // Simulate update failing unexpectedly
+    mockUserRepoInstance.findById.mockResolvedValue(originalUserProfile);
+    mockUserRepoInstance.updateProfile.mockResolvedValue(null);
 
     const updateData: UpdateUserProfile = { name: "Test Name" };
     const input = { userId: mockUserId, data: updateData };
