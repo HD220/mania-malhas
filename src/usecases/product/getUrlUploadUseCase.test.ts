@@ -114,4 +114,35 @@ describe('getUrlUploadUseCase', () => {
       10 * 60
     );
   });
+
+  it('T01.4.2.4: should throw an error if MINIO_BUCKET_PRODUCTS is not defined in env', async () => {
+    // Temporarily modify the mocked env for this test case
+    const originalBucketName = (await import('@/db/postgres/env')).default.MINIO_BUCKET_PRODUCTS;
+    (await import('@/db/postgres/env')).default.MINIO_BUCKET_PRODUCTS = undefined as any; // Force undefined
+
+    const input: GetUrlUploadInput = { fileExt: mockFileExt };
+
+    // Expect an error because bucketName would be undefined.
+    // The actual error might come from the minioService when it receives an undefined bucket.
+    // For this test, we'll assume it results in a TypeError or a specific error thrown by getPresignedUrlPutObject.
+    // If getPresignedUrlPutObject is robust, it should throw a meaningful error.
+    // If not, the error might be less specific (e.g. TypeError from trying to use undefined).
+    // The use case itself doesn't explicitly check if bucketName is undefined.
+
+    // Let's make the mock for getPresignedUrlPutObject also check for undefined bucketName for clarity.
+    const undefinedBucketError = new Error('Bucket name must be defined');
+    mockGetPresignedUrlPutObject.mockImplementation(async (bucket, objectName) => {
+      if (bucket === undefined) {
+        throw undefinedBucketError;
+      }
+      return mockPresignedUrl;
+    });
+
+    await expect(getUrlUploadUseCase(input)).rejects.toThrow(undefinedBucketError);
+
+    expect(mockRandomUUID).toHaveBeenCalledTimes(1); // Called to generate objectName
+
+    // Restore the original mocked env value
+    (await import('@/db/postgres/env')).default.MINIO_BUCKET_PRODUCTS = originalBucketName;
+  });
 });
