@@ -5,7 +5,7 @@ import deleteTransactionUseCase, {
   DeleteTransactionInput,
 } from "./deleteTransactionUseCase";
 import { TransactionRepositoryFactory } from "@/db/repositories/transactionRepository";
-import { PaymentRepositoryFactory } from "@/db/repositories/paymentRepository";
+import { PaymentRepositoryFactory } from "@/features/payment/db/paymentRepository";
 import { SelectTransaction } from "@/db/repositories/schemas/transactionSchema";
 import { SelectPayment } from "@/features/payment/schemas/paymentSchema";
 

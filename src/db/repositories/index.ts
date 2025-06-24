@@ -7,7 +7,7 @@ import { notificationRepository as notificationRepositoryFactory } from "./notif
 import { productRepository as productRepositoryFactory } from "./productRepository";
 import { partnerRepository as partnerRepositoryFactory } from "./partnerRepository";
 import { transactionRepository as transactionRepositoryFactory } from "./transactionRepository";
-import { paymentRepository as paymentRepositoryFactory } from "./paymentRepository";
+import { paymentRepository as paymentRepositoryFactory } from "@/features/payment/db/paymentRepository";
 
 // Instantiate repositories by calling their factory functions with the db instance
 export const userRepository = userRepositoryFactory(db);

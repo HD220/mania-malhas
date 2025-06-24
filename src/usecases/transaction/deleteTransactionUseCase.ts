@@ -7,7 +7,7 @@ import {
 import {
   paymentRepository as createPaymentRepository,
   PaymentRepositoryFactory,
-} from "@/db/repositories/paymentRepository";
+} from "@/features/payment/db/paymentRepository";
 import { NotFoundError, DomainConflictError } from "@/lib/errors/domainErrors";
 
 /**

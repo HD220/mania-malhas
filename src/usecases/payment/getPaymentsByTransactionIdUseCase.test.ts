@@ -1,11 +1,11 @@
 import { describe, it, expect, vi, beforeEach } from 'vitest';
 import getPaymentsByTransactionIdUseCase from './getPaymentsByTransactionIdUseCase';
-import { paymentRepository } from '@/db/repositories/paymentRepository';
+import { paymentRepository } from '@/features/payment/db/paymentRepository';
 import { SelectPayment } from '@/features/payment/schemas/paymentSchema';
 import { faker } from '@faker-js/faker';
 
 // Mock do paymentRepository
-vi.mock('@/db/repositories/paymentRepository', () => ({
+vi.mock('@/features/payment/db/paymentRepository', () => ({
   paymentRepository: vi.fn().mockReturnValue({
     findByTransactionId: vi.fn(),
   }),
