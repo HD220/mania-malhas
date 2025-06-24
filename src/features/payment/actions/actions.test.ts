@@ -1,5 +1,5 @@
 import { describe, it, expect, vi, beforeEach } from 'vitest';
-import { addPaymentAction, PaymentServerResponse } from './actions'; // listPaymentsByTransactionAction não será testada aqui
+import { addPaymentAction, PaymentServerResponse } from '.'; // listPaymentsByTransactionAction não será testada aqui
 import createPaymentUseCase from '@/features/payment/usecases/createPaymentUseCase';
 import { InsertPayment } from '@/features/payment/schemas/paymentSchema';
 import { ZodError } from 'zod';

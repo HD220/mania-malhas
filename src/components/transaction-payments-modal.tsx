@@ -5,7 +5,7 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription, Di
 import { Button } from "@/components/ui/button";
 import { PaymentForm, PaymentFormData } from "@/components/forms/payment-form";
 import { PaymentList } from "@/components/payment-list";
-import { addPaymentAction, listPaymentsByTransactionAction, PaymentServerResponse } from "@/app/payment/actions"; // Adjust path as needed
+import { addPaymentAction, listPaymentsByTransactionAction, PaymentServerResponse } from "@/features/payment/actions"; // Adjust path as needed
 import { SelectPayment } from "@/features/payment/schemas/paymentSchema";
 import { useToast } from "./ui/use-toast";
 

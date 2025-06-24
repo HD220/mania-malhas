@@ -26,7 +26,7 @@ export const paymentFormSchema = z.object({
 export type PaymentFormData = z.infer<typeof paymentFormSchema>;
 
 // Import the server response type
-import { PaymentServerResponse } from "@/app/payment/actions";
+import { PaymentServerResponse } from "@/features/payment/actions";
 
 interface PaymentFormProps {
   transactionId: string; // Needed to associate the payment
