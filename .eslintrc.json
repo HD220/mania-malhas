@@ -4,7 +4,7 @@
   ],
   "extends": [
     "next/core-web-vitals",
-    "project-structure/recommended"
+    "plugin:project-structure/recommended"
   ],
   "rules": {
     "project-structure/independent-modules": [2, {
