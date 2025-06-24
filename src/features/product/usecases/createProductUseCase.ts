@@ -1,9 +1,9 @@
 import { db } from "@/db/postgres";
-import { productRepository } from "@/features/product/db/productRepository";
+import { productRepository } from "../db/productRepository"; // Adjusted
 import {
   InsertProductWithImages,
   insertProductWithImagesSchema,
-} from "@/features/product/schemas/productImageSchema";
+} from "../schemas/productImageSchema"; // Adjusted
 
 /**
  * Creates a new product along with its associated images.

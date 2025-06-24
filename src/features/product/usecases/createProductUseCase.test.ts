@@ -1,11 +1,11 @@
 import { describe, it, expect, vi, beforeEach } from 'vitest';
 import createProductUseCase from './createProductUseCase'; // Caminho para o seu use case
-import { productRepository } from '@/db/repositories/productRepository'; // Caminho para o seu repositório
-import { InsertProductWithImages, insertProductWithImagesSchema } from '@/db/repositories/schemas/productImageSchema';
+import { productRepository } from '@/features/product/db/productRepository'; // Adjusted
+import { InsertProductWithImages, insertProductWithImagesSchema } from '@/features/product/schemas/productImageSchema'; // Adjusted
 import { ZodError } from 'zod';
 
 // Mock do repositório de produtos
-vi.mock('@/db/repositories/productRepository', () => ({
+vi.mock('@/features/product/db/productRepository', () => ({ // Adjusted
   productRepository: vi.fn().mockReturnValue({
     insert: vi.fn(),
     // Adicione outros métodos mockados se createProductUseCase os utilizar indiretamente

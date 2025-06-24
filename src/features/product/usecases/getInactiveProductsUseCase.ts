@@ -1,6 +1,6 @@
 import { db } from "@/db/postgres";
-import { productRepository } from "@/features/product/db/productRepository";
-import { SelectProductWithImages } from "@/features/product/schemas/productImageSchema";
+import { productRepository } from "../db/productRepository"; // Adjusted
+import { SelectProductWithImages } from "../schemas/productImageSchema"; // Adjusted
 
 /**
  * Fetches all inactive products, including their images.

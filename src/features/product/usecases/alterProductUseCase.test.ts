@@ -1,11 +1,11 @@
 import { describe, it, expect, vi, beforeEach } from 'vitest';
-import alterProductUseCase from './alterProductUseCase';
-import { productRepository } from '@/db/repositories/productRepository';
-import { InsertProductWithImages, insertProductWithImagesSchema } from '@/db/repositories/schemas/productImageSchema';
+import alterProductUseCase from './alterProductUseCase'; // Will be correct
+import { productRepository } from '@/features/product/db/productRepository'; // Adjusted
+import { InsertProductWithImages, insertProductWithImagesSchema } from '@/features/product/schemas/productImageSchema'; // Adjusted
 import { ZodError } from 'zod';
 
 // Mock do repositório de produtos
-vi.mock('@/db/repositories/productRepository', () => ({
+vi.mock('@/features/product/db/productRepository', () => ({ // Adjusted
   productRepository: vi.fn().mockReturnValue({
     update: vi.fn(),
     // Outros métodos não são diretamente chamados por alterProductUseCase

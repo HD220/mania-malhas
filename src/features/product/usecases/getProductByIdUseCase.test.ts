@@ -1,11 +1,11 @@
 import { describe, it, expect, vi, beforeEach } from 'vitest';
 import getProductByIdUseCase from './getProductByIdUseCase';
-import { productRepository } from '@/db/repositories/productRepository';
-import { SelectProductWithImages } from '@/db/repositories/schemas/productImageSchema';
+import { productRepository } from '@/features/product/db/productRepository'; // Adjusted
+import { SelectProductWithImages } from '@/features/product/schemas/productImageSchema'; // Adjusted
 import { faker } from '@faker-js/faker';
 
 // Mock do productRepository
-vi.mock('@/db/repositories/productRepository', () => ({
+vi.mock('@/features/product/db/productRepository', () => ({ // Adjusted
   productRepository: vi.fn().mockReturnValue({
     findById: vi.fn(),
   }),

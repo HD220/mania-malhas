@@ -1,5 +1,5 @@
 import { db } from "@/db/postgres";
-import { productRepository } from "@/features/product/db/productRepository";
+import { productRepository } from "../db/productRepository"; // Adjusted
 
 /**
  * Counts the number of active products in the system.

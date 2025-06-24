@@ -1,6 +1,6 @@
 import { db } from "@/db/postgres";
-import { productRepository } from "@/features/product/db/productRepository";
-import { SelectProductImage } from "@/features/product/schemas/productImageSchema";
+import { productRepository } from "../db/productRepository"; // Adjusted
+import { SelectProductImage } from "../schemas/productImageSchema"; // Adjusted
 
 /**
  * Fetches a specific product image by its ID and the product ID it belongs to.
