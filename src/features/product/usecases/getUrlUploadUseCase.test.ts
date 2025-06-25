@@ -1,8 +1,8 @@
 import { describe, it, expect, vi, beforeEach } from 'vitest';
 import getUrlUploadUseCase, { Input as GetUrlUploadInput, Output as GetUrlUploadOutput } from './getUrlUploadUseCase';
 import { getPresignedUrlPutObject as actualGetPresignedUrlPutObject } from '@/services/minio';
-// Import randomUUID from "node:crypto" for explicitness.
-import { randomUUID } from 'node:crypto';
+// Import crypto module as a namespace to use vi.spyOn
+import * as crypto from 'node:crypto';
 // import env from '@/db/postgres/env'; // Will be mocked
 
 // Mock env from @/db/postgres/env
@@ -24,18 +24,7 @@ vi.mock('@/services/minio', () => ({
   getPresignedUrlPutObject: vi.fn(),
 }));
 
-// Mock crypto.randomUUID
-// The use case imports from "crypto", which resolves to 'node:crypto'.
-// We must mock the exact module specifier used by the code under test if not identical.
-// However, for built-ins, 'crypto' and 'node:crypto' should be interchangeable for mocking.
-// Mock 'node:crypto' as it's the canonical name for the built-in module.
-vi.mock('node:crypto', async (importOriginal) => {
-  const originalCryptoMod = await importOriginal<typeof import('node:crypto')>();
-  return {
-    ...originalCryptoMod,
-    randomUUID: vi.fn(),
-  };
-});
+// vi.mock for 'node:crypto' will be removed, will use vi.spyOn instead.
 
 // Typed mock functions
 // After vi.mock, the import will yield the mock
@@ -53,8 +42,7 @@ describe('getUrlUploadUseCase', () => {
   beforeEach(() => {
     vi.clearAllMocks();
     // Set default mock implementations
-    // Use the imported 'randomUUID' directly, which should be the mock.
-    (randomUUID as vi.Mock).mockReturnValue(mockGeneratedUUID);
+    vi.spyOn(crypto, 'randomUUID').mockReturnValue(mockGeneratedUUID);
     // MINIO_BUCKET_PRODUCTS should be available from .env.test or the fallback in env.ts
     // If env.MINIO_BUCKET_PRODUCTS is not 'test_products_bucket' (from .env.test) or 'products' (schema default),
     // then the test might pick up an unexpected value if env.ts defaults kicked in differently.
@@ -69,7 +57,7 @@ describe('getUrlUploadUseCase', () => {
     const input: GetUrlUploadInput = { fileExt: mockFileExt };
     const result: GetUrlUploadOutput = await getUrlUploadUseCase(input);
 
-    expect(randomUUID as vi.Mock).toHaveBeenCalledTimes(1);
+    expect(crypto.randomUUID).toHaveBeenCalledTimes(1);
     expect(mockGetPresignedUrlPutObject).toHaveBeenCalledTimes(1);
     expect(mockGetPresignedUrlPutObject).toHaveBeenCalledWith(
       mockBucketName,
@@ -88,7 +76,7 @@ describe('getUrlUploadUseCase', () => {
     // Expect the use case to throw (or reject with) the error from the service
     await expect(getUrlUploadUseCase(input)).rejects.toThrow(minioError);
 
-    expect(randomUUID as vi.Mock).toHaveBeenCalledTimes(1); // Still called before the service
+    expect(crypto.randomUUID).toHaveBeenCalledTimes(1); // Still called before the service
     expect(mockGetPresignedUrlPutObject).toHaveBeenCalledTimes(1);
     expect(mockGetPresignedUrlPutObject).toHaveBeenCalledWith(
       mockBucketName,
@@ -114,7 +102,7 @@ describe('getUrlUploadUseCase', () => {
 
     await expect(getUrlUploadUseCase(input)).rejects.toThrow(invalidObjectNameError);
 
-    expect(randomUUID as vi.Mock).toHaveBeenCalledTimes(1);
+    expect(crypto.randomUUID).toHaveBeenCalledTimes(1);
     expect(mockGetPresignedUrlPutObject).toHaveBeenCalledTimes(1);
     expect(mockGetPresignedUrlPutObject).toHaveBeenCalledWith(
       mockBucketName,
@@ -148,7 +136,7 @@ describe('getUrlUploadUseCase', () => {
 
     await expect(getUrlUploadUseCase(input)).rejects.toThrow(undefinedBucketError);
 
-    expect(randomUUID as vi.Mock).toHaveBeenCalledTimes(1); // Called to generate objectName
+    expect(crypto.randomUUID).toHaveBeenCalledTimes(1); // Called to generate objectName
 
     // Restore the original mocked env value
     (await import('@/db/postgres/env')).default.MINIO_BUCKET_PRODUCTS = originalBucketName;
