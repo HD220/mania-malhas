@@ -13,11 +13,12 @@ description: >
   Deve-se dar atenção especial a manter a semântica do nome do arquivo,
   como por exemplo, incluir o nome da feature no arquivo para evitar colisões e
   melhorar a clareza (ex: `auth.actions.ts` em vez de apenas `actions.ts` dentro de `src/features/auth/actions/`).
-status: Pendente
+status: Subdividido
 priority: P3
 complexity: 2
 created_date: 2024-08-07
 due_date:
+completion_date: 2024-08-08 # Data do desmembramento
 dependencies:
   - AUDIT-001
   - ARCH-DOC-001
@@ -27,16 +28,27 @@ tags:
   - structure
   - naming-convention
   - features
+  - meta-tarefa
 ---
 
-### Critérios de Aceitação:
-- Todos os arquivos e diretórios (onde aplicável, embora diretórios geralmente sigam o mesmo padrão ou um padrão específico como `__tests__`) dentro de `src/features/[nome_da_feature]/` e seus subdiretórios são nomeados usando `kebab-case`.
-- Os nomes dos arquivos são descritivos e, quando apropriado, prefixados ou sufixados com o nome da feature ou tipo de módulo (ex: `payment.schemas.ts`, `user-card.component.tsx`).
-- Todos os imports e referências a esses arquivos no código são atualizados para refletir os novos nomes.
+### Critérios de Aceitação Originais (Agora cobertos pelas sub-tarefas):
+- Todos os arquivos e diretórios dentro de `src/features/[nome_da_feature]/` e seus subdiretórios são nomeados usando `kebab-case`.
+- Os nomes dos arquivos são descritivos e, quando apropriado, prefixados ou sufixados com o nome da feature ou tipo de módulo.
+- Todos os imports e referências a esses arquivos no código são atualizados.
 - A aplicação compila e funciona como esperado após as renomeações.
-- ESLint não reporta erros relacionados a nomes de arquivos ou caminhos quebrados devido à renomeação.
+- ESLint não reporta erros.
+
+### Sub-tarefas Criadas:
+Esta tarefa foi desmembrada nas seguintes sub-tarefas, uma para cada feature principal:
+- `REFAC-STRUCT-015.1`: Padronizar nomes de arquivos em `src/features/dashboard/`.
+- `REFAC-STRUCT-015.2`: Padronizar nomes de arquivos em `src/features/notification/`.
+- `REFAC-STRUCT-015.3`: Padronizar nomes de arquivos em `src/features/partner/`.
+- `REFAC-STRUCT-015.4`: Padronizar nomes de arquivos em `src/features/payment/`.
+- `REFAC-STRUCT-015.5`: Padronizar nomes de arquivos em `src/features/product/`.
+- `REFAC-STRUCT-015.6`: Padronizar nomes de arquivos em `src/features/transaction/`.
+- `REFAC-STRUCT-015.7`: Padronizar nomes de arquivos em `src/features/user/`.
 
 ### Notas Adicionais:
-- A complexidade é 2 porque pode envolver um número significativo de arquivos e requer cuidado para atualizar todos os imports.
-- Pode ser útil usar ferramentas de busca e substituição em todo o projeto, mas com cautela.
-- Considerar se a regra ESLint `unicorn/filename-case` (se configurada e funcionando) pode ajudar a identificar ou corrigir isso. Se não, esta tarefa é manual.
+- A complexidade original era 2. Foi desmembrada em tarefas de complexidade 1 para cada feature.
+- Ferramentas de busca e substituição em todo o projeto serão úteis, mas devem ser usadas com cautela para atualizar os imports.
+- A regra ESLint `unicorn/filename-case` (se configurada) pode auxiliar na identificação, mas a correção e atualização de imports ainda será manual por sub-tarefa.
