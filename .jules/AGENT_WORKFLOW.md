@@ -1,47 +1,63 @@
-# Protocolo de Continuidade de Trabalho para Agente LLM
+# Fluxo de Trabalho do Agente e Gerenciamento de Tarefas
 
-**Para o Agente LLM (Jules):**
+Este documento descreve como o Agente Jules (e outros agentes LLM) devem interagir com o sistema de gerenciamento de tarefas deste projeto.
 
-Este documento define o seu fluxo de trabalho padrão ao ser instruído a "prosseguir com as tarefas" ou "continuar o trabalho" neste projeto. O objetivo é garantir uma abordagem sistemática, autônoma e alinhada com as práticas de desenvolvimento estabelecidas.
+## 1. Visão Geral do Gerenciamento de Tarefas
 
-## Fluxo de Trabalho Cíclico:
+O gerenciamento de tarefas evoluiu para um sistema de arquivos individuais para maior detalhamento e clareza, complementado por um arquivo de resumo.
 
-Ao receber uma instrução genérica para continuar o trabalho, siga os passos abaixo:
+-   **Arquivos de Tarefas Individuais:** Cada tarefa é definida em seu próprio arquivo Markdown com frontmatter YAML, localizado em `/.jules/tasks/TASK_ID.md`. Estes arquivos contêm todos os detalhes da tarefa.
+-   **Especificação do Formato:** Para detalhes completos sobre a estrutura e campos dos arquivos de tarefa, consulte `/.jules/TASK_FORMAT_SPECIFICATION.md`.
+-   **Arquivo de Resumo Principal:** O arquivo `/.jules/TASKS.md` agora serve como uma tabela de resumo de alto nível. Ele fornece uma visão geral rápida das tarefas, seus status, prioridades e links para os arquivos de detalhes.
 
-1.  **Consulta de Documentação Essencial:**
-    *   **Revisite `AGENTS.md`:** Antes de qualquer ação, releia o `AGENTS.md` para relembrar a visão geral do projeto, princípios de desenvolvimento, padrões arquiteturais, estrutura de código, tecnologias chave, e quaisquer considerações específicas do projeto. Preste atenção especial às seções que podem ter sido atualizadas.
-    *   **Analise `.jules/TASKS.md`:** Este é o seu principal backlog de tarefas.
+## 2. Lendo Tarefas
 
-2.  **Seleção e Gerenciamento de Tarefas:**
-    *   **Identifique Tarefas Pendentes:** No `.jules/TASKS.md`, procure por tarefas com status "Pendente".
-    *   **Priorize Complexidade 1:** Selecione uma tarefa com `Complexidade (1-5) = 1`. Se houver múltiplas, você pode escolher com base na data de criação ou em qualquer outra heurística simples, ou perguntar se houver ambiguidade.
-    *   **Subdivisão de Tarefas Complexas:**
-        *   Se **não** houver tarefas de complexidade 1 disponíveis, identifique a próxima tarefa pendente de maior prioridade (ou a mais antiga) que tenha complexidade > 1.
-        *   **Seu objetivo principal agora é subdividir esta tarefa complexa.** Proponha um plano detalhado de subdivisão, quebrando a tarefa original em múltiplas sub-tarefas, cada uma com complexidade estimada de 1.
-        *   Apresente este plano de subdivisão ao usuário para aprovação. **Não prossiga com a execução da tarefa original ou das sub-tarefas propostas antes da aprovação.**
-        *   Uma vez aprovado, atualize o `.jules/TASKS.md`: marque a tarefa original como "Bloqueado" ou "Subdividido" (adicionando uma nota referenciando as novas sub-tarefas) e adicione as novas sub-tarefas (com complexidade 1) à lista. Em seguida, retorne ao passo de seleção de tarefa (priorizando as recém-criadas).
+1.  **Consulte o Resumo:** Comece visualizando `/.jules/TASKS.md` para obter uma lista das tarefas, seus status atuais, prioridades e responsáveis. Esta tabela também pode conter links diretos para os arquivos de detalhes.
+2.  **Acesse os Detalhes:** Para entender completamente uma tarefa, abra o arquivo individual correspondente em `/.jules/tasks/TASK_ID.md` (onde `TASK_ID.md` é o nome do arquivo da tarefa, ex: `F07.1.md`).
 
-3.  **Execução de Tarefa (para tarefas de Complexidade 1):**
-    *   **Crie um Plano de Execução Detalhado:** Para a tarefa selecionada, use a ferramenta `set_plan()` para articular um plano passo a passo de como você pretende implementá-la. Este plano deve ser específico e acionável.
-    *   **Desenvolva Conforme o Plano:** Siga seu plano, utilizando as ferramentas disponíveis (`ls`, `read_files`, `create_file_with_block`, `replace_with_git_merge_diff`, `run_in_bash_session`, etc.).
-    *   **Testes (quando aplicável):** Se a tarefa envolve lógica de backend (casos de uso, actions), escreva ou atualize os testes unitários/integração relevantes. Siga as diretrizes de teste em `AGENTS.md`.
-    *   **Commits:** Faça commits intermediários se a tarefa for um pouco mais longa, usando mensagens de commit claras e seguindo o padrão Conventional Commits.
-    *   **Documente o Progresso:** Use `plan_step_complete()` após cada passo significativo do seu plano.
+## 3. Criando Novas Tarefas
 
-4.  **Conclusão e Submissão da Tarefa:**
-    *   **Verificação Final:** Revise seu trabalho. Certifique-se de que a tarefa foi totalmente concluída conforme os requisitos. Execute testes relevantes (`npm test` para lógica de backend).
-    *   **Submeta o Código:** Utilize a ferramenta `submit()` para criar um Pull Request (simulado). Forneça um nome de branch descritivo e uma mensagem de commit detalhada.
-    *   **Atualize `.jules/TASKS.md`:** Mude o status da tarefa para "Concluído" e preencha a "Data de Conclusão (Real)". Adicione notas relevantes, como o link para o commit ou PR.
+Ao identificar a necessidade de uma nova tarefa:
 
-5.  **Relate e Prepare para a Próxima Tarefa (ou Handoff):**
-    *   **Informe o Usuário:** Comunique a conclusão da tarefa.
-    *   **Documente para Handoff (se pausar):** Se você for pausar o trabalho antes de iniciar a próxima tarefa, preencha (mentalmente ou se instruído, em um arquivo temporário) as seções do que seria um `PROMPT_HANDOFF.md` para facilitar a retomada. O foco é garantir que o próximo agente (ou você mesmo em uma futura sessão) possa continuar eficientemente.
-    *   **Retorne ao Passo 2:** Se houver mais tarefas e você for instruído a continuar, reinicie o ciclo.
+1.  **Defina um ID Único:** Escolha um ID claro e único para a nova tarefa (ex: `NOVA-FEATURE-001`).
+2.  **Crie o Arquivo da Tarefa:**
+    -   Crie um novo arquivo em `/.jules/tasks/` com o nome `ID_DA_TAREFA.md` (ex: `/.jules/tasks/NOVA-FEATURE-001.md`).
+    -   Preencha o frontmatter YAML e o corpo da descrição em Markdown conforme especificado em `/.jules/TASK_FORMAT_SPECIFICATION.md`. Certifique-se de incluir todos os campos obrigatórios (`id`, `title`, `priority`, `status`, `complexity`, `creation_date`).
+3.  **Adicione ao Resumo Principal:**
+    -   Abra `/.jules/TASKS.md`.
+    -   Adicione uma nova linha na tabela de resumo para a nova tarefa, incluindo colunas chave como ID, Prioridade, Título Curto, Status, Complexidade, Responsável, Data de Criação e um link para o arquivo de detalhe (ex: `[NOVA-FEATURE-001.md](./tasks/NOVA-FEATURE-001.md)`).
 
-## Considerações Adicionais:
+## 4. Atualizando Tarefas
 
-*   **Erros e Bloqueios:** Se encontrar um erro que não consegue resolver ou um bloqueio, não prossiga cegamente. Pare, documente o problema (usando a estrutura de um `PROMPT_HANDOFF.md` para o contexto) e solicite ajuda ao usuário.
-*   **Clareza:** Se os requisitos de uma tarefa em `TASKS.md` não estiverem claros, peça esclarecimentos antes de iniciar o trabalho.
-*   **Autonomia com Responsabilidade:** Siga este protocolo para operar de forma autônoma, mas sempre priorize a qualidade, a comunicação e o alinhamento com os objetivos do projeto definidos em `AGENTS.md`.
+Para modificar uma tarefa existente (ex: mudar status, adicionar notas, atualizar descrição):
 
-Este protocolo visa otimizar sua contribuição e garantir um desenvolvimento consistente e rastreável.
+1.  **Modifique o Arquivo de Detalhe:**
+    -   Abra o arquivo `/.jules/tasks/TASK_ID.md` correspondente.
+    -   Faça as alterações necessárias no frontmatter YAML ou no corpo da descrição.
+2.  **Atualize o Resumo Principal (se necessário):**
+    -   Se você alterou campos que são espelhados na tabela de resumo em `/.jules/TASKS.md` (como `Status`, `Prioridade`, `Título Curto`, `Responsável`, `Complexidade`), atualize a linha correspondente em `/.jules/TASKS.md` para manter a consistência.
+
+## 5. Desmembrando Tarefas Complexas (Subdivisão)
+
+Conforme o protocolo, tarefas com `Complexidade > 1` devem ser desmembradas.
+
+1.  **Identifique a Tarefa Mãe:** A tarefa a ser desmembrada (ex: `TSK-COMPLEXA-001`).
+2.  **Atualize a Tarefa Mãe:**
+    -   No arquivo `/.jules/tasks/TSK-COMPLEXA-001.md`, altere o `status` para `Subdividido`.
+    -   Você pode adicionar uma nota no campo `notes` indicando que foi subdividida e quais são as sub-tarefas.
+3.  **Crie Sub-Tarefas:**
+    -   Para cada nova sub-tarefa, siga o processo de "Criando Novas Tarefas" (passo 3).
+    -   No frontmatter de cada sub-tarefa, use o campo `dependencies` para listar o ID da tarefa mãe (ex: `dependencies: ["TSK-COMPLEXA-001"]`). Alternativamente ou complementarmente, pode-se usar o campo `parent_task: "TSK-COMPLEXA-001"`. (Nota: `TASK_FORMAT_SPECIFICATION.md` sugere `parent_task` para este propósito específico, enquanto `dependencies` é para pré-requisitos de execução).
+4.  **Atualize o Resumo Principal (`TASKS.md`):**
+    -   Modifique a linha da tarefa mãe para refletir seu novo status (`Subdividido`).
+    -   Adicione novas linhas para cada sub-tarefa criada.
+
+## 6. Ciclo de Trabalho Geral
+
+Lembre-se de seguir o ciclo de trabalho principal:
+1.  **Sincronização e Análise:** Leia `/.jules/TASKS.md` e os arquivos de detalhes relevantes.
+2.  **Seleção da Ação:** Decida entre desmembrar uma tarefa complexa ou executar uma tarefa simples.
+3.  **Execução:** Adote a persona, anuncie, atualize status (no arquivo da tarefa), e realize o trabalho. Crie novas tarefas se necessário.
+4.  **Submissão:** Faça o commit das alterações (nos arquivos de tarefa, `TASKS.md`, código, etc.).
+
+Aderir a este fluxo de trabalho garantirá que o rastreamento de tarefas permaneça preciso e que o projeto progrida de forma organizada.
