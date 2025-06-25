@@ -7,7 +7,7 @@ import { PaymentForm, PaymentFormData } from "@/features/payment/components/paym
 import { PaymentList } from "@/features/payment/components/payment-list";
 import { addPaymentAction, listPaymentsByTransactionAction, PaymentServerResponse } from "@/features/payment/actions"; // Adjust path as needed
 import { SelectPayment } from "@/features/payment/schemas/paymentSchema";
-import { useToast } from "./ui/use-toast";
+import { useToast } from "@/components/ui/use-toast";
 
 interface TransactionPaymentsModalProps {
   transactionId: string | null; // Null when modal is closed
