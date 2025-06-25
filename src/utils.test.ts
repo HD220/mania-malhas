@@ -39,9 +39,9 @@ describe("Utility Functions", () => {
     // Mock XMLHttpRequest and add test cases for uploadS3 here
     // Global mock for XMLHttpRequest
     let mockXHRInstance: {
-      open: jest.Mock;
-      send: jest.Mock;
-      setRequestHeader: jest.Mock;
+      open: ReturnType<typeof vi.fn>;
+      send: ReturnType<typeof vi.fn>;
+      setRequestHeader: ReturnType<typeof vi.fn>;
       onreadystatechange: (() => void) | null;
       readyState: number;
       status: number;
@@ -49,17 +49,17 @@ describe("Utility Functions", () => {
         onprogress: ((event: Partial<ProgressEvent>) => void) | null;
         onerror: ((event: Partial<Event>) => void) | null;
         onload: ((event: Partial<Event>) => void) | null;
-        addEventListener: jest.Mock;
-        removeEventListener: jest.Mock;
-        dispatchEvent: jest.Mock;
+        addEventListener: ReturnType<typeof vi.fn>;
+        removeEventListener: ReturnType<typeof vi.fn>;
+        dispatchEvent: ReturnType<typeof vi.fn>;
       };
     };
 
     beforeEach(() => {
       mockXHRInstance = {
-        open: jest.fn(),
-        send: jest.fn(),
-        setRequestHeader: jest.fn(),
+        open: vi.fn(),
+        send: vi.fn(),
+        setRequestHeader: vi.fn(),
         onreadystatechange: null,
         readyState: 0,
         status: 0,
@@ -67,27 +67,27 @@ describe("Utility Functions", () => {
           onprogress: null,
           onerror: null,
           onload: null,
-          addEventListener: jest.fn((event, cb) => {
+          addEventListener: vi.fn((event, cb) => {
             if (event === 'progress') mockXHRInstance.upload.onprogress = cb;
             if (event === 'error') mockXHRInstance.upload.onerror = cb;
             if (event === 'load') mockXHRInstance.upload.onload = cb;
           }),
-          removeEventListener: jest.fn(),
-          dispatchEvent: jest.fn(),
+          removeEventListener: vi.fn(),
+          dispatchEvent: vi.fn(),
         },
       };
-      global.XMLHttpRequest = jest.fn(() => mockXHRInstance) as any;
+      global.XMLHttpRequest = vi.fn(() => mockXHRInstance) as any;
     });
 
     afterEach(() => {
       // Restore original XMLHttpRequest if necessary, or ensure mocks are cleared
-      jest.restoreAllMocks(); // Or specific mock clear
+      vi.restoreAllMocks(); // Or specific mock clear
     });
 
     it("should upload a file successfully, calling onProgress and resolving", async () => {
       const mockUrl = "https://presigned-url.com/upload";
       const mockFile = new File(["dummy content"], "example.png", { type: "image/png" });
-      const onProgressMock = jest.fn();
+      const onProgressMock = vi.fn();
 
       const uploadPromise = uploadS3(mockUrl, mockFile, onProgressMock);
 
@@ -120,7 +120,7 @@ describe("Utility Functions", () => {
     it("should handle network errors and reject with an error message", async () => {
       const mockUrl = "https://presigned-url.com/upload";
       const mockFile = new File(["dummy content"], "example.png", { type: "image/png" });
-      const onProgressMock = jest.fn();
+      const onProgressMock = vi.fn();
 
       const uploadPromise = uploadS3(mockUrl, mockFile, onProgressMock);
 
@@ -138,7 +138,7 @@ describe("Utility Functions", () => {
     it("should handle non-200 status codes on readyStateChange and reject", async () => {
       const mockUrl = "https://presigned-url.com/upload";
       const mockFile = new File(["dummy content"], "example.png", { type: "image/png" });
-      const onProgressMock = jest.fn();
+      const onProgressMock = vi.fn();
 
       const uploadPromise = uploadS3(mockUrl, mockFile, onProgressMock);
 
@@ -158,7 +158,7 @@ describe("Utility Functions", () => {
     it("should call onProgress with 0 if length is not computable", async () => {
         const mockUrl = "https://presigned-url.com/upload";
         const mockFile = new File(["dummy content"], "example.png", { type: "image/png" });
-        const onProgressMock = jest.fn();
+        const onProgressMock = vi.fn();
 
         const uploadPromise = uploadS3(mockUrl, mockFile, onProgressMock);
 

@@ -2,12 +2,12 @@
 id: "REFAC-STRUCT-003"
 title: "Mover `session.ts` e `session.test.ts` de `src/lib/auth/` para `src/features/auth/lib/`"
 priority: "P3"
-status: "Pendente"
+status: "Concluído"
 complexity: 1
 assigned_to: "AgenteJules"
 dependencies: ["REFAC-STRUCT-001"] # Depende da criação da feature `auth`
 creation_date: "2024-08-07"
-completion_date: ""
+completion_date: "2024-08-09"
 tags:
   - "refactor"
   - "estrutura"

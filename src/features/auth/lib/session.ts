@@ -2,7 +2,7 @@
 
 /**
  * @fileoverview Session management utilities.
- * @module lib/auth/session
+ * @module features/auth/lib/session
  * @remarks This module currently contains placeholder logic for session management.
  * It is intended to be replaced with a proper authentication solution like NextAuth.js.
  */
@@ -34,7 +34,7 @@ const getUserIdFromSession = async (): Promise<string | null> => {
   // This avoids a DB call in this placeholder, but requires the DB to be seeded appropriately.
   // const placeholderUserId = "00000000-0000-0000-0000-000000000001"; // Standard test user ID from other files
   // console.warn(
-  //   `lib/auth/session: Using hardcoded placeholder user ID ${placeholderUserId}. Replace with actual session logic.`
+  //   `features/auth/lib/session: Using hardcoded placeholder user ID ${placeholderUserId}. Replace with actual session logic.`
   // );
   // return placeholderUserId;
 
@@ -43,7 +43,7 @@ const getUserIdFromSession = async (): Promise<string | null> => {
   // If a specific test user is needed consistently, the above hardcoded ID could be used,
   // but it's better if calling code (like server actions) provides a default or handles null.
   console.warn(
-    `lib/auth/session: getUserIdFromSession is a placeholder and currently returns null. Replace with actual session logic.`
+    `features/auth/lib/session: getUserIdFromSession is a placeholder and currently returns null. Replace with actual session logic.`
   );
   return null;
 };

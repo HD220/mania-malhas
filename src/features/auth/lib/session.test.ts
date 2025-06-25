@@ -2,11 +2,11 @@ import { internalGetUserIdFromSession } from "./session";
 
 describe("Auth Session Utilities", () => {
   describe("internalGetUserIdFromSession", () => {
-    let consoleWarnSpy: jest.SpyInstance;
+    let consoleWarnSpy: ReturnType<typeof vi.spyOn>;
 
     beforeEach(() => {
       // Spy on console.warn before each test
-      consoleWarnSpy = jest.spyOn(console, "warn").mockImplementation(() => {});
+      consoleWarnSpy = vi.spyOn(console, "warn").mockImplementation(() => {});
     });
 
     afterEach(() => {
@@ -23,7 +23,7 @@ describe("Auth Session Utilities", () => {
       await internalGetUserIdFromSession();
       expect(consoleWarnSpy).toHaveBeenCalledTimes(1);
       expect(consoleWarnSpy).toHaveBeenCalledWith(
-        "lib/auth/session: getUserIdFromSession is a placeholder and currently returns null. Replace with actual session logic."
+        "features/auth/lib/session: getUserIdFromSession is a placeholder and currently returns null. Replace with actual session logic."
       );
     });
   });
