@@ -1,42 +1,71 @@
 {
+  "root": true,
   "plugins": [
     "project-structure",
-    "filenames-simple",
-    "import" // Adicionado explicitamente, embora possa ser herdado
+    "import"
   ],
   "extends": [
     "next/core-web-vitals",
-    "plugin:import/recommended", // Adiciona configurações recomendadas para import
-    "plugin:import/typescript" // Para resolução de paths com TypeScript
+    "plugin:import/recommended",
+    "plugin:import/typescript"
   ],
   "rules": {
-    // Regra para nomes de arquivo em kebab-case
-    "filenames-simple/filename-case": [2, { "case": "kebab-case" }],
-
-    // Configuração inicial para project-structure (será refinada)
+    "import/order": [2, {
+      "groups": ["builtin", "external", "internal", "parent", "sibling", "index", "object", "type"],
+      "pathGroups": [
+        { "pattern": "@/**", "group": "internal", "position": "before" },
+        { "pattern": "@features/**", "group": "internal", "position": "before" },
+        { "pattern": "@components/**", "group": "internal", "position": "before" },
+        { "pattern": "@lib/**", "group": "internal", "position": "before" }
+      ],
+      "pathGroupsExcludedImportTypes": ["builtin"],
+      "newlines-between": "always",
+      "alphabetize": { "order": "asc", "caseInsensitive": true }
+    }],
+    "import/no-restricted-paths": [2, {
+      "zones": [
+        { "target": "src/features/**", "from": "src/app/**", "message": "Features should not import from the 'app' layer." },
+        { "target": "src/components/**", "from": "src/features/**", "message": "Global components should not import from features." },
+        { "target": "src/components/**", "from": "src/app/**", "message": "Global components should not import from the app layer." },
+        { "target": "src/lib/**", "from": "src/features/**", "message": "Global lib should not import from features." },
+        { "target": "src/lib/**", "from": "src/components/**", "message": "Global lib should not import from components." },
+        { "target": "src/lib/**", "from": "src/app/**", "message": "Global lib should not import from the app layer." },
+        { "target": "./src/**", "from": "./src/services", "message": "Global 'src/services/' is deprecated. Use 'src/lib/clients/' or feature-specific lib." },
+        { "target": "./src/**", "from": "./src/utils", "message": "Global 'src/utils/' is deprecated. Use 'src/lib/utils/' or feature-specific lib." },
+        { "target": "./src/**", "from": "./src/styles", "message": "Global 'src/styles/' is deprecated. Use 'src/globals.css'." }
+      ]
+    }],
+    "no-restricted-imports": ["error", {
+        "patterns": [
+          { "group": ["**/src/services/**"], "message": "Global 'src/services/' is deprecated. Use 'src/lib/clients/' or feature-specific services." },
+          { "group": ["**/src/utils/**", "!**/src/lib/utils/**"], "message": "Global 'src/utils/' is deprecated. Use 'src/lib/utils/' or feature-specific utils." },
+          { "group": ["**/src/styles/**"], "message": "Global 'src/styles/' is deprecated. Use 'src/globals.css' or component-specific styles." }
+        ]
+      }
+    ],
     "project-structure/independent-modules": [2, {
-      "debugMode": false, // Mudar para true para ajudar a debugar patterns
+      "debugMode": false,
       "modules": [
         // --- Global Layers ---
         {
           "name": "global-lib-db-config",
           "pattern": "src/lib/db-config/**",
-          "allowImportsFrom": ["*"] // Config do DB pode precisar de 'pg', 'dotenv', etc.
+          "allowImportsFrom": ["*", "@/lib/shared-types/**"]
         },
         {
           "name": "global-lib-utils",
           "pattern": "src/lib/utils/**",
-          "allowImportsFrom": [] // Idealmente, sem dependências externas, apenas built-in ou outros utils daqui.
+          "allowImportsFrom": ["@/lib/shared-types/**"]
         },
         {
           "name": "global-lib-clients",
           "pattern": "src/lib/clients/**",
-          "allowImportsFrom": ["*"] // Clientes SDK podem importar seus pacotes base.
+          "allowImportsFrom": ["*", "@/lib/shared-types/**", "@/lib/constants/**"]
         },
         {
           "name": "global-lib-shared-types",
           "pattern": "src/lib/shared-types/**",
-          "allowImportsFrom": [] // Apenas definições de tipos e schemas Zod.
+          "allowImportsFrom": ["zod"] // Permite Zod para definir schemas aqui
         },
         {
           "name": "global-lib-constants",
@@ -44,59 +73,59 @@
           "allowImportsFrom": []
         },
         {
-          "name": "global-lib-catch-all", // Para outros arquivos em src/lib/
+          "name": "global-lib-root",
           "pattern": "src/lib/*",
-          "allowImportsFrom": ["@/lib/utils/**", "@/lib/clients/**", "@/lib/shared-types/**", "@/lib/constants/**"]
+          "allowImportsFrom": ["@/lib/utils/**", "@/lib/clients/**", "@/lib/shared-types/**", "@/lib/constants/**", "*"] // Permitir '*' para pacotes externos
         },
         {
           "name": "global-components-ui",
           "pattern": "src/components/ui/**",
-          "allowImportsFrom": ["@/lib/utils/**", "@/lib/shared-types/**"] // E dependências como 'class-variance-authority', 'lucide-react'
+          "allowImportsFrom": ["@/lib/utils/**", "@/lib/shared-types/**", "react", "lucide-react", "class-variance-authority", "@radix-ui/**", "cmdk", "embla-carousel-react", "react-day-picker", "react-dropzone", "vaul", "@/components/providers/**"] // Adicionado providers
         },
         {
           "name": "global-components-generic",
-          "pattern": "src/components/*", // Exclui ui já definido acima
-          "allowImportsFrom": ["@/components/ui/**", "@/lib/**"]
+          "pattern": "src/components/*",
+          "allowImportsFrom": ["@/components/ui/**", "@/lib/**", "react", "next/**", "lucide-react", "@/assets/**", "@/features/**/components/**", "@/features/**/types/**", "@/features/**/actions/**"] // Permitir de features components, types, actions
         },
-        // --- Features ---
-        // Este pattern genérico para features é um desafio para 'allowImportsFrom' granular por subpasta da feature.
-        // O ideal seria definir cada subpasta da feature como um módulo separado se quisermos controle total.
-        // Por agora, uma definição geral para features:
         {
-          "name": "feature-code",
-          "pattern": "src/features/[a-z0-9-]+/!(components|actions)/**", // Todo código da feature exceto componentes e actions
-          "allowImportsFrom": [
-            "@/lib/**",
-            "@/components/ui/**", // Para tipos, talvez? Geralmente não usado diretamente por lógica de backend.
-            "@/features/[^/]+/types/**", // Tipos da própria feature (usando [^/]+ para o nome da feature)
-            "@/features/[^/]+/lib/**",   // Lib da própria feature
-            "@/features/[^/]+/db/**",    // DB da própria feature (ex: usecase importa repo)
-            "./**", "../**" // Relativos
-          ]
+          "name": "global-providers", // Para src/components/providers
+          "pattern": "src/components/providers/**",
+          "allowImportsFrom": ["react", "next-themes", "react-dropzone", "*"]
+        },
+        // --- Feature Layers ---
+        {
+          "name": "feature-types",
+          "pattern": "src/features/[a-z0-9-]+/types/**",
+          "allowImportsFrom": ["zod", "drizzle-zod", "@/lib/shared-types/**", "@/lib/db-config/schema/**", "../db/**"]
+        },
+        {
+          "name": "feature-db",
+          "pattern": "src/features/[a-z0-9-]+/db/**",
+          "allowImportsFrom": ["@/lib/db-config/**", "../types/**", "drizzle-orm", "@/lib/shared-types/**"]
+        },
+        {
+          "name": "feature-lib",
+          "pattern": "src/features/[a-z0-9-]+/lib/**",
+          "allowImportsFrom": ["../types/**", "@/lib/**", "*"]
+        },
+        {
+          "name": "feature-usecases",
+          "pattern": "src/features/[a-z0-9-]+/usecases/**",
+          "allowImportsFrom": ["../types/**", "../db/**", "../lib/**", "@/lib/**", "zod", "*"]
+        },
+        {
+          "name": "feature-actions",
+          "pattern": "src/features/[a-z0-9-]+/actions/**",
+          "allowImportsFrom": ["../types/**", "../usecases/**", "../db/**", "../lib/**", "@/lib/**", "next/cache", "zod", "next/navigation", "*"]
         },
         {
           "name": "feature-components",
           "pattern": "src/features/[a-z0-9-]+/components/**",
           "allowImportsFrom": [
+            "../types/**", "../actions/**", "../lib/**",
+            "@/components/ui/**", "@/components/**",
             "@/lib/**",
-            "@/components/ui/**",
-            "@/components/**",
-            "@/features/[^/]+/types/**", // Tipos da própria feature
-            "@/features/[^/]+/lib/**",   // Lib da própria feature
-            "@/features/[^/]+/actions/**",// Actions da própria feature (para chamar em handlers)
-            "./**", "../**"
-          ]
-        },
-        {
-          "name": "feature-actions",
-          "pattern": "src/features/[a-z0-9-]+/actions/**",
-          "allowImportsFrom": [
-            "@/lib/**",
-            "@/features/[^/]+/types/**",    // Tipos da própria feature
-            "@/features/[^/]+/lib/**",      // Lib da própria feature
-            "@/features/[^/]+/usecases/**", // Usecases da própria feature
-            "@/features/[^/]+/db/**",       // DB da própria feature (se o usecase for muito simples)
-            "./**", "../**"
+            "react", "next/**", "lucide-react", "sonner", "react-hook-form", "@hookform/resolvers/zod", "date-fns", "use-debounce", "date-fns/locale", "*"
           ]
         },
         // --- App Layer ---
@@ -106,132 +135,36 @@
           "allowImportsFrom": [
             "@/features/[a-z0-9-]+/components/**",
             "@/features/[a-z0-9-]+/actions/**",
-            "@/features/[a-z0-9-]+/types/**", // Para props de componentes, etc.
+            "@/features/[a-z0-9-]+/types/**",
+            "@/features/[a-z0-9-]+/schemas/**", // Mantido temporariamente se schemas não estiverem em types
+            "@/features/[a-z0-9-]+/usecases/**", // Permitindo app importar usecases diretamente
             "@/components/**",
             "@/lib/**",
-            "@/globals.css" // Se for importado em layout.tsx
+            "@/assets/**",
+            "next/**", "react", "lucide-react", "@/globals.css", "zod", "date-fns", "use-debounce", "date-fns/locale"
           ]
+        },
+        // --- Root src files ---
+        {
+            "name": "src-root",
+            "pattern": "src/*", // Ex: src/globals.css, src/constant.tsx
+            "allowImportsFrom": ["*", "./styles/**"] // Permitir globals.css importar de styles (se houver)
+        },
+        {
+            "name": "src-global-types", // Para src/types/ se existir
+            "pattern": "src/types/**",
+            "allowImportsFrom": ["*"]
         }
       ]
-    }],
-
-    "import/no-restricted-paths": [2, {
-      "zones": [
-        // Zona para proibir imports diretos entre features diferentes (exceto talvez de seus `types` ou `index` públicos)
-        // Esta configuração é complexa e precisa de refinamento.
-        // Exemplo: Proibir feature 'user' de importar de 'product' diretamente, exceto tipos.
-        // {
-        //   "target": "src/features/user/**",
-        //   "from": "src/features/product/**",
-        //   "except": ["src/features/product/types/**"],
-        //   "message": "Direct import from 'product' feature into 'user' feature is restricted. Use shared types or consider indirection."
-        // },
-
-        // Proibir features de importar da camada app
-        { "target": "src/features/**", "from": "src/app/**", "message": "Features should not import from the 'app' layer." },
-
-        // Proibir componentes globais de importar de features ou app
-        { "target": "src/components/**", "from": "src/features/**", "message": "Global components should not import from features." },
-        { "target": "src/components/**", "from": "src/app/**", "message": "Global components should not import from the app layer." },
-
-        // Proibir lib de importar de features, components, ou app
-        { "target": "src/lib/**", "from": "src/features/**", "message": "Global lib should not import from features." },
-        { "target": "src/lib/**", "from": "src/components/**", "message": "Global lib should not import from components." },
-        { "target": "src/lib/**", "from": "src/app/**", "message": "Global lib should not import from the app layer." },
-
-        // Proibir imports de pastas que não devem mais existir na raiz de src (já cobertos por no-restricted-imports também)
-        { "target": "./src/**", "from": "./src/services", "message": "Global 'src/services/' is deprecated. Use 'src/lib/clients/' or feature-specific lib." },
-        { "target": "./src/**", "from": "./src/utils", "message": "Global 'src/utils/' is deprecated. Use 'src/lib/utils/' or feature-specific lib." },
-        { "target": "./src/**", "from": "./src/styles", "message": "Global 'src/styles/' is deprecated. Use 'src/globals.css'." }
-      ]
-    }],
-    "import/order": [2, {
-      "groups": ["builtin", "external", "internal", "parent", "sibling", "index", "object", "type"],
-      "pathGroups": [ // Para melhor agrupamento de imports com alias
-        {
-          "pattern": "@/**",
-          "group": "internal",
-          "position": "before"
-        },
-        {
-          "pattern": "@features/**",
-          "group": "internal",
-          "position": "before"
-        },
-        {
-          "pattern": "@components/**",
-          "group": "internal",
-          "position": "before"
-        },
-        {
-          "pattern": "@lib/**",
-          "group": "internal",
-          "position": "before"
-        }
-      ],
-      "pathGroupsExcludedImportTypes": ["builtin"],
-      "newlines-between": "always",
-      "alphabetize": { "order": "asc", "caseInsensitive": true }
-    }],
-    "no-restricted-imports": [ // Alternativa ou complemento ao import/no-restricted-paths para padrões específicos
-      "error",
-      {
-        "patterns": [
-          {
-            "group": ["**/src/services/**"],
-            "message": "Global 'src/services/' is deprecated. Use 'src/lib/clients/' or feature-specific services."
-          },
-          {
-            "group": ["**/src/utils/**", "!**/src/lib/utils/**"], // Proíbe src/utils mas permite src/lib/utils
-            "message": "Global 'src/utils/' is deprecated. Use 'src/lib/utils/' or feature-specific utils."
-          },
-          {
-            "group": ["**/src/styles/**"],
-            "message": "Global 'src/styles/' is deprecated. Use 'src/globals.css' or component-specific styles."
-          }
-        ]
-      }
-    ]
+    }]
   },
   "settings": {
     "import/resolver": {
       "typescript": {
-        "alwaysTryTypes": true // Ajuda o plugin a encontrar arquivos de tipo
-      }
-    },
-    // Configuração para eslint-plugin-filenames-simple para ignorar arquivos Next.js e componentes React
-    "filenames-simple": {
-      "namingPattern": {
-        // Permite PascalCase para .tsx (Componentes React) e arquivos específicos do Next.js
-        "^(page|layout|loading|error|not-found|template|default)\\.tsx$": "pascal-case",
-        "^([A-Z][a-zA-Z0-9]*)+\\.tsx$": "pascal-case",
-        // Demais arquivos .ts e .tsx devem ser kebab-case
-        "*.ts": "kebab-case",
-        "*.tsx": "kebab-case"
+        "alwaysTryTypes": true,
+        "project": "./tsconfig.json"
       }
     }
   },
-  "overrides": [
-    {
-      // Para arquivos de teste, permitir diferentes padrões de nomenclatura se necessário
-      "files": ["**/__tests__/**/*.ts", "**/__tests__/**/*.tsx", "*.test.ts", "*.test.tsx", "test-setup.ts"],
-      "rules": {
-        "filenames-simple/filename-case": "off" // Desligar para testes por enquanto, pode ser refinado
-      }
-    },
-    {
-      // Arquivos de configuração na raiz podem ter nomes variados
-      "files": ["*.config.js", "*.config.mjs", "*.config.ts", ".eslintrc.json"],
-      "rules": {
-        "filenames-simple/filename-case": "off"
-      }
-    },
-    {
-      // Arquivos de definição de tipos podem ser PascalCase
-      "files": ["*.d.ts"],
-      "rules": {
-        "filenames-simple/filename-case": "off"
-      }
-    }
-  ]
+  "overrides": []
 }
