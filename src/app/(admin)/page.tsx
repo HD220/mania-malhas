@@ -1,4 +1,4 @@
-import { getDashboardStats } from "./dashboard/actions"; // Ajuste o caminho se necessário
+import { getDashboardStats } from "@/features/dashboard/actions"; // Ajuste o caminho se necessário
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import Link from "next/link";

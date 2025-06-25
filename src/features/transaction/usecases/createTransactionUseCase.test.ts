@@ -14,12 +14,12 @@ vi.mock('@/features/transaction/db/transactionRepository', () => ({
   })),
 }));
 
-vi.mock('@/usecases/notification/createNotificationUseCase', () => ({
+vi.mock('@/features/notification/usecases/createNotificationUseCase', () => ({
   default: vi.fn(),
 }));
 
-vi.mock('@/app/(admin)/notifications/actions', async (importOriginal) => {
-  const actual = await importOriginal<typeof import('@/app/(admin)/notifications/actions')>();
+vi.mock('@/features/notification/actions', async (importOriginal) => {
+  const actual = await importOriginal<typeof import('@/features/notification/actions')>();
   return {
     ...actual,
     internalGetUserIdFromSession: vi.fn(),
@@ -31,8 +31,8 @@ vi.mock('@/app/(admin)/notifications/actions', async (importOriginal) => {
 // --- START IMPORTS (after mocks are defined) ---
 import createTransactionUseCase, { CreateTransactionInput } from './createTransactionUseCase';
 import { transactionRepository } from '@/features/transaction/db/transactionRepository';
-import createNotificationUseCaseActual from '@/usecases/notification/createNotificationUseCase';
-import { internalGetUserIdFromSession as internalGetUserIdFromSessionActual } from '@/app/(admin)/notifications/actions';
+import createNotificationUseCaseActual from '@/features/notification/usecases/createNotificationUseCase';
+import { internalGetUserIdFromSession as internalGetUserIdFromSessionActual } from '@/features/notification/actions';
 import { insertTransactionSchema, SelectTransaction } from '@/features/transaction/schemas/transactionSchema';
 import { SelectNotification } from '@/features/notification/schemas/notificationSchema'; // Added this import
 // --- END IMPORTS ---

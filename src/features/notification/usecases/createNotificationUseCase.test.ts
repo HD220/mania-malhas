@@ -1,7 +1,7 @@
 import { describe, it, expect, vi, beforeEach } from "vitest";
 import { CreateNotificationUseCase, createNotificationInputSchema, CreateNotificationInput } from "./createNotificationUseCase";
-import { NotificationRepository } from "@/db/repositories/notificationRepository";
-import { selectNotificationSchema, SelectNotification, notificationTypeEnum } from "@/db/repositories/schemas/notificationSchema";
+import { NotificationRepository } from "@/features/notification/db/notificationRepository";
+import { selectNotificationSchema, SelectNotification, notificationTypeEnum } from "@/features/notification/schemas/notificationSchema";
 import { ZodError } from "zod";
 import { DomainError } from "@/lib/errors/domainErrors";
 import { faker } from "@faker-js/faker";
@@ -23,7 +23,7 @@ const sampleRelatedEntityId = faker.string.uuid();
 
 const validCreateInput: CreateNotificationInput = {
   userId: sampleUserId,
-  type: "new_transaction", // Valid type from the enum
+  type: "new_transaction",
   message: "Nova transação X criada.",
   relatedEntityId: sampleRelatedEntityId,
   relatedEntityType: "transaction",
@@ -63,14 +63,13 @@ describe("CreateNotificationUseCase", () => {
         userId: sampleUserId,
         type: "generic",
         message: "Mensagem genérica."
-        // relatedEntityId and relatedEntityType are optional in schema and input type now
     };
     const correspondingNotificationRecord: SelectNotification = selectNotificationSchema.parse({
-        ...createdNotification, // base
+        ...createdNotification,
         type: inputWithoutOptional.type,
         message: inputWithoutOptional.message,
-        relatedEntityId: null, // How DB stores undefined optional UUIDs
-        relatedEntityType: null, // How DB stores undefined optional strings
+        relatedEntityId: null,
+        relatedEntityType: null,
     });
 
     (mockNotificationRepository.insert as vi.Mock).mockResolvedValueOnce({ id: sampleNotificationId });
@@ -85,14 +84,12 @@ describe("CreateNotificationUseCase", () => {
 
   it("should throw ZodError for invalid input - missing userId", async () => {
     const invalidInput = { ...validCreateInput, userId: "not-a-uuid" };
-    // @ts-expect-error testing invalid type
-    await expect(useCase.execute(invalidInput)).rejects.toThrow(ZodError);
+    await expect(useCase.execute(invalidInput as any)).rejects.toThrow(ZodError);
   });
 
   it("should throw ZodError for invalid input - invalid type", async () => {
     const invalidInput = { ...validCreateInput, type: "invalid_type_enum" };
-    // @ts-expect-error testing invalid type
-    await expect(useCase.execute(invalidInput)).rejects.toThrow(ZodError);
+    await expect(useCase.execute(invalidInput as any)).rejects.toThrow(ZodError);
   });
 
   it("should throw ZodError for invalid input - missing message", async () => {

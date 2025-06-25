@@ -19,7 +19,7 @@ import { Navbar } from "@/components/navbar/navbar";
 import menus from "@/constant";
 import { Bell, CircleUser, Menu, Package2 } from "lucide-react";
 import { useState } from "react";
-import { NotificationsPanel } from "./notifications/NotificationsPanel";
+import { NotificationsPanel } from "@/features/notification/components/NotificationsPanel";
 import { logoutUser } from "@/app/(auth)/actions";
 
 /**

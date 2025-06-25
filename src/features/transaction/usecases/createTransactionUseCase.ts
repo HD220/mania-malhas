@@ -9,10 +9,10 @@ import {
   insertTransactionSchema
 } from "@/features/transaction/schemas/transactionSchema";
 import { ZodError } from "zod";
-import createNotificationUseCase, { CreateNotificationInput } from "@/usecases/notification/createNotificationUseCase";
+import createNotificationUseCase, { CreateNotificationInput } from "@/features/notification/usecases/createNotificationUseCase";
 // Assuming internalGetUserIdFromSession is the way to get current user for notification.
 // This might be better passed in or handled by a higher-level service that orchestrates both.
-import { internalGetUserIdFromSession } from "@/app/(admin)/notifications/actions"; // Temporary direct import
+import { internalGetUserIdFromSession } from "@/features/notification/actions"; // Temporary direct import
 
 /**
  * Defines the input data structure for creating a new transaction.

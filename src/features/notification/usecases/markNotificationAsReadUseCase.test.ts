@@ -1,8 +1,8 @@
 import { describe, it, expect, vi, beforeEach } from "vitest";
 import { MarkNotificationAsReadUseCase, MarkNotificationAsReadInput } from "./markNotificationAsReadUseCase";
-import { NotificationRepository } from "@/db/repositories/notificationRepository";
-import { selectNotificationSchema, SelectNotification } from "@/db/repositories/schemas/notificationSchema";
-import { notificationTypeEnum as actualEnumValues } from "@/db/postgres/schema/notification"; // For mock data generation
+import { NotificationRepository } from "@/features/notification/db/notificationRepository";
+import { selectNotificationSchema, SelectNotification } from "@/features/notification/schemas/notificationSchema";
+import { notificationTypeEnum as actualEnumValues } from "@/db/postgres/schema/notification";
 import { ZodError } from "zod";
 import { NotFoundError, ForbiddenError } from "@/lib/errors/domainErrors";
 import { faker } from "@faker-js/faker";
@@ -26,7 +26,7 @@ const createMockNotification = (isRead: boolean, userId = sampleUserId, notifica
   return selectNotificationSchema.parse({
     id: notificationId,
     userId: userId,
-    type: actualEnumValues.enumValues[0], // 'info'
+    type: actualEnumValues.enumValues[0],
     message: "Test message",
     relatedEntityId: null,
     relatedEntityType: null,
@@ -46,17 +46,19 @@ describe("MarkNotificationAsReadUseCase", () => {
     userId: sampleUserId,
   };
 
-  it("should successfully mark an unread notification as read", async () => {
+  it("should successfully mark an unread notification as read and return the updated notification", async () => {
     const unreadNotification = createMockNotification(false);
-    const readNotification = selectNotificationSchema.parse({ ...unreadNotification, isRead: true, updatedAt: new Date() });
+    const readNotification = selectNotificationSchema.parse({ ...unreadNotification, isRead: true, updatedAt: new Date(Date.now() + 1000) }); // Simulate updatedAt change
 
-    (mockNotificationRepository.findById as vi.Mock).mockResolvedValueOnce(unreadNotification);
-    (mockNotificationRepository.markAsRead as vi.Mock).mockResolvedValueOnce(readNotification);
+    (mockNotificationRepository.findById as vi.Mock)
+      .mockResolvedValueOnce(unreadNotification) // First call in use case
+      .mockResolvedValueOnce(readNotification);   // Second call after markAsRead
+    (mockNotificationRepository.markAsRead as vi.Mock).mockResolvedValueOnce(undefined); // Repo markAsRead returns void
 
     const result = await useCase.execute(validInput);
 
     expect(mockNotificationRepository.findById).toHaveBeenCalledWith(sampleNotificationId);
-    expect(mockNotificationRepository.markAsRead).toHaveBeenCalledWith(sampleNotificationId);
+    expect(mockNotificationRepository.markAsRead).toHaveBeenCalledWith(sampleNotificationId, sampleUserId); // Ensure userId is passed
     expect(result).toEqual(readNotification);
     expect(result.isRead).toBe(true);
   });
@@ -69,7 +71,7 @@ describe("MarkNotificationAsReadUseCase", () => {
 
     expect(mockNotificationRepository.findById).toHaveBeenCalledWith(sampleNotificationId);
     expect(mockNotificationRepository.markAsRead).not.toHaveBeenCalled();
-    expect(result).toEqual(alreadyReadNotification); // Zod parsing happens in use case, so objects should match
+    expect(result).toEqual(alreadyReadNotification);
     expect(result.isRead).toBe(true);
   });
 
@@ -85,7 +87,7 @@ describe("MarkNotificationAsReadUseCase", () => {
     const notificationOfAnotherUser = createMockNotification(false, anotherUserId);
     (mockNotificationRepository.findById as vi.Mock).mockResolvedValueOnce(notificationOfAnotherUser);
 
-    const execution = useCase.execute(validInput); // validInput.userId is sampleUserId
+    const execution = useCase.execute(validInput);
     await expect(execution).rejects.toThrow(ForbiddenError);
     await expect(execution).rejects.toThrow("Você não tem permissão para marcar esta notificação como lida.");
     expect(mockNotificationRepository.markAsRead).not.toHaveBeenCalled();

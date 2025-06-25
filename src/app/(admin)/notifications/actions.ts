@@ -6,18 +6,18 @@ import {
   ListNotificationsForUserUseCase,
   listNotificationsForUserInputSchema,
   ListNotificationsForUserOutput,
-} from "@/usecases/notification/listNotificationsForUserUseCase";
+} from "@/features/notification/usecases/listNotificationsForUserUseCase";
 import {
   MarkNotificationAsReadUseCase,
   markNotificationAsReadInputSchema,
   MarkNotificationAsReadInput, // Import the type
-} from "@/usecases/notification/markNotificationAsReadUseCase";
+} from "@/features/notification/usecases/markNotificationAsReadUseCase";
 import {
   MarkAllNotificationsAsReadUseCase,
   markAllNotificationsAsReadInputSchema,
   MarkAllNotificationsAsReadOutput,
   MarkAllNotificationsAsReadInput, // Import the type
-} from "@/usecases/notification/markAllNotificationsAsReadUseCase";
+} from "@/features/notification/usecases/markAllNotificationsAsReadUseCase";
 import { notificationRepository } from "@/db/repositories";
 import { userRepository } from "@/db/repositories"; // Needed for session placeholder
 import { ForbiddenError, NotFoundError } from "@/lib/errors/domainErrors";

@@ -51,28 +51,15 @@ interface NotificationsPanelProps {
   onOpenChange: (open: boolean) => void;
 }
 
-/**
- * `NotificationsPanel` is a client component that displays a list of notifications
- * within a Sheet (side panel). It currently uses mock data and includes placeholders
- * for future functionality like marking notifications as read and clearing all.
- *
- * @param {NotificationsPanelProps} props - Props for the component.
- * @param {boolean} props.open - Controls the visibility of the notification panel.
- * @param {(open: boolean) => void} props.onOpenChange - Callback function to handle panel open/close state changes.
- */
 export function NotificationsPanel({ open, onOpenChange }: NotificationsPanelProps) {
-  // TODO: No futuro, buscar notificações reais de um estado global, context, ou API.
   const notifications = mockNotifications;
   const unreadCount = notifications.filter(n => !n.read).length;
 
   const handleMarkAsRead = (notificationId: string) => {
-    // TODO: Implementar lógica para marcar notificação como lida (estado local ou API)
     console.log(`Marcar notificação ${notificationId} como lida.`);
-    // Para simulação, poderia atualizar o estado local aqui se notifications fosse um estado.
   };
 
   const handleClearAll = () => {
-    // TODO: Implementar lógica para limpar todas as notificações
     console.log("Limpar todas as notificações.");
   };
 
@@ -99,7 +86,7 @@ export function NotificationsPanel({ open, onOpenChange }: NotificationsPanelPro
             Nenhuma notificação nova.
           </div>
         ) : (
-          <div className="flex-1 overflow-y-auto pr-4 -mr-4"> {/* Ajuste de padding para scrollbar */}
+          <div className="flex-1 overflow-y-auto pr-4 -mr-4">
             <ul className="space-y-3">
               {notifications.map((notification) => (
                 <li
