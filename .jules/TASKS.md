@@ -28,7 +28,7 @@ O fluxo de trabalho para interagir com este sistema de tarefas está documentado
 | META-MIGRATE-FORMAT-001.5 | P0 | Atualizar a documentação do fluxo de trabalho do agente          | Concluído   | 1            | AgenteJules                 | 2024-08-06      | [META-MIGRATE-FORMAT-001.5.md](./tasks/META-MIGRATE-FORMAT-001.5.md) |
 | META-MIGRATE-FORMAT-001.6 | P0 | Finalizar a migração da TASKS.md principal                     | Concluído   | 1            | AgenteJules                 | 2024-08-06      | [META-MIGRATE-FORMAT-001.6.md](./tasks/META-MIGRATE-FORMAT-001.6.md) |
 | REFAC-01.3.4 | P4         | Mover actions `payment` para `src/features/payment/actions/`     | Concluído   | 1            | AgenteJules                 | 2024-08-06      | [REFAC-01.3.4.md](./tasks/REFAC-01.3.4.md)                     |
-| REFAC-01.3.5 | P4         | Mover componentes UI `payment` para `src/features/payment/components/` | Pendente    | 1            | AgenteJules                 | 2024-08-06      | [REFAC-01.3.5.md](./tasks/REFAC-01.3.5.md)                     |
+| REFAC-01.3.5 | P4         | Mover componentes UI `payment` para `src/features/payment/components/` | Concluído   | 1            | AgenteJules                 | 2024-08-06      | [REFAC-01.3.5.md](./tasks/REFAC-01.3.5.md)                     |
 
 **Legenda de Status:** Pendente, Em Andamento, Concluído, Bloqueado, Revisão, Subdividido
 **Legenda de Complexidade (1-5):** 1 (Muito Baixa), 2 (Baixa), 3 (Média), 4 (Alta), 5 (Muito Alta / Requer Subdivisão Significativa)

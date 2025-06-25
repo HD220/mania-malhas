@@ -2,13 +2,13 @@
 id: "REFAC-01.3.5"
 title: "Mover componentes UI `payment` para `src/features/payment/components/`"
 priority: "P4"
-status: "Pendente"
+status: "Concluído"
 complexity: 1
 assigned_to: "AgenteJules"
 dependencies:
   - "REFAC-01.3.4"
 creation_date: "2024-08-06"
-completion_date: null
+completion_date: "2024-08-06"
 tags:
   - "refactor"
   - "payment"
@@ -16,20 +16,20 @@ tags:
   - "ui"
 parent_task: "REFAC-01.3"
 notes: |
-  Parte da refatoração da feature `payment` (REFAC-01.3).
-  Envolve identificar os componentes React (UI) relacionados a pagamentos,
-  movê-los para a nova estrutura `src/features/payment/components/`,
-  e atualizar todos os imports relevantes no projeto.
+  Componentes UI `payment-form.tsx` e `payment-list.tsx` já estavam em `src/features/payment/components/`.
+  O componente `transaction-payments-modal.tsx` foi movido de `src/components/` para `src/features/payment/components/`.
+  O import em `src/app/(admin)/transactions/list/page.tsx` foi atualizado.
+  ESLint não pôde ser executado devido a erro no sandbox.
 ---
 
 **Descrição Detalhada:**
 
-1.  Identificar todos os componentes React (arquivos `.tsx`) relacionados à interface do usuário da funcionalidade de "payment". Estes podem estar localizados em diretórios genéricos como `src/components/` ou dentro de pastas de rotas como `src/app/(admin)/payment/components/` ou `src/app/(main_app)/payment/components/`.
-2.  Verificar se o diretório `src/features/payment/components/` já existe e se já contém os componentes corretos (conforme verificado na tarefa REFAC-01.3.4, ele contém `payment-form.tsx` e `payment-list.tsx`).
-3.  Se houver componentes de UI de `payment` ainda em locais antigos:
-    a.  Mover os arquivos de componentes identificados para `src/features/payment/components/`.
-    b.  Realizar uma busca global no projeto por todos os locais que importavam estes componentes de seus caminhos antigos.
-    c.  Atualizar todos os caminhos de importação para apontar para a nova localização em `src/features/payment/components/`.
-4.  Se os componentes já estiverem no local correto (como `payment-form.tsx` e `payment-list.tsx`), confirmar que os imports que os utilizam estão corretos.
-5.  Verificar se há testes específicos para estes componentes UI (ex: testes de snapshot, interação) e garantir que continuam passando após a movimentação/verificação dos imports. (Nota: Testes de UI estão fora do escopo do agente, conforme `AGENTS.md`, mas a estrutura dos imports deve ser válida).
-6.  Rodar ESLint para garantir a conformidade do código.
+A tarefa consistia em mover os componentes UI da feature `payment` para `src/features/payment/components/` e atualizar os imports.
+
+**Resultado:**
+1.  **Identificação:** Os componentes `payment-form.tsx` e `payment-list.tsx` já estavam em `src/features/payment/components/`. O componente `transaction-payments-modal.tsx` foi identificado em `src/components/`.
+2.  **Movimentação:** `transaction-payments-modal.tsx` foi movido para `src/features/payment/components/transaction-payments-modal.tsx`.
+3.  **Atualização de Imports:** O import de `TransactionPaymentsModal` em `src/app/(admin)/transactions/list/page.tsx` foi atualizado para o novo caminho.
+4.  **Validação:**
+    *   ESLint: Tentativas de rodar ESLint resultaram em erro "Failed to compute affected file count". A validação de lint não pôde ser concluída.
+    *   Testes de UI: Fora do escopo do agente.

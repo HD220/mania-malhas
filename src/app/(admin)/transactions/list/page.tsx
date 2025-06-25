@@ -12,7 +12,7 @@ import {
 import { useEffect, useState, useCallback } from "react";
 import { listTransactionsAction } from "@/features/transaction/actions"; // CORRECTED PATH
 import { TransactionWithPartner } from "@/features/transaction/db/transactionRepository";
-import { TransactionPaymentsModal } from "@/components/transaction-payments-modal";
+import { TransactionPaymentsModal } from "@/features/payment/components/transaction-payments-modal";
 import { useToast } from "@/components/ui/use-toast";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Label } from "@/components/ui/label";
