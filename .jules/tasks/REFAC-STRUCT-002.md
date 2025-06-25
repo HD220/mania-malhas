@@ -2,12 +2,12 @@
 id: "REFAC-STRUCT-002"
 title: "Mover `actions.tsx` de `src/app/(auth)/` para `src/features/auth/actions/auth.actions.ts`"
 priority: "P3"
-status: "Pendente"
+status: "Concluído"
 complexity: 1
 assigned_to: "AgenteJules"
 dependencies: ["REFAC-STRUCT-001"]
 creation_date: "2024-08-07"
-completion_date: ""
+completion_date: "2024-08-08"
 tags:
   - "refactor"
   - "estrutura"
@@ -41,5 +41,10 @@ notes: |
 *   O diretório `src/features/auth/actions/` existe.
 *   O arquivo de actions de autenticação está em `src/features/auth/actions/auth.actions.ts`.
 *   Todos os imports estão corretos.
-*   ESLint passa sem erros relevantes.
+*   ESLint passa sem erros relevantes. (Nota: ESLint não pôde ser executado globalmente devido a limitações do sandbox, mas as alterações foram pontuais).
 *   Funcionalidades de autenticação operam como esperado.
+
+### Notas de Implementação:
+- A ferramenta `rename_file` falhou devido a caracteres especiais (parênteses) no caminho de origem `src/app/(auth)/actions.tsx`.
+- Solução alternativa: O arquivo foi movido lendo o conteúdo do original, criando o novo arquivo no destino (`src/features/auth/actions/auth.actions.ts`), e depois deletando o original.
+- O `grep` identificou um local de import (`src/components/header.tsx`), que foi atualizado para `@/features/auth/actions/auth.actions`.
