@@ -31,9 +31,9 @@ async function internalGetUserIdFromSession(): Promise<string> {
   return placeholderUserId;
 }
 
-const listNotificationsUseCase = new ListNotificationsForUserUseCase(notificationRepository());
-const markNotificationAsReadUseCase = new MarkNotificationAsReadUseCase(notificationRepository());
-const markAllNotificationsAsReadUseCase = new MarkAllNotificationsAsReadUseCase(notificationRepository());
+const listNotificationsUseCase = new ListNotificationsForUserUseCase(notificationRepository);
+const markNotificationAsReadUseCase = new MarkNotificationAsReadUseCase(notificationRepository);
+const markAllNotificationsAsReadUseCase = new MarkAllNotificationsAsReadUseCase(notificationRepository);
 
 export interface ActionResponse<T> {
   success: boolean;
