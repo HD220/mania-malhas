@@ -10,10 +10,12 @@ O gerenciamento de tarefas evoluiu para um sistema de arquivos individuais para 
 -   **Especificação do Formato:** Para detalhes completos sobre a estrutura e campos dos arquivos de tarefa, consulte `/.jules/TASK_FORMAT_SPECIFICATION.md`.
 -   **Arquivo de Resumo Principal:** O arquivo `/.jules/TASKS.md` agora serve como uma tabela de resumo de alto nível. Ele fornece uma visão geral rápida das tarefas, seus status, prioridades e links para os arquivos de detalhes.
 
-## 2. Lendo Tarefas
+## 2. Lendo Tarefas e Preparando a Ação
 
-1.  **Consulte o Resumo:** Comece visualizando `/.jules/TASKS.md` para obter uma lista das tarefas, seus status atuais, prioridades e responsáveis. Esta tabela também pode conter links diretos para os arquivos de detalhes.
-2.  **Acesse os Detalhes:** Para entender completamente uma tarefa, abra o arquivo individual correspondente em `/.jules/tasks/TASK_ID.md` (onde `TASK_ID.md` é o nome do arquivo da tarefa, ex: `F07.1.md`).
+1.  **Consulte o Resumo (`/.jules/TASKS.md`):** Comece visualizando a tabela de resumo para obter uma lista das tarefas, seus status atuais, prioridades e responsáveis.
+2.  **Acesse os Detalhes (Leitura Obrigatória):**
+    *   **Para Executar uma Tarefa:** Antes de iniciar a execução de uma tarefa (com `Complexidade < 2` e dependências resolvidas), **é obrigatório ler seu arquivo de detalhe completo** em `/.jules/tasks/TASK_ID.md`. Isso garante a compreensão total dos requisitos, critérios de aceitação, histórico e qualquer nota relevante.
+    *   **Para Desmembrar uma Tarefa:** Antes de iniciar o desmembramento de uma tarefa complexa (`Complexidade > 1`), **é obrigatório ler seu arquivo de detalhe completo** em `/.jules/tasks/TASK_ID.md`. Isso é crucial para definir sub-tarefas que cubram adequadamente o escopo da tarefa-mãe.
 
 ## 3. Criando Novas Tarefas
 

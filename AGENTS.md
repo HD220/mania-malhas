@@ -21,51 +21,26 @@ Aderimos aos seguintes princípios para garantir a qualidade e manutenibilidade 
 *   **Segurança:** Considere a segurança desde o início do desenvolvimento (Security by Design). Esteja ciente das vulnerabilidades comuns (ex: OWASP Top 10) e aplique as melhores práticas para mitigá-las.
 *   **YAGNI (You Ain't Gonna Need It):** Não implemente funcionalidades que não são necessárias no momento, mesmo que você antecipe que serão úteis no futuro. Concentre-se nos requisitos atuais.
 
-## Padrões Arquiteturais
+## Padrões Arquiteturais e Estrutura de Código
 
-O projeto utiliza uma arquitetura baseada em Next.js com as seguintes características:
+A arquitetura e a organização do código fonte (`src/`) são detalhadas no documento **`docs/project-structure-guide.md`**. Este documento é a **fonte da verdade** para a estrutura do projeto. Abaixo, um resumo dos pontos chave, mas **consulte sempre o guia completo para detalhes**.
 
-*   **Framework:** Next.js (utilizando o App Router).
-*   **Lógica de Negócios:** Centralizada em "casos de uso" (localizados em `src/usecases/`), que orquestram a lógica de domínio e interagem com a camada de acesso a dados.
-*   **Acesso a Dados:** Uma camada de Repositório (em `src/db/repositories/`) abstrai as interações com o banco de dados, promovendo a separação de responsabilidades.
-*   **Banco de Dados:** PostgreSQL, com Drizzle ORM para consultas, schemas e migrações.
-*   **Server Actions:** Usadas para executar lógica de backend (mutações, queries) diretamente a partir de componentes React no servidor ou cliente, facilitando a comunicação full-stack.
-*   **Componentização da UI:** A interface do usuário é construída com React, utilizando componentes da biblioteca Shadcn/UI para uma base visual consistente e acessível.
-*   **Referência:** `[A SER DEFINIDO - LINK_PARA_DOCUMENTO_DE_ARQUITETURA]` (Atualmente, não há um documento de arquitetura formal separado; este `AGENTS.MD` e a estrutura do código servem como guia inicial).
-
-## Estrutura de Código Sugerida
-
-A organização do código fonte (`src/`) é a seguinte:
-
-*   `src/app/`: Contém as rotas e páginas da aplicação (convenção Next.js App Router).
-    *   `(admin)/`: Agrupa rotas e componentes específicos da área administrativa (dashboard, perfil, CRUDs).
-    *   `(auth)/`: Agrupa rotas e componentes para autenticação (login).
-    *   `api/`: (Se aplicável, para route handlers/APIs tradicionais - não proeminente atualmente).
-*   `src/assets/`: Arquivos estáticos como imagens de logo.
-*   `src/components/`: Componentes React reutilizáveis.
-    *   `forms/`: Componentes de formulário específicos para entidades (Produto, Parceiro, Pagamento).
-    *   `navbar/`, `navigation/`, `notifications/`: Componentes de UI específicos.
-    *   `providers/`: Provedores de contexto React (ex: ThemeProvider).
-    *   `ui/`: Componentes base da biblioteca Shadcn/UI (Button, Card, Input, etc.).
-*   `src/constant.tsx`: Constantes globais da aplicação.
-*   `src/db/`: Relacionado ao banco de dados.
-    *   `postgres/`: Configuração específica do PostgreSQL.
-        *   `drizzle.config.ts`: Configuração do Drizzle Kit.
-        *   `env.ts`: Gerenciamento de variáveis de ambiente para o DB.
-        *   `index.ts`: Instância principal do cliente Drizzle.
-        *   `migrate.ts`: Script para executar migrações.
-        *   `migrations/`: Arquivos SQL de migração gerados pelo Drizzle Kit.
-        *   `schema/`: Definições de schema das tabelas do banco (ex: `product.ts`, `user.ts`).
-        *   `seed.ts`: Script para popular o banco com dados iniciais.
-    *   `repositories/`: Implementações da camada de repositório para cada entidade (ex: `productRepository.ts`).
-*   `src/lib/`: Utilitários genéricos e lógica auxiliar.
-    *   `errors/`: Definições de erros customizados.
-    *   `utils.ts`: Funções utilitárias gerais.
-*   `src/services/`: Integração com serviços externos (ex: `minio.ts` para upload de arquivos).
-*   `src/styles/`: Arquivos de estilo globais.
-*   `src/test/`: Configuração de ambiente de teste (ex: `setup.ts` para Vitest).
-*   `src/usecases/`: Lógica de negócios desacoplada, organizada por entidade (produto, parceiro, pagamento, transação).
-*   `.jules/`: Arquivos específicos para a colaboração com agentes LLM (`TASKS.md`, `AGENT_WORKFLOW.md`).
+*   **Framework:** Next.js (App Router).
+*   **Linguagem:** TypeScript.
+*   **Nomenclatura:** `kebab-case` para arquivos e diretórios, exceto onde convenções de framework (ex: `page.tsx`, componentes React `PascalCase.tsx`) ditam o contrário.
+*   **Features (`src/features/`)**: Módulos de negócio verticalmente fatiados (ex: `user-profile`, `product-management`). Cada feature contém seus próprios `actions`, `components`, `db` (repositórios), `lib`, `types` (schemas Zod), e `usecases`.
+*   **Componentes Genéricos (`src/components/`)**: Componentes React reutilizáveis não atrelados a uma feature.
+    *   `ui/`: Componentes base ShadCN/UI.
+*   **Biblioteca (`src/lib/`)**: Configurações globais, clientes de serviço, utilitários compartilhados.
+    *   `db-config/`: Configuração Drizzle ORM, schemas de tabela (`*.table.ts`), migrações.
+    *   `utils/`: Utilitários globais.
+    *   `clients/` ou `sdk/`: Para clientes de serviços externos (ex: MinIO).
+    *   `shared-types/`: Tipos e Schemas Zod compartilhados.
+    *   `constants/`: Constantes globais.
+*   **Rotas (`src/app/`)**: Páginas e layouts do Next.js.
+*   **Testes (`__tests__/`)**: Ao lado dos arquivos testados. Setup global em `test-setup.ts` na raiz do projeto.
+*   **Estilos Globais:** `src/globals.css`.
+*   **Referência Principal:** `docs/project-structure-guide.md`.
 
 ## Tecnologias Chave
 
