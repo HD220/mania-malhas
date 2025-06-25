@@ -2,32 +2,31 @@
 id: "REFAC-01.3.4"
 title: "Mover actions `payment` para `src/features/payment/actions/`"
 priority: "P4"
-status: "Pendente"
+status: "Concluído"
 complexity: 1
 assigned_to: "AgenteJules"
 dependencies:
   - "REFAC-01.3.3"
 creation_date: "2024-08-06"
-completion_date: null
+completion_date: "2024-08-06"
 tags:
   - "refactor"
   - "payment"
   - "backend"
 parent_task: "REFAC-01.3"
 notes: |
-  Parte da refatoração da feature `payment` (REFAC-01.3).
-  Envolve identificar os arquivos de server actions relacionados a pagamentos,
-  movê-los para a nova estrutura `src/features/payment/actions/`,
-  e atualizar todos os imports relevantes no projeto.
+  Verificado que as actions da feature `payment` já estavam localizadas em `src/features/payment/actions/`.
+  Os imports relevantes no projeto também já apontavam para o local correto.
+  ESLint e testes para a feature `payment` passaram com sucesso.
+  Nenhuma movimentação de arquivo ou atualização de import foi necessária nesta etapa.
 ---
 
 **Descrição Detalhada:**
 
-1.  Identificar todos os arquivos de Server Actions relacionados à funcionalidade de "payment". Estes podem estar localizados em diretórios como `src/app/(admin)/payment/actions.ts`, `src/app/(main_app)/payment/actions.ts` ou similares.
-2.  Criar o diretório `src/features/payment/actions/` se ainda não existir.
-3.  Mover os arquivos de actions identificados para `src/features/payment/actions/`.
-4.  Se houver múltiplos arquivos de actions ou se for uma boa prática, criar/atualizar um `src/features/payment/actions/index.ts` para reexportar as actions.
-5.  Realizar uma busca global no projeto por todos os locais que importavam estas actions de seus caminhos antigos.
-6.  Atualizar todos os caminhos de importação para apontar para a nova localização em `src/features/payment/actions/`.
-7.  Verificar se há testes unitários ou de integração específicos para estas actions e garantir que continuam passando após a movimentação e atualização dos imports.
-8.  Rodar ESLint para garantir a conformidade do código.
+A tarefa consistia em mover as actions da feature `payment` para `src/features/payment/actions/` e atualizar os imports.
+
+**Resultado:**
+Após inspeção, verificou-se que os arquivos de actions (`index.ts`, `actions.test.ts`) já se encontravam no diretório de destino `src/features/payment/actions/`.
+Uma verificação dos imports utilizando `grep` confirmou que os componentes que consomem estas actions já utilizavam o caminho correto (`@/features/payment/actions`).
+ESLint e todos os testes para a feature `payment` (`npm test src/features/payment/`) foram executados e passaram com sucesso.
+Portanto, a tarefa foi concluída por verificação e validação, sem necessidade de modificação de código.
