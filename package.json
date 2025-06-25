@@ -90,6 +90,8 @@
     "drizzle-orm": "^0.44.2",
     "eslint": "^8.57.0",
     "eslint-config-next": "14.2.3",
+    "eslint-plugin-filenames-simple": "^0.9.0",
+    "eslint-plugin-import": "^2.32.0",
     "eslint-plugin-project-structure": "^3.13.3",
     "jsdom": "^26.1.0",
     "postcss": "^8.4.38",
