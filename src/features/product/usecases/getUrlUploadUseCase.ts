@@ -1,5 +1,5 @@
 import { getPresignedUrlPutObject } from "@/services/minio";
-import { randomUUID } from "crypto";
+import { generateUniqueId } from '@/utils/uuidUtils'; // Alterado
 import env from "@/db/postgres/env";
 
 /**
@@ -42,7 +42,7 @@ export type Output = {
 export default async function getUrlUploadUseCase({
   fileExt,
 }: Input): Promise<Output> {
-  const objectName = `${randomUUID()}.${fileExt}`;
+  const objectName = `${generateUniqueId()}.${fileExt}`; // Corrigido para usar generateUniqueId
   const bucketName = env.MINIO_BUCKET_PRODUCTS;
   const tenMinutesInSeconds = 10 * 60; // Standard expiration for presigned PUT URLs
 

@@ -1,9 +1,12 @@
 import { describe, it, expect, vi, beforeEach } from 'vitest';
 import getUrlUploadUseCase, { Input as GetUrlUploadInput, Output as GetUrlUploadOutput } from './getUrlUploadUseCase';
 import { getPresignedUrlPutObject as actualGetPresignedUrlPutObject } from '@/services/minio';
-// Import crypto module as a namespace to use vi.spyOn
-import * as crypto from 'node:crypto';
 // import env from '@/db/postgres/env'; // Will be mocked
+
+// Mock o wrapper do UUID
+vi.mock('@/utils/uuidUtils', () => ({
+  generateUniqueId: vi.fn().mockReturnValue('test-uuid-12345'),
+}));
 
 // Mock env from @/db/postgres/env
 // IMPORTANT: Variables used inside the factory must be defined literally or imported,
@@ -24,31 +27,22 @@ vi.mock('@/services/minio', () => ({
   getPresignedUrlPutObject: vi.fn(),
 }));
 
-// vi.mock for 'node:crypto' will be removed, will use vi.spyOn instead.
-
 // Typed mock functions
 // After vi.mock, the import will yield the mock
 const mockGetPresignedUrlPutObject = actualGetPresignedUrlPutObject as vi.Mock;
-// 'randomUUID' imported at the top is now the mock function.
+
+// Importar o wrapper para asserções
+import { generateUniqueId } from '@/utils/uuidUtils';
 
 describe('getUrlUploadUseCase', () => {
   const mockFileExt = 'jpg';
-  const mockGeneratedUUID = 'test-uuid-12345';
-  const expectedObjectName = `${mockGeneratedUUID}.${mockFileExt}`;
-  // const mockBucketName = env.MINIO_BUCKET_PRODUCTS; // env is now mocked
-  const mockBucketName = MOCK_TEST_BUCKET_NAME; // Use the constant from the mock setup
+  // Use the literal UUID value that the mock will return for consistent object names
+  const expectedObjectName = `test-uuid-12345.${mockFileExt}`;
+  const mockBucketName = MOCK_TEST_BUCKET_NAME;
   const mockPresignedUrl = `https://s3.example.com/${mockBucketName}/${expectedObjectName}?signature=verysecret`;
 
-  beforeEach(() => {
+  beforeEach(async () => { // Make beforeEach async if needed for imports
     vi.clearAllMocks();
-    // Set default mock implementations
-    vi.spyOn(crypto, 'randomUUID').mockReturnValue(mockGeneratedUUID);
-    // MINIO_BUCKET_PRODUCTS should be available from .env.test or the fallback in env.ts
-    // If env.MINIO_BUCKET_PRODUCTS is not 'test_products_bucket' (from .env.test) or 'products' (schema default),
-    // then the test might pick up an unexpected value if env.ts defaults kicked in differently.
-    // For robustness, tests involving env vars often also mock 'env' or specific process.env values.
-    // However, for T01.4.2.1 (success case), we assume env is correctly set up by global test config.
-    // The specific test for MINIO_BUCKET_NAME absence is T01.4.2.4.
   });
 
   it('T01.4.2.1: should return a presigned URL on successful MinIO service call', async () => {
@@ -57,7 +51,7 @@ describe('getUrlUploadUseCase', () => {
     const input: GetUrlUploadInput = { fileExt: mockFileExt };
     const result: GetUrlUploadOutput = await getUrlUploadUseCase(input);
 
-    expect(crypto.randomUUID).toHaveBeenCalledTimes(1);
+    expect(generateUniqueId).toHaveBeenCalledTimes(1);
     expect(mockGetPresignedUrlPutObject).toHaveBeenCalledTimes(1);
     expect(mockGetPresignedUrlPutObject).toHaveBeenCalledWith(
       mockBucketName,
@@ -73,10 +67,9 @@ describe('getUrlUploadUseCase', () => {
 
     const input: GetUrlUploadInput = { fileExt: mockFileExt };
 
-    // Expect the use case to throw (or reject with) the error from the service
     await expect(getUrlUploadUseCase(input)).rejects.toThrow(minioError);
 
-    expect(crypto.randomUUID).toHaveBeenCalledTimes(1); // Still called before the service
+    expect(generateUniqueId).toHaveBeenCalledTimes(1); // Corrigido
     expect(mockGetPresignedUrlPutObject).toHaveBeenCalledTimes(1);
     expect(mockGetPresignedUrlPutObject).toHaveBeenCalledWith(
       mockBucketName,
@@ -86,23 +79,23 @@ describe('getUrlUploadUseCase', () => {
   });
 
   it('T01.4.2.3: should throw an error if fileExt leads to an invalid object name for MinIO', async () => {
-    const invalidFileExt = ''; // Results in objectName like "uuid."
-    const potentiallyInvalidObjectName = `${mockGeneratedUUID}.${invalidFileExt}`;
+    // const { randomUUID: mockedRandomUUID } = await import('node:crypto'); // Removido
+    const invalidFileExt = '';
+    const potentiallyInvalidObjectName = `test-uuid-12345.${invalidFileExt}`;
 
-    // Simulate the MinIO service rejecting an invalid object name
     const invalidObjectNameError = new Error('Invalid object name for MinIO');
     mockGetPresignedUrlPutObject.mockImplementation(async (bucket, objectName) => {
       if (objectName === potentiallyInvalidObjectName) {
         throw invalidObjectNameError;
       }
-      return mockPresignedUrl; // Fallback for other names, though not expected in this test
+      return mockPresignedUrl;
     });
 
     const input: GetUrlUploadInput = { fileExt: invalidFileExt };
 
     await expect(getUrlUploadUseCase(input)).rejects.toThrow(invalidObjectNameError);
 
-    expect(crypto.randomUUID).toHaveBeenCalledTimes(1);
+    expect(generateUniqueId).toHaveBeenCalledTimes(1);
     expect(mockGetPresignedUrlPutObject).toHaveBeenCalledTimes(1);
     expect(mockGetPresignedUrlPutObject).toHaveBeenCalledWith(
       mockBucketName,
@@ -112,20 +105,13 @@ describe('getUrlUploadUseCase', () => {
   });
 
   it('T01.4.2.4: should throw an error if MINIO_BUCKET_PRODUCTS is not defined in env', async () => {
-    // Temporarily modify the mocked env for this test case
-    const originalBucketName = (await import('@/db/postgres/env')).default.MINIO_BUCKET_PRODUCTS;
-    (await import('@/db/postgres/env')).default.MINIO_BUCKET_PRODUCTS = undefined as any; // Force undefined
+    // const { randomUUID: mockedRandomUUID } = await import('node:crypto'); // Removido
+    const importedEnv = (await import('@/db/postgres/env')).default;
+    const originalBucketName = importedEnv.MINIO_BUCKET_PRODUCTS;
+    importedEnv.MINIO_BUCKET_PRODUCTS = undefined as any;
 
     const input: GetUrlUploadInput = { fileExt: mockFileExt };
 
-    // Expect an error because bucketName would be undefined.
-    // The actual error might come from the minioService when it receives an undefined bucket.
-    // For this test, we'll assume it results in a TypeError or a specific error thrown by getPresignedUrlPutObject.
-    // If getPresignedUrlPutObject is robust, it should throw a meaningful error.
-    // If not, the error might be less specific (e.g. TypeError from trying to use undefined).
-    // The use case itself doesn't explicitly check if bucketName is undefined.
-
-    // Let's make the mock for getPresignedUrlPutObject also check for undefined bucketName for clarity.
     const undefinedBucketError = new Error('Bucket name must be defined');
     mockGetPresignedUrlPutObject.mockImplementation(async (bucket, objectName) => {
       if (bucket === undefined) {
@@ -136,9 +122,8 @@ describe('getUrlUploadUseCase', () => {
 
     await expect(getUrlUploadUseCase(input)).rejects.toThrow(undefinedBucketError);
 
-    expect(crypto.randomUUID).toHaveBeenCalledTimes(1); // Called to generate objectName
+    expect(generateUniqueId).toHaveBeenCalledTimes(1);
 
-    // Restore the original mocked env value
-    (await import('@/db/postgres/env')).default.MINIO_BUCKET_PRODUCTS = originalBucketName;
+    importedEnv.MINIO_BUCKET_PRODUCTS = originalBucketName;
   });
 });
