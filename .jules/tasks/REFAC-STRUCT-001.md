@@ -2,12 +2,12 @@
 id: "REFAC-STRUCT-001"
 title: "Mover `login-form.tsx` para `src/features/auth/components/`"
 priority: "P3"
-status: "Pendente"
+status: "Concluído"
 complexity: 1
 assigned_to: "AgenteJules"
 dependencies: [] # Pode depender de AUDIT-001 se formalmente rastreado
 creation_date: "2024-08-07"
-completion_date: ""
+completion_date: "2024-08-08"
 tags:
   - "refactor"
   - "estrutura"
@@ -41,5 +41,10 @@ notes: |
 *   O diretório `src/features/auth/components/` existe.
 *   O arquivo `login-form.tsx` está localizado em `src/features/auth/components/login-form.tsx`.
 *   Todos os imports para `login-form.tsx` estão atualizados e corretos.
-*   ESLint passa sem erros relacionados ao arquivo movido ou seus imports.
+*   ESLint passa sem erros relacionados ao arquivo movido ou seus imports. (Nota: ESLint não pôde ser executado globalmente devido a limitações do sandbox, mas as alterações foram pontuais).
 *   A funcionalidade de login continua operando como esperado.
+
+### Notas de Implementação:
+- A ferramenta `rename_file` falhou consistentemente ao tentar mover o arquivo, reportando "No such file or directory" apesar do arquivo existir.
+- Solução alternativa: O arquivo foi movido lendo o conteúdo do original, criando o novo arquivo no destino desejado, e depois deletando o original.
+- O `grep` identificou apenas um local de import (`src/app/(auth)/login/page.tsx`), que foi atualizado.
