@@ -2,12 +2,12 @@
 id: "REFAC-STRUCT-007"
 title: "Mover `productRepository` para `src/features/product/db/`"
 priority: "P3"
-status: "Pendente"
+status: "Concluído"
 complexity: 1
 assigned_to: "AgenteJules"
 dependencies: [] # Feature `product` já existe
 creation_date: "2024-08-07"
-completion_date: ""
+completion_date: "2024-08-09"
 tags:
   - "refactor"
   - "estrutura"
