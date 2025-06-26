@@ -4,7 +4,7 @@ import {
   ValidationError,
   DomainConflictError,
   ForbiddenError,
-} from "./domainErrors";
+} from "./domain-errors"; // Updated path
 
 describe("Domain Errors", () => {
   describe("DomainError", () => {

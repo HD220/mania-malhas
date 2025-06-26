@@ -3,7 +3,7 @@ import updateTransactionUseCase, { UpdateTransactionInput, updateTransactionSche
 import { transactionRepository } from '@/features/transaction/db/transactionRepository';
 import { SelectTransaction } from '@/features/transaction/schemas/transactionSchema';
 import { ZodError } from 'zod';
-import { NotFoundError } from '@/lib/errors/domainErrors';
+import { NotFoundError } from '@/lib/errors/domain-errors';
 import { faker } from '@faker-js/faker';
 
 // Mock do transactionRepository factory

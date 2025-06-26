@@ -16,7 +16,7 @@ import { ZodError, ZodIssue } from 'zod';
 import updateTransactionUseCase, { UpdateTransactionInput } from '@/features/transaction/usecases/updateTransactionUseCase';
 import deleteTransactionUseCase, { deleteTransactionInputSchema } from '@/features/transaction/usecases/deleteTransactionUseCase';
 import getTransactionByIdUseCase, { getTransactionByIdInputSchema } from '@/features/transaction/usecases/getTransactionByIdUseCase';
-import { NotFoundError, DomainConflictError } from '@/lib/errors/domainErrors';
+import { NotFoundError, DomainConflictError } from '@/lib/errors/domain-errors';
 
 // Mock dos use cases
 vi.mock('@/features/transaction/usecases/getTransactionsUseCase');

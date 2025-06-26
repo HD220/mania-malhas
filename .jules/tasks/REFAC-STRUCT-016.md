@@ -7,11 +7,11 @@ description: >
   arquivo de teste associado (`domainErrors.test.ts`) precisam ser renomeados
   para `domain-errors.ts` e `domain-errors.test.ts`, respectivamente.
   Todos os imports que referenciam esses arquivos devem ser atualizados.
-status: Pendente
+status: Concluído
 priority: P3
 complexity: 1
 created_date: 2024-08-07
-due_date:
+completion_date: "2024-08-09"
 dependencies:
   - AUDIT-001
   - ARCH-DOC-001

@@ -150,7 +150,7 @@ describe('listTransactionsAction Server Action', () => {
 });
 
 describe('getTransactionByIdAction Server Action', async () => {
-  const { NotFoundError } = await vi.importActual<typeof import('@/lib/errors/domainErrors')>('@/lib/errors/domainErrors');
+  const { NotFoundError } = await vi.importActual<typeof import('@/lib/errors/domain-errors')>('@/lib/errors/domain-errors');
   // getTransactionByIdUseCase is already mocked by vi.mock at the top level
   const validTxId = faker.string.uuid();
 
@@ -293,7 +293,7 @@ describe('createTransactionAction Server Action', () => {
 });
 
 describe('deleteTransactionAction Server Action', async () => {
-  const { NotFoundError, DomainConflictError } = await vi.importActual<typeof import('@/lib/errors/domainErrors')>('@/lib/errors/domainErrors');
+  const { NotFoundError, DomainConflictError } = await vi.importActual<typeof import('@/lib/errors/domain-errors')>('@/lib/errors/domain-errors');
   // deleteTransactionUseCase is already mocked by vi.mock at the top level
   const mockRevalidatePath = revalidatePath as ReturnType<typeof vi.fn>; // Correctly typed mock
   const validTransactionId = faker.string.uuid();
@@ -369,7 +369,7 @@ describe('deleteTransactionAction Server Action', async () => {
 });
 
 describe('updateTransactionAction Server Action', async () => {
-  const { NotFoundError } = await vi.importActual<typeof import('@/lib/errors/domainErrors')>('@/lib/errors/domainErrors');
+  const { NotFoundError } = await vi.importActual<typeof import('@/lib/errors/domain-errors')>('@/lib/errors/domain-errors');
   const mockUpdateTransactionUseCase = updateTransactionUseCase as ReturnType<typeof vi.fn>;
   const mockRevalidatePath = revalidatePath as ReturnType<typeof vi.fn>;
   const transactionId = faker.string.uuid();

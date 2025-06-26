@@ -2,7 +2,7 @@
  * @fileoverview Defines custom domain-specific error classes.
  * These errors are used throughout the application to represent specific failure scenarios
  * related to business logic or data validation, providing more context than generic Error objects.
- * @module lib/errors/domainErrors
+ * @module lib/errors/domain-errors
  */
 
 /**
