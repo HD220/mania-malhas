@@ -1,7 +1,7 @@
 import { describe, it, expect, vi, beforeEach } from 'vitest';
 import { addPaymentAction, PaymentServerResponse } from '.'; // listPaymentsByTransactionAction não será testada aqui
-import createPaymentUseCase from '@/features/payment/usecases/createPaymentUseCase';
-import { InsertPayment } from '@/features/payment/schemas/paymentSchema';
+import createPaymentUseCase from '@/features/payment/usecases/create-payment.usecase';
+import { InsertPayment } from '@/features/payment/schemas/payment.schema';
 import { ZodError } from 'zod';
 import { faker } from '@faker-js/faker';
 

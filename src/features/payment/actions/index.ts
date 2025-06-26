@@ -1,8 +1,8 @@
 "use server";
 
 import { InsertPayment } from "@/features/payment/schemas/paymentSchema";
-import createPaymentUseCase from "@/features/payment/usecases/createPaymentUseCase";
-import getPaymentsByTransactionIdUseCase from "@/features/payment/usecases/getPaymentsByTransactionIdUseCase";
+import createPaymentUseCase from "@/features/payment/usecases/create-payment.usecase";
+import getPaymentsByTransactionIdUseCase from "@/features/payment/usecases/get-payments-by-transaction-id.usecase";
 import { revalidatePath } from "next/cache";
 import { ZodError } from "zod";
 

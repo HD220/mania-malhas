@@ -1,7 +1,7 @@
-import { db } from "@/db/postgres";
+import { db } from "@/lib/db-config/postgres"; // Updated
 import { paymentRepository } from "@/features/payment/db/payment-repository";
-import { InsertPayment, insertPaymentSchema } from "@/features/payment/schemas/paymentSchema";
-import { transactionTable } from "@/db/postgres/schema/transaction";
+import { InsertPayment, insertPaymentSchema } from "@/features/payment/schemas/payment.schema"; // Updated
+import { transactionTable } from "@/features/transaction/db/schema"; // Updated
 import { eq, sum, desc } from "drizzle-orm";
 import { ZodError } from "zod";
 

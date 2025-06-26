@@ -1,9 +1,9 @@
 import { describe, it, expect, vi, beforeEach } from 'vitest';
-import createPaymentUseCase from './createPaymentUseCase';
+import createPaymentUseCase from './create-payment.usecase'; // Updated
 import { db } from '@/lib/db-config/postgres';
 import { paymentRepository } from '@/features/payment/db/payment-repository';
-import { InsertPayment, insertPaymentSchema } from '@/features/payment/schemas/paymentSchema';
-import { transactionTable } from '@/db/postgres/schema/transaction';
+import { InsertPayment, insertPaymentSchema } from '@/features/payment/schemas/payment.schema';
+import { transactionTable } from '@/features/transaction/db/schema'; // Updated
 import { ZodError } from 'zod';
 
 // Mock do paymentRepository
@@ -15,29 +15,27 @@ vi.mock('@/features/payment/db/payment-repository', () => ({
 }));
 
 // Mock do 'db' para a consulta direta à transactionTable
-vi.mock('@/lib/db-config/postgres', () => ({
+vi.mock('@/lib/db-config/postgres', () => ({ // Updated
   db: {
     select: vi.fn().mockReturnThis(),
     from: vi.fn().mockReturnThis(),
     where: vi.fn().mockReturnThis(),
-    // Adicione .execute() se sua cadeia de query real o usar, ou mockResolvedValue diretamente no where/from
   },
 }));
 
 
-import { faker } from '@faker-js/faker'; // Import faker
+import { faker } from '@faker-js/faker';
 
 describe('createPaymentUseCase', () => {
   let mockPaymentRepo: ReturnType<typeof paymentRepository>;
   const mockDbSelect = db.select as ReturnType<typeof vi.fn>;
-  let validTransactionId: string; // Será um UUID mockado
+  let validTransactionId: string;
 
   beforeEach(() => {
     vi.clearAllMocks();
     mockPaymentRepo = paymentRepository(vi.fn() as any);
-    validTransactionId = faker.string.uuid(); // Gerar novo UUID para cada teste se necessário, ou um fixo
+    validTransactionId = faker.string.uuid();
 
-    // Reset db mock fluent interface for each test if needed
     mockDbSelect.mockClear().mockReturnThis();
     (db.from as ReturnType<typeof vi.fn>).mockClear().mockReturnThis();
     (db.where as ReturnType<typeof vi.fn>).mockClear();
@@ -48,21 +46,19 @@ describe('createPaymentUseCase', () => {
   it('should create a payment successfully with valid data', async () => {
     const validInput: InsertPayment = {
       transactionId: validTransactionId,
-      value: 50.00, // value é number no InsertPayment (após coerce no schema)
+      value: 50.00,
       date: new Date(),
     };
-    // O schema vai converter value para number, então o input para o use case deve ser number
     const parsedInput = insertPaymentSchema.parse(validInput);
 
     (db.where as ReturnType<typeof vi.fn>).mockResolvedValue([mockTransactionDetails]);
-    (mockPaymentRepo.findByTransactionId as ReturnType<typeof vi.fn>).mockResolvedValue([]); // No existing payments
+    (mockPaymentRepo.findByTransactionId as ReturnType<typeof vi.fn>).mockResolvedValue([]);
     (mockPaymentRepo.insert as ReturnType<typeof vi.fn>).mockResolvedValue({ id: 'new-payment-id' });
 
     const result = await createPaymentUseCase(parsedInput);
 
     expect(mockDbSelect).toHaveBeenCalledWith({ totalValue: transactionTable.value, type: transactionTable.type });
     expect(db.from).toHaveBeenCalledWith(transactionTable);
-    // expect(db.where).toHaveBeenCalledWith(expect.anything()); // eq(transactionTable.id, validTransactionId)
 
     expect(mockPaymentRepo.findByTransactionId).toHaveBeenCalledWith(validTransactionId);
     expect(mockPaymentRepo.insert).toHaveBeenCalledWith(parsedInput);
@@ -72,7 +68,7 @@ describe('createPaymentUseCase', () => {
   it('should throw ZodError for invalid payment data (e.g., negative value)', async () => {
     const invalidInput = {
       transactionId: validTransactionId,
-      value: -10, // Invalid value
+      value: -10,
     } as InsertPayment;
 
     try {
@@ -87,11 +83,10 @@ describe('createPaymentUseCase', () => {
   });
 
   it('should throw Error if transaction is not found', async () => {
-    // Usar um UUID válido aqui, mesmo que não exista no "banco" mockado
     const inputForNotFound: InsertPayment = { transactionId: faker.string.uuid(), value: 50.00 };
-    const parsedInput = insertPaymentSchema.parse(inputForNotFound); // Parse para garantir que o UUID é válido para o schema
+    const parsedInput = insertPaymentSchema.parse(inputForNotFound);
 
-    (db.where as ReturnType<typeof vi.fn>).mockResolvedValue([]); // Simula transação não encontrada
+    (db.where as ReturnType<typeof vi.fn>).mockResolvedValue([]);
 
     await expect(createPaymentUseCase(parsedInput)).rejects.toThrow("Transação não encontrada.");
   });
@@ -100,10 +95,9 @@ describe('createPaymentUseCase', () => {
     const validInput: InsertPayment = { transactionId: validTransactionId, value: 150.00 };
     const parsedInput = insertPaymentSchema.parse(validInput);
 
-    (db.where as ReturnType<typeof vi.fn>).mockResolvedValue([mockTransactionDetails]); // totalValue = 100.00
-    (mockPaymentRepo.findByTransactionId as ReturnType<typeof vi.fn>).mockResolvedValue([{ value: "20.00" }]); // 20 já pago
+    (db.where as ReturnType<typeof vi.fn>).mockResolvedValue([mockTransactionDetails]);
+    (mockPaymentRepo.findByTransactionId as ReturnType<typeof vi.fn>).mockResolvedValue([{ value: "20.00" }]);
 
-    // Tenta pagar 150, mas só faltam 80.
     await expect(createPaymentUseCase(parsedInput)).rejects.toThrow(/excede o saldo devedor/);
   });
 
@@ -111,8 +105,8 @@ describe('createPaymentUseCase', () => {
     const validInput: InsertPayment = { transactionId: validTransactionId, value: 80.00 };
     const parsedInput = insertPaymentSchema.parse(validInput);
 
-    (db.where as ReturnType<typeof vi.fn>).mockResolvedValue([mockTransactionDetails]); // totalValue = 100.00
-    (mockPaymentRepo.findByTransactionId as ReturnType<typeof vi.fn>).mockResolvedValue([{ value: "20.00" }]); // 20 já pago
+    (db.where as ReturnType<typeof vi.fn>).mockResolvedValue([mockTransactionDetails]);
+    (mockPaymentRepo.findByTransactionId as ReturnType<typeof vi.fn>).mockResolvedValue([{ value: "20.00" }]);
     (mockPaymentRepo.insert as ReturnType<typeof vi.fn>).mockResolvedValue({ id: 'payment-id-full' });
 
     const result = await createPaymentUseCase(parsedInput);

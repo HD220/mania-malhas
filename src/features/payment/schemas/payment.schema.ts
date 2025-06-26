@@ -1,6 +1,6 @@
 import { z } from "zod";
 import { createInsertSchema, createSelectSchema } from "drizzle-zod";
-import { paymentTable } from "@/db/postgres/schema/payment";
+import { paymentTable } from "@/features/payment/db/schema"; // Updated path
 
 // Schema for inserting payments
 export const insertPaymentSchema = createInsertSchema(paymentTable, {
