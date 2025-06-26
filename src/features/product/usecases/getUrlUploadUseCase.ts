@@ -1,4 +1,4 @@
-import { getPresignedUrlPutObject } from "@/services/minio";
+import { getPresignedUrlPutObject } from "@/lib/clients/minio.client";
 import { generateUniqueId } from '@/lib/utils/uuid.util'; // Alterado
 import env from "@/db/postgres/env";
 

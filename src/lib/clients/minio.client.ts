@@ -3,7 +3,7 @@
  * This module configures and exports a MinIO client instance for interacting with
  * an S3-compatible object storage service. It also provides helper functions
  * for generating pre-signed URLs.
- * @module services/minio
+ * @module lib/clients/minio.client
  */
 
 import env from "@/db/postgres/env";

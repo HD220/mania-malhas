@@ -2,12 +2,12 @@
 id: "REFAC-STRUCT-011"
 title: "Mover cliente MinIO de `src/services/` para `src/lib/clients/`"
 priority: "P3"
-status: "Pendente"
+status: "Concluído"
 complexity: 1
 assigned_to: "AgenteJules"
 dependencies: []
 creation_date: "2024-08-07"
-completion_date: ""
+completion_date: "2024-08-09"
 tags:
   - "refactor"
   - "estrutura"

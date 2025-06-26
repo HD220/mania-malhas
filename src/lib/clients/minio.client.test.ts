@@ -1,4 +1,4 @@
-import { getPresignedUrlPutObject } from "./minio";
+import { getPresignedUrlPutObject } from "./minio.client"; // Updated import
 import * as Minio from "minio";
 
 // Mock the Minio client
@@ -17,7 +17,7 @@ jest.mock("minio");
 //   },
 // }));
 
-describe("MinIO Service", () => {
+describe("MinIO Service Client", () => { // Updated describe
   describe("getPresignedUrlPutObject", () => {
     const mockBucketName = "test-bucket";
     const mockObjectName = "test-object.txt";
@@ -32,12 +32,12 @@ describe("MinIO Service", () => {
 
       // Setup the mock implementation for the Minio.Client constructor
       // and its methods.
-      // Note: The actual minioClient instance in minio.ts is created when the module is imported.
+      // Note: The actual minioClient instance in minio.client.ts is created when the module is imported.
       // We need to ensure our mocks effectively replace its behavior.
       // A common way is to mock the module that exports the client, or ensure methods called on it are mocked.
-      // Since minio.ts exports its own `minioClient`, we will mock the methods on that specific instance.
+      // Since minio.client.ts exports its own `minioClient`, we will mock the methods on that specific instance.
       // However, jest.mock("minio") at the top level mocks the entire 'minio' module.
-      // So, when `new Minio.Client()` is called in minio.ts, it will use the mocked constructor.
+      // So, when `new Minio.Client()` is called in minio.client.ts, it will use the mocked constructor.
 
       mockMinioClientInstance = {
         bucketExists: jest.fn(),
@@ -48,13 +48,13 @@ describe("MinIO Service", () => {
       // Configure Minio.Client to return our mock instance
       (Minio.Client as jest.Mock).mockImplementation(() => mockMinioClientInstance);
 
-      // Since minioClient in minio.ts is instantiated on module load,
-      // we might also need to directly mock the methods of the exported minioClient from "./minio"
+      // Since minioClient in minio.client.ts is instantiated on module load,
+      // we might also need to directly mock the methods of the exported minioClient from "./minio.client"
       // if the top-level mock doesn't fully capture it for an already instantiated client.
       // For now, we assume the `jest.mock("minio")` and `(Minio.Client as jest.Mock).mockImplementation`
       // will effectively mock the client used by the function.
       // If not, we would do:
-      // import { minioClient } from "./minio";
+      // import { minioClient } from "./minio.client";
       // jest.spyOn(minioClient, 'bucketExists').mockImplementation(...);
       // etc. for other methods.
       // Let's try with the current setup first.

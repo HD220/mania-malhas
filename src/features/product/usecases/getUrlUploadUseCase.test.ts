@@ -1,6 +1,6 @@
 import { describe, it, expect, vi, beforeEach } from 'vitest';
 import getUrlUploadUseCase, { Input as GetUrlUploadInput, Output as GetUrlUploadOutput } from './getUrlUploadUseCase';
-import { getPresignedUrlPutObject as actualGetPresignedUrlPutObject } from '@/services/minio';
+import { getPresignedUrlPutObject as actualGetPresignedUrlPutObject } from '@/lib/clients/minio.client';
 // import env from '@/db/postgres/env'; // Will be mocked
 
 // Mock o wrapper do UUID
@@ -23,7 +23,7 @@ vi.mock('@/db/postgres/env', () => ({
 const MOCK_TEST_BUCKET_NAME = 'mocked-test-bucket-for-product-upload';
 
 // Mock the minio service
-vi.mock('@/services/minio', () => ({
+vi.mock('@/lib/clients/minio.client', () => ({
   getPresignedUrlPutObject: vi.fn(),
 }));
 
