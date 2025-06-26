@@ -1,5 +1,5 @@
 import { getPartnerById, updatePartner } from "@/features/partner/actions";
-import { PartnerForm } from "@/features/partner/components/partner-form";
+import { PartnerForm } from "@/features/partner/components/partner-form/partner-form";
 import { notFound } from "next/navigation"; // Importar notFound
 
 export default async function Page({ params }: { params: { id: string } }) {

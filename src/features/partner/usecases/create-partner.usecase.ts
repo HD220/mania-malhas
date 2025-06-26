@@ -1,9 +1,9 @@
-import { db } from "@/db/postgres";
-import { partnerRepository } from "@/features/partner/db/partnerRepository";
+import { db } from "@/lib/db-config/postgres"; // Updated
+import { partnerRepository } from "@/features/partner/db/partner-repository"; // Updated
 import {
   InsertPartner,
   insertPartnerSchema,
-} from "@/features/partner/schemas/partnerSchema";
+} from "@/features/partner/schemas/partner.schema"; // Updated
 import { ZodError } from "zod";
 
 /**

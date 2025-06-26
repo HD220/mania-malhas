@@ -1,14 +1,15 @@
 import { describe, it, expect, vi, beforeEach } from 'vitest';
-import alterPartnerUseCase from './alterPartnerUseCase';
-import { partnerRepository } from '@/features/partner/db/partnerRepository';
-import { InsertPartner, insertPartnerSchema } from '@/features/partner/schemas/partnerSchema';
+import alterPartnerUseCase from './alter-partner.usecase'; // Updated
+import { partnerRepository } from '@/features/partner/db/partner-repository'; // Updated
+import { InsertPartner, insertPartnerSchema } from '@/features/partner/schemas/partner.schema';
 import { ZodError } from 'zod';
 import { faker } from '@faker-js/faker';
 
 // Mock do partnerRepository
-vi.mock('@/features/partner/db/partnerRepository', () => ({
+vi.mock('@/features/partner/db/partner-repository', () => ({ // Updated
   partnerRepository: vi.fn().mockReturnValue({
     update: vi.fn(),
+    findById: vi.fn(), // Added findById as the use case now calls it
   }),
 }));
 
@@ -18,7 +19,8 @@ describe('alterPartnerUseCase', () => {
 
   beforeEach(() => {
     vi.clearAllMocks();
-    mockPartnerRepo = partnerRepository(vi.fn() as any);
+    // Since partnerRepository is a factory, we call it to get the mocked instance's methods
+    mockPartnerRepo = partnerRepository(vi.fn() as any); // Pass a mock DB instance
     partnerId = faker.string.uuid();
   });
 
@@ -29,17 +31,21 @@ describe('alterPartnerUseCase', () => {
     notes: 'Updated notes.',
   };
 
-  it('should update a partner successfully with valid data', async () => {
+  const updatedPartnerMock = { ...validUpdateData, id: partnerId, createdAt: new Date(), updatedAt: new Date() };
+
+
+  it('should update a partner successfully and return the updated partner', async () => {
     (mockPartnerRepo.update as ReturnType<typeof vi.fn>).mockResolvedValue(undefined);
-    // O schema parseia os dados antes de passar para o repo, então usamos o input original aqui
-    // para o use case, e o parsed para a asserção do repo.
+    (mockPartnerRepo.findById as ReturnType<typeof vi.fn>).mockResolvedValue(updatedPartnerMock); // Mock findById
+
     const parsedData = insertPartnerSchema.parse(validUpdateData);
 
-
-    await expect(alterPartnerUseCase(partnerId, validUpdateData)).resolves.toBeUndefined();
+    const result = await alterPartnerUseCase(partnerId, validUpdateData);
 
     expect(mockPartnerRepo.update).toHaveBeenCalledTimes(1);
     expect(mockPartnerRepo.update).toHaveBeenCalledWith(partnerId, parsedData);
+    expect(mockPartnerRepo.findById).toHaveBeenCalledWith(partnerId); // Verify findById was called
+    expect(result).toEqual(updatedPartnerMock);
   });
 
   it('should throw Error if ID is not provided', async () => {
@@ -53,7 +59,7 @@ describe('alterPartnerUseCase', () => {
   });
 
   it('should throw ZodError for invalid data (e.g., name too short)', async () => {
-    const invalidData = { ...validUpdateData, name: '' }; // Nome vazio, schema requer min(1)
+    const invalidData = { ...validUpdateData, name: '' };
     try {
       await alterPartnerUseCase(partnerId, invalidData);
       expect.fail('Should have thrown ZodError');
@@ -80,12 +86,21 @@ describe('alterPartnerUseCase', () => {
     expect(mockPartnerRepo.update).not.toHaveBeenCalled();
   });
 
-  it('should throw an error if repository fails to update', async () => {
+  it('should throw an error if repository.update fails', async () => {
     const repositoryError = new Error('Database update failed');
     (mockPartnerRepo.update as ReturnType<typeof vi.fn>).mockRejectedValue(repositoryError);
-    const parsedData = insertPartnerSchema.parse(validUpdateData);
+    // const parsedData = insertPartnerSchema.parse(validUpdateData); // Not needed if update fails
 
     await expect(alterPartnerUseCase(partnerId, validUpdateData)).rejects.toThrow(repositoryError);
-    expect(mockPartnerRepo.update).toHaveBeenCalledWith(partnerId, parsedData);
+    // findById should not be called if update fails
+    expect(mockPartnerRepo.findById).not.toHaveBeenCalled();
+  });
+
+  it('should return null if repository.findById returns null after update', async () => {
+    (mockPartnerRepo.update as ReturnType<typeof vi.fn>).mockResolvedValue(undefined);
+    (mockPartnerRepo.findById as ReturnType<typeof vi.fn>).mockResolvedValue(null);
+
+    const result = await alterPartnerUseCase(partnerId, validUpdateData);
+    expect(result).toBeNull();
   });
 });

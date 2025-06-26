@@ -20,10 +20,10 @@ import { InputField } from "@/components/ui/input-field";
 import {
   UsePartnerFormProps,
   usePartnerForm,
-} from "./usePartnerForm"; // Updated import path
+} from "./use-partner-form"; // Updated import path
 import { Checkbox } from "@/components/ui/checkbox";
 import { Textarea } from "@/components/ui/textarea";
-import { formatterPhoneNumber } from "@/utils";
+import { formatterPhoneNumber } from "@/lib/utils/general.utils"; // Updated import path
 
 export function PartnerForm({ initialValues, onSubmit }: UsePartnerFormProps) {
   const { form, submit } = usePartnerForm({

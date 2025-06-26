@@ -1,10 +1,10 @@
-import { db } from "@/db/postgres";
-import { partnerRepository } from "@/features/partner/db/partnerRepository";
+import { db } from "@/lib/db-config/postgres"; // Updated path
+import { partnerRepository } from "@/features/partner/db/partner-repository"; // Updated path
 import {
   InsertPartner,
   insertPartnerSchema,
   SelectPartner,
-} from "@/features/partner/schemas/partnerSchema";
+} from "@/features/partner/schemas/partner.schema"; // Updated path
 import { ZodError } from "zod";
 
 /**
@@ -47,7 +47,10 @@ export default async function alterPartnerUseCase(
 
   // The repository's update method is expected to handle cases where the ID might not exist,
   // ideally returning null in such cases, or the updated partner data.
-  const updatedPartner = await repo.update(id, validationResult.data);
+  // The current partnerRepository.update returns void. It should ideally return the updated entity or null.
+  // For now, we'll call update and then findById to get the updated data.
+  await repo.update(id, validationResult.data);
+  const updatedPartner = await repo.findById(id); // Re-fetch to get updated data
 
   return updatedPartner;
 }

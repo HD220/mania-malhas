@@ -13,11 +13,11 @@ description: >
   - `schemas/partnerSchema.ts` -> `schemas/partner.schema.ts`
   - `usecases/alterPartnerUseCase.ts` -> `usecases/alter-partner.usecase.ts`
   E assim por diante. Imports devem ser atualizados.
-status: Pendente
+status: Concluído
 priority: P3
 complexity: 1
 created_date: 2024-08-08
-due_date:
+completion_date: "2024-08-09"
 dependencies:
   - REFAC-STRUCT-015
 parent_task: REFAC-STRUCT-015

@@ -1,11 +1,11 @@
 import { describe, it, expect, vi, beforeEach } from 'vitest';
-import createPartnerUseCase from './createPartnerUseCase';
-import { partnerRepository } from '@/features/partner/db/partnerRepository';
-import { InsertPartner, insertPartnerSchema } from '@/features/partner/schemas/partnerSchema';
+import createPartnerUseCase from './create-partner.usecase'; // Updated
+import { partnerRepository } from '@/features/partner/db/partner-repository'; // Updated
+import { InsertPartner, insertPartnerSchema } from '@/features/partner/schemas/partner.schema';
 import { ZodError } from 'zod';
 
 // Mock do repositório de parceiros
-vi.mock('@/features/partner/db/partnerRepository', () => ({
+vi.mock('@/features/partner/db/partner-repository', () => ({ // Updated
   partnerRepository: vi.fn().mockReturnValue({
     insert: vi.fn(),
   }),

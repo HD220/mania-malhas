@@ -1,4 +1,4 @@
-import { PartnerForm } from "@/features/partner/components/partner-form";
+import { PartnerForm } from "@/features/partner/components/partner-form/partner-form";
 import { createPartner } from "@/features/partner/actions";
 
 export default function Page() {

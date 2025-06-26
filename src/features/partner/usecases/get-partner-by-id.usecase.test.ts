@@ -1,11 +1,11 @@
 import { describe, it, expect, vi, beforeEach } from 'vitest';
-import getPartnerByIdUseCase from './getPartnerByIdUseCase';
-import { partnerRepository } from '@/features/partner/db/partnerRepository';
-import { SelectPartner } from '@/features/partner/schemas/partnerSchema';
+import getPartnerByIdUseCase from './get-partner-by-id.usecase'; // Updated
+import { partnerRepository } from '@/features/partner/db/partner-repository'; // Updated
+import { SelectPartner } from '@/features/partner/schemas/partner.schema';
 import { faker } from '@faker-js/faker';
 
 // Mock do partnerRepository
-vi.mock('@/features/partner/db/partnerRepository', () => ({
+vi.mock('@/features/partner/db/partner-repository', () => ({ // Updated
   partnerRepository: vi.fn().mockReturnValue({
     findById: vi.fn(),
   }),

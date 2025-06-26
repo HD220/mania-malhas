@@ -6,10 +6,10 @@ import { z } from "zod";
 import {
   InsertPartner,
   insertPartnerSchema,
-} from "@/features/partner/schemas/partnerSchema";
+} from "@/features/partner/schemas/partner.schema"; // Updated path
 import { useToast } from "@/components/ui/use-toast";
 import { useRouter } from "next/navigation";
-import { CreatePartnerServerResponse, UpdatePartnerServerResponse } from "@/features/partner/actions"; // Updated import paths
+import { CreatePartnerServerResponse, UpdatePartnerServerResponse } from "@/features/partner/actions";
 
 export const formPartnerSchema = insertPartnerSchema;
 

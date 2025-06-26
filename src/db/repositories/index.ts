@@ -5,7 +5,7 @@ import { db } from "@/lib/db-config/postgres";
 import { userRepository as userRepositoryFactory } from "@/features/user/db/user-repository";
 import { notificationRepository as notificationRepositoryFactory } from "@/features/notification/db/notification-repository";
 import { productRepository as productRepositoryFactory } from "@/features/product/db/productRepository";
-import { partnerRepository as partnerRepositoryFactory } from "@/features/partner/db/partnerRepository";
+import { partnerRepository as partnerRepositoryFactory } from "@/features/partner/db/partner-repository";
 import { transactionRepository as transactionRepositoryFactory } from "@/features/transaction/db/transactionRepository";
 import { paymentRepository as paymentRepositoryFactory } from "@/features/payment/db/payment-repository";
 

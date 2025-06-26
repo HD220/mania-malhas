@@ -4,10 +4,10 @@ import {
   InsertPartner,
   insertPartnerSchema, // This might not be directly used by all actions, but good to have if needed
 } from "@/features/partner/schemas/partnerSchema";
-import alterPartnerUseCase from "@/features/partner/usecases/alterPartnerUseCase";
-import getPartnerByIdUseCase from "@/features/partner/usecases/getPartnerByIdUseCase";
-import createPartnerUseCase from "@/features/partner/usecases/createPartnerUseCase";
-import searchPartnersUseCase from "@/features/partner/usecases/searchPartnersUseCase";
+import alterPartnerUseCase from '@/features/partner/usecases/alter-partner.usecase';
+import getPartnerByIdUseCase from '@/features/partner/usecases/get-partner-by-id.usecase';
+import createPartnerUseCase from '@/features/partner/usecases/create-partner.usecase';
+import searchPartnersUseCase from "@/features/partner/usecases/search-partners.usecase";
 import { revalidatePath, unstable_noStore as noStore } from "next/cache";
 import { redirect } from "next/navigation"; // Though not currently used, might be in future
 import { ZodError } from "zod";

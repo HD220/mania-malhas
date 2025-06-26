@@ -1,11 +1,11 @@
 import { describe, it, expect, vi, beforeEach } from 'vitest';
-import { createPartner, CreatePartnerServerResponse } from './index'; // Updated import
-import createPartnerUseCase from '@/features/partner/usecases/createPartnerUseCase';
-import { InsertPartner } from '@/features/partner/schemas/partnerSchema';
+import { createPartner, CreatePartnerServerResponse } from './index';
+import createPartnerUseCase from '@/features/partner/usecases/create-partner.usecase'; // Updated
+import { InsertPartner } from '@/features/partner/schemas/partner.schema'; // Updated
 import { ZodError } from 'zod';
 import { revalidatePath } from 'next/cache';
 
-vi.mock('@/features/partner/usecases/createPartnerUseCase');
+vi.mock('@/features/partner/usecases/create-partner.usecase'); // Updated
 vi.mock('next/cache', async (importOriginal) => {
   const actual = await importOriginal<typeof import('next/cache')>();
   return {
@@ -17,7 +17,7 @@ vi.mock('next/navigation', async (importOriginal) => {
   const actual = await importOriginal<typeof import('next/navigation')>();
   return {
     ...actual,
-    redirect: vi.fn(), // Though not used by createPartner, good to keep if other actions might use it
+    redirect: vi.fn(),
   };
 });
 

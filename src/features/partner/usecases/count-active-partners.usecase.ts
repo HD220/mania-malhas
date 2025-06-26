@@ -1,5 +1,5 @@
-import { db } from "@/db/postgres";
-import { partnerRepository } from "@/features/partner/db/partnerRepository";
+import { db } from "@/lib/db-config/postgres"; // Updated
+import { partnerRepository } from "@/features/partner/db/partner-repository"; // Updated
 
 /**
  * Counts the number of active partners in the system.

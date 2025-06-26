@@ -1,11 +1,11 @@
 import { describe, it, expect, vi, beforeEach } from 'vitest';
-import { updatePartner, UpdatePartnerServerResponse } from './index'; // Updated import
-import alterPartnerUseCase from '@/features/partner/usecases/alterPartnerUseCase';
-import { InsertPartner } from '@/features/partner/schemas/partnerSchema';
+import { updatePartner, UpdatePartnerServerResponse } from './index';
+import alterPartnerUseCase from '@/features/partner/usecases/alter-partner.usecase'; // Updated
+import { InsertPartner } from '@/features/partner/schemas/partner.schema'; // Updated
 import { ZodError } from 'zod';
 import { revalidatePath } from 'next/cache';
 
-vi.mock('@/features/partner/usecases/alterPartnerUseCase');
+vi.mock('@/features/partner/usecases/alter-partner.usecase'); // Updated
 vi.mock('next/cache', async (importOriginal) => {
   const actual = await importOriginal<typeof import('next/cache')>();
   return {
