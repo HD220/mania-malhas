@@ -2,12 +2,12 @@
 id: "REFAC-STRUCT-006"
 title: "Mover `paymentRepository` para `src/features/payment/db/`"
 priority: "P3"
-status: "Pendente"
+status: "Concluído"
 complexity: 1
 assigned_to: "AgenteJules"
 dependencies: [] # Feature `payment` já existe
 creation_date: "2024-08-07"
-completion_date: ""
+completion_date: "2024-08-09"
 tags:
   - "refactor"
   - "estrutura"

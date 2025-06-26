@@ -1,5 +1,5 @@
 import { db } from "@/db/postgres";
-import { paymentRepository } from "@/features/payment/db/paymentRepository";
+import { paymentRepository } from "@/features/payment/db/payment-repository";
 import { SelectPayment } from "@/features/payment/schemas/paymentSchema";
 
 /**
