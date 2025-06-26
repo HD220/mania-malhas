@@ -8,11 +8,11 @@ description: >
   dentro desta feature devem ser renomeados para `kebab-case` conforme o
   `docs/project-structure-guide.md`. Por exemplo, `myFile.ts` se torna `my-file.ts`.
   Os imports devem ser atualizados em todo o projeto.
-status: Pendente
+status: Concluído
 priority: P3
 complexity: 1
 created_date: 2024-08-08
-due_date:
+completion_date: "2024-08-09"
 dependencies:
   - REFAC-STRUCT-015 # Tarefa mãe
 parent_task: REFAC-STRUCT-015
