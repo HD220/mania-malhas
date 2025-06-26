@@ -1,5 +1,5 @@
 import { describe, it, expect, vi, beforeEach } from "vitest";
-import { userRepository } from "./userRepository";
+import { userRepository } from "./user-repository";
 import { InsertUser, UpdateUserProfile, selectUserSchema, selectUserWithPasswordSchema, SelectUser, SelectUserWithPassword } from "./schemas/userSchema";
 import { userTable } from "@/db/postgres/schema/user";
 import { faker } from "@faker-js/faker";

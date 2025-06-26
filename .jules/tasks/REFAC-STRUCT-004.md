@@ -2,12 +2,12 @@
 id: "REFAC-STRUCT-004"
 title: "Mover `userRepository` para `src/features/user/db/`"
 priority: "P3"
-status: "Pendente"
+status: "Concluído"
 complexity: 1
 assigned_to: "AgenteJules"
 dependencies: [] # Pode depender da criação da feature `user` se ela não existir
 creation_date: "2024-08-07"
-completion_date: ""
+completion_date: "2024-08-09"
 tags:
   - "refactor"
   - "estrutura"
