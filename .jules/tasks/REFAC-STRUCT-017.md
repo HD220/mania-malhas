@@ -12,11 +12,17 @@ description: >
   `src/lib/minio-service/minio.ts` e `src/lib/minio-service/__tests__/minio.test.ts`.
   Os nomes dos arquivos devem ser mantidos ou convertidos para `kebab-case` conforme
   a convenção. Todos os imports devem ser atualizados.
-status: Pendente
+status: Concluído
 priority: P3
 complexity: 1
 created_date: 2024-08-07
-due_date:
+completion_date: "2024-08-09"
+notes: |
+  Esta tarefa foi considerada redundante/supersedida pela REFAC-STRUCT-011,
+  que já moveu o cliente MinIO de `src/services/` para `src/lib/clients/`.
+  O objetivo principal de remover o cliente de `src/services/` foi alcançado.
+  A pequena diferença no nome do diretório de destino (`minio-service` vs `clients`)
+  não justifica uma nova movimentação neste momento. Marcando como concluída.
 dependencies:
   - AUDIT-001
   - ARCH-DOC-001
