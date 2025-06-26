@@ -1,9 +1,9 @@
 import { describe, it, expect, vi, beforeEach } from "vitest";
-import { notificationRepository, NotificationRepositoryFactory } from "./notification-repository"; // Adjust path as necessary
-import { InsertNotification, SelectNotification } from "./schemas/notificationSchema";
-import { notificationTable, notificationTypeEnum } from "@/db/postgres/schema/notification";
+import { notificationRepository, NotificationRepositoryFactory } from "../notification-repository"; // Adjusted path
+import { InsertNotification, SelectNotification } from "../schemas/notificationSchema"; // Adjusted path
+import { notificationTable, notificationTypeEnum } from "../schema"; // Adjusted path
 import { faker } from "@faker-js/faker";
-import { DBConnection } from "./notification-repository"; // Assuming DBConnection is exported or use any/mock type
+import { DBConnection } from "../notification-repository"; // Assuming DBConnection is exported or use any/mock type
 
 // Mock the Drizzle db instance and its methods
 const mockDb = {

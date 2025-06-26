@@ -11,11 +11,11 @@ description: >
   para o subdiretório `__tests__/` dentro do diretório `db/` da feature correspondente
   (ex: `src/features/user/db/__tests__/user-repository.test.ts`).
   O diretório `src/db/repositories/` (ou seu equivalente) deve ser removido se ficar vazio.
-status: Pendente
+status: Concluído
 priority: P3
 complexity: 1
 created_date: 2024-08-07
-due_date:
+completion_date: "2024-08-09"
 dependencies:
   - AUDIT-001
   - ARCH-DOC-001

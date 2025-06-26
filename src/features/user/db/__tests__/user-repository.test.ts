@@ -1,7 +1,7 @@
 import { describe, it, expect, vi, beforeEach } from "vitest";
-import { userRepository } from "./user-repository";
-import { InsertUser, UpdateUserProfile, selectUserSchema, selectUserWithPasswordSchema, SelectUser, SelectUserWithPassword } from "./schemas/userSchema";
-import { userTable } from "@/db/postgres/schema/user";
+import { userRepository } from "../user-repository"; // Adjusted path
+import { InsertUser, UpdateUserProfile, selectUserSchema, selectUserWithPasswordSchema, SelectUser, SelectUserWithPassword } from "../schemas/userSchema"; // Adjusted path
+import { userTable } from "@/features/user/db/schema"; // Corrected path
 import { faker } from "@faker-js/faker";
 
 // --- START MOCK FUNCTION DEFINITIONS FOR Drizzle CHAINED METHODS ---
