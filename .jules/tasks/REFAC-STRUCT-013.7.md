@@ -9,11 +9,11 @@ description: >
   Pode ser necessário criar ou ajustar um arquivo central (ex: `src/lib/db-config/postgres/schema/index.ts`
   ou diretamente no `src/lib/db-config/postgres/index.ts` onde o `db` é instanciado)
   que importe todos os schemas das features.
-status: Pendente
+status: Concluído
 priority: P2 # Prioridade maior pois valida o trabalho das outras sub-tarefas
 complexity: 1
 created_date: 2024-08-08
-due_date:
+completion_date: "2024-08-09"
 dependencies:
   - REFAC-STRUCT-013.1
   - REFAC-STRUCT-013.2
