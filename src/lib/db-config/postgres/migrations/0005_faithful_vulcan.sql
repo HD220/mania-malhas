@@ -1,0 +1,1 @@
+ALTER TABLE "transaction" ADD COLUMN "type" char(2) NOT NULL;

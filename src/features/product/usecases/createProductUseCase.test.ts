@@ -13,7 +13,7 @@ vi.mock('@/features/product/db/productRepository', () => ({ // Adjusted
 }));
 
 // Mock do banco de dados (db) - pode não ser necessário se o productRepository estiver totalmente mockado
-// vi.mock('@/db/postgres', () => ({
+// vi.mock('@/lib/db-config/postgres', () => ({
 //   db: {}, // Mock vazio ou com funcionalidades específicas se necessário
 // }));
 

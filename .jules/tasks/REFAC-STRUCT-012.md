@@ -8,11 +8,11 @@ description: >
   (e potencialmente `src/db/` se ele contiver apenas `postgres/`) para
   `src/lib/db-config/postgres/` e atualizar todas as referências e imports no
   código para refletir essa mudança.
-status: Pendente
+status: Concluído
 priority: P3
 complexity: 1
 created_date: 2024-08-07
-due_date:
+completion_date: "2024-08-09"
 dependencies:
   - AUDIT-001
   - ARCH-DOC-001

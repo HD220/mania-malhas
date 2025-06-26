@@ -1,4 +1,4 @@
-import { db } from "@/db/postgres";
+import { db } from "@/lib/db-config/postgres";
 
 // Import the factory functions, potentially aliasing them if their exported names
 // are the same as the constants we want to export here.

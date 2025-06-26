@@ -1,6 +1,6 @@
 import { describe, it, expect, vi, beforeEach } from 'vitest';
 import createPaymentUseCase from './createPaymentUseCase';
-import { db } from '@/db/postgres';
+import { db } from '@/lib/db-config/postgres';
 import { paymentRepository } from '@/features/payment/db/payment-repository';
 import { InsertPayment, insertPaymentSchema } from '@/features/payment/schemas/paymentSchema';
 import { transactionTable } from '@/db/postgres/schema/transaction';
@@ -15,7 +15,7 @@ vi.mock('@/features/payment/db/payment-repository', () => ({
 }));
 
 // Mock do 'db' para a consulta direta à transactionTable
-vi.mock('@/db/postgres', () => ({
+vi.mock('@/lib/db-config/postgres', () => ({
   db: {
     select: vi.fn().mockReturnThis(),
     from: vi.fn().mockReturnThis(),
