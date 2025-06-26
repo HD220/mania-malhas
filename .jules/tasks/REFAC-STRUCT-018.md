@@ -12,11 +12,11 @@ description: >
   `globals_default.css`, e mesclar seu conteúdo relevante em `src/globals.css`
   ou removê-lo se for supérfluo. O diretório `src/styles/` deve ser removido
   se ficar vazio.
-status: Pendente
+status: Concluído
 priority: P3
 complexity: 1
 created_date: 2024-08-07
-due_date:
+completion_date: "2024-08-09"
 dependencies:
   - AUDIT-001
   - ARCH-DOC-001
