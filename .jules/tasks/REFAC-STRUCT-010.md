@@ -2,12 +2,12 @@
 id: "REFAC-STRUCT-010"
 title: "Mover utilitários globais de `src/utils/` para `src/lib/utils/`"
 priority: "P3"
-status: "Pendente"
+status: "Concluído"
 complexity: 1
 assigned_to: "AgenteJules"
 dependencies: []
 creation_date: "2024-08-07"
-completion_date: ""
+completion_date: "2024-08-09"
 tags:
   - "refactor"
   - "estrutura"

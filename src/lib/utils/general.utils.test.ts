@@ -1,4 +1,4 @@
-import { cn, uploadS3, formatterPhoneNumber } from "./utils";
+import { cn, uploadS3, formatterPhoneNumber } from "./general.utils";
 
 describe("Utility Functions", () => {
   describe("cn", () => {

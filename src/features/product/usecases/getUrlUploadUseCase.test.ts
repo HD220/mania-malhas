@@ -4,7 +4,7 @@ import { getPresignedUrlPutObject as actualGetPresignedUrlPutObject } from '@/se
 // import env from '@/db/postgres/env'; // Will be mocked
 
 // Mock o wrapper do UUID
-vi.mock('@/utils/uuidUtils', () => ({
+vi.mock('@/lib/utils/uuid.util', () => ({
   generateUniqueId: vi.fn().mockReturnValue('test-uuid-12345'),
 }));
 
@@ -32,7 +32,7 @@ vi.mock('@/services/minio', () => ({
 const mockGetPresignedUrlPutObject = actualGetPresignedUrlPutObject as vi.Mock;
 
 // Importar o wrapper para asserções
-import { generateUniqueId } from '@/utils/uuidUtils';
+import { generateUniqueId } from '@/lib/utils/uuid.util';
 
 describe('getUrlUploadUseCase', () => {
   const mockFileExt = 'jpg';
