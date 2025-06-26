@@ -11,11 +11,14 @@ description: >
   Exemplos de arquivos a serem verificados: `aside-bar.tsx`, `header.tsx`,
   `main-app-header.tsx`. Se algum não estiver em `kebab-case`, deve ser renomeado
   e seus imports atualizados.
-status: Pendente
+status: Concluído
 priority: P3
 complexity: 1
 created_date: 2024-08-07
-due_date:
+completion_date: "2024-08-09"
+notes: |
+  Após verificação, todos os arquivos relevantes em `src/components/` (excluindo `ui/`)
+  já estavam em `kebab-case`. Nenhuma renomeação foi necessária.
 dependencies:
   - AUDIT-001
   - ARCH-DOC-001
