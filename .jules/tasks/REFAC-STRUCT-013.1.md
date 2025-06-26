@@ -7,11 +7,11 @@ description: >
   de usuário, atualmente em `src/lib/db-config/postgres/schema/user.ts` (após
   REFAC-STRUCT-012), para `src/features/user/db/schema.ts`.
   Isso alinhará a estrutura do schema com a feature correspondente.
-status: Pendente
+status: Concluído
 priority: P3
 complexity: 1
 created_date: 2024-08-08
-due_date:
+completion_date: "2024-08-09"
 dependencies:
   - REFAC-STRUCT-013 # Tarefa mãe
   - REFAC-STRUCT-012 # Garante que o caminho base `src/lib/db-config/...` exista

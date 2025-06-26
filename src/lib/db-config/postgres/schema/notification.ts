@@ -1,5 +1,5 @@
 import { pgTable, uuid, varchar, text, boolean, timestamp, pgEnum, foreignKey } from "drizzle-orm/pg-core";
-import { userTable } from "./user"; // This relative import should still work
+import { userTable } from "@/features/user/db/schema";
 
 // Optional: Define an enum for notification types if they are strictly predefined
 export const notificationTypeEnum = pgEnum("notification_type_enum", [
