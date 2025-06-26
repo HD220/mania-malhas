@@ -1,7 +1,7 @@
 import { sql } from "drizzle-orm";
 import env from "@/lib/db-config/postgres/env"; // Updated import
 import { db } from "."; // Should now correctly point to src/lib/db-config/postgres/index.ts
-import { partnerTable } from "./schema/partner";
+import { partnerTable } from "@/features/partner/db/schema"; // Updated import
 import { productTable, productImagesTable } from "@/features/product/db/schema"; // Updated import
 import { transactionTable } from "./schema/transaction";
 import { paymentTable } from "./schema/payment";

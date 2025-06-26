@@ -9,7 +9,7 @@ import {
   uuid,
   varchar,
 } from "drizzle-orm/pg-core";
-import { partnerTable } from "./partner"; // This relative import should still work
+import { partnerTable } from "@/features/partner/db/schema";
 
 export const transactionTable = pgTable("transaction", {
   id: uuid("id").defaultRandom().primaryKey(),
