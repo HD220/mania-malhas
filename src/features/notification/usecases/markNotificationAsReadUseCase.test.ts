@@ -1,6 +1,6 @@
 import { describe, it, expect, vi, beforeEach } from "vitest";
 import { MarkNotificationAsReadUseCase, MarkNotificationAsReadInput } from "./markNotificationAsReadUseCase";
-import { NotificationRepository } from "@/features/notification/db/notificationRepository";
+import { NotificationRepository } from "@/features/notification/db/notification-repository";
 import { selectNotificationSchema, SelectNotification } from "@/features/notification/schemas/notificationSchema";
 import { notificationTypeEnum as actualEnumValues } from "@/db/postgres/schema/notification";
 import { ZodError } from "zod";

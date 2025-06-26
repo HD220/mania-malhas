@@ -1,6 +1,6 @@
 import { describe, it, expect, vi, beforeEach } from "vitest";
 import { CreateNotificationUseCase, createNotificationInputSchema, CreateNotificationInput } from "./createNotificationUseCase";
-import { NotificationRepository } from "@/features/notification/db/notificationRepository";
+import { NotificationRepository } from "@/features/notification/db/notification-repository";
 import { selectNotificationSchema, SelectNotification, notificationTypeEnum } from "@/features/notification/schemas/notificationSchema";
 import { ZodError } from "zod";
 import { DomainError } from "@/lib/errors/domainErrors";

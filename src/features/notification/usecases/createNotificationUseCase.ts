@@ -1,5 +1,5 @@
 import { z } from "zod";
-import { NotificationRepository } from "@/features/notification/db/notificationRepository";
+import { NotificationRepository } from "@/features/notification/db/notification-repository";
 import { insertNotificationSchema, SelectNotification, selectNotificationSchema } from "@/features/notification/schemas/notificationSchema";
 import { ZodError } from "zod";
 import { DomainError } from "@/lib/errors/domainErrors";

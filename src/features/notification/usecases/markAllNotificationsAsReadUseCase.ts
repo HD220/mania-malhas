@@ -1,5 +1,5 @@
 import { z } from "zod";
-import { NotificationRepository } from "@/features/notification/db/notificationRepository";
+import { NotificationRepository } from "@/features/notification/db/notification-repository";
 import { ZodError } from "zod";
 
 export const markAllNotificationsAsReadInputSchema = z.object({
