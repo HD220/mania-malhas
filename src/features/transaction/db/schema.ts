@@ -29,7 +29,7 @@ export const transactionTable = pgTable("transaction", {
     withTimezone: true,
   }).defaultNow(),
   transactionId: uuid("transactionId").references(
-    (): AnyPgColumn => transactionTable.id
+    (): AnyPgColumn => transactionTable.id // Self-reference should be fine
   ),
   createdAt: timestamp("createdAt", { mode: "date", withTimezone: true })
     .notNull()

@@ -3,7 +3,7 @@ import env from "@/lib/db-config/postgres/env"; // Updated import
 import { db } from "."; // Should now correctly point to src/lib/db-config/postgres/index.ts
 import { partnerTable } from "@/features/partner/db/schema"; // Updated import
 import { productTable, productImagesTable } from "@/features/product/db/schema"; // Updated import
-import { transactionTable } from "./schema/transaction";
+import { transactionTable } from "@/features/transaction/db/schema"; // Updated import
 import { paymentTable } from "@/features/payment/db/schema"; // Updated import
 import { fakerPT_BR as faker } from '@faker-js/faker'; // Usar alias fakerPT_BR
 
