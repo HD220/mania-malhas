@@ -4,7 +4,7 @@ import { db } from "."; // Should now correctly point to src/lib/db-config/postg
 import { partnerTable } from "@/features/partner/db/schema"; // Updated import
 import { productTable, productImagesTable } from "@/features/product/db/schema"; // Updated import
 import { transactionTable } from "./schema/transaction";
-import { paymentTable } from "./schema/payment";
+import { paymentTable } from "@/features/payment/db/schema"; // Updated import
 import { fakerPT_BR as faker } from '@faker-js/faker'; // Usar alias fakerPT_BR
 
 // Tipos para os dados retornados pelos inserts, para facilitar o encadeamento

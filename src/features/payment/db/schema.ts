@@ -1,5 +1,6 @@
 import { decimal, pgTable, timestamp, uuid } from "drizzle-orm/pg-core";
-import { transactionTable } from "./transaction"; // This relative import should still work
+// Assuming transactionTable will be moved to its feature schema
+import { transactionTable } from "@/features/transaction/db/schema";
 
 export const paymentTable = pgTable(
   "payment",

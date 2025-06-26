@@ -6,11 +6,11 @@ description: >
   (REFAC-STRUCT-013), esta tarefa foca em mover a definição da(s) tabela(s)
   de pagamento, atualmente em `src/lib/db-config/postgres/schema/payment.ts` (após
   REFAC-STRUCT-012), para `src/features/payment/db/schema.ts`.
-status: Pendente
+status: Concluído
 priority: P3
 complexity: 1
 created_date: 2024-08-08
-due_date:
+completion_date: "2024-08-09"
 dependencies:
   - REFAC-STRUCT-013
   - REFAC-STRUCT-012
