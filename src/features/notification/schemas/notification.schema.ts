@@ -1,6 +1,7 @@
 import { createInsertSchema, createSelectSchema } from "drizzle-zod";
 import { z } from "zod";
-import { notificationTable, notificationTypeEnum } from "@/db/postgres/schema/notification"; // Adjusted import path
+// Corrected import path to point to the feature's own DB schema
+import { notificationTable, notificationTypeEnum } from "@/features/notification/db/schema";
 
 // Insert Schema
 export const insertNotificationSchema = createInsertSchema(notificationTable, {

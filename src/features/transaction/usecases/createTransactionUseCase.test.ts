@@ -14,7 +14,7 @@ vi.mock('@/features/transaction/db/transactionRepository', () => ({
   })),
 }));
 
-vi.mock('@/features/notification/usecases/createNotificationUseCase', () => ({
+vi.mock('@/features/notification/usecases/create-notification.usecase', () => ({
   default: vi.fn(),
 }));
 
@@ -31,10 +31,10 @@ vi.mock('@/features/notification/actions', async (importOriginal) => {
 // --- START IMPORTS (after mocks are defined) ---
 import createTransactionUseCase, { CreateTransactionInput } from './createTransactionUseCase';
 import { transactionRepository } from '@/features/transaction/db/transactionRepository';
-import createNotificationUseCaseActual from '@/features/notification/usecases/createNotificationUseCase';
+import createNotificationUseCaseActual from '@/features/notification/usecases/create-notification.usecase';
 import { internalGetUserIdFromSession as internalGetUserIdFromSessionActual } from '@/features/notification/actions';
 import { insertTransactionSchema, SelectTransaction } from '@/features/transaction/schemas/transactionSchema';
-import { SelectNotification } from '@/features/notification/schemas/notificationSchema'; // Added this import
+import { SelectNotification } from '@/features/notification/schemas/notification.schema'; // Added this import
 // --- END IMPORTS ---
 
 const mockTransactionRepoFactory = transactionRepository as vi.MockedFunction<typeof transactionRepository>;

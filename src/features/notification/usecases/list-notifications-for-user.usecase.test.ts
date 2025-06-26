@@ -1,8 +1,8 @@
 import { describe, it, expect, vi, beforeEach } from "vitest";
-import { ListNotificationsForUserUseCase, ListNotificationsForUserInput } from "./listNotificationsForUserUseCase";
+import { ListNotificationsForUserUseCase, ListNotificationsForUserInput } from "./list-notifications-for-user.usecase"; // Updated path
 import { NotificationRepository } from "@/features/notification/db/notification-repository";
-import { selectNotificationSchema, SelectNotification } from "@/features/notification/schemas/notificationSchema";
-import { notificationTypeEnum } from "@/db/postgres/schema/notification";
+import { selectNotificationSchema, SelectNotification } from "@/features/notification/schemas/notification.schema"; // Updated path
+import { notificationTypeEnum } from "@/features/notification/db/schema"; // Updated path
 import { ZodError } from "zod";
 import { faker } from "@faker-js/faker";
 

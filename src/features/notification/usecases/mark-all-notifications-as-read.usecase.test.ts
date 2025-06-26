@@ -1,5 +1,5 @@
 import { describe, it, expect, vi, beforeEach } from "vitest";
-import { MarkAllNotificationsAsReadUseCase, MarkAllNotificationsAsReadInput, MarkAllNotificationsAsReadOutput } from "./markAllNotificationsAsReadUseCase";
+import { MarkAllNotificationsAsReadUseCase, MarkAllNotificationsAsReadInput, MarkAllNotificationsAsReadOutput } from "./mark-all-notifications-as-read.usecase"; // Updated path
 import { NotificationRepository } from "@/features/notification/db/notification-repository";
 import { ZodError } from "zod";
 import { faker } from "@faker-js/faker";

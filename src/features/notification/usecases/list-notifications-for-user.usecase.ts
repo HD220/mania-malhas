@@ -1,6 +1,6 @@
 import { z } from "zod";
 import { NotificationRepository } from "@/features/notification/db/notification-repository";
-import { SelectNotification, selectNotificationSchema } from "@/features/notification/schemas/notificationSchema";
+import { SelectNotification, selectNotificationSchema } from "@/features/notification/schemas/notification.schema"; // Updated path
 import { ZodError } from "zod";
 
 export const listNotificationsForUserInputSchema = z.object({

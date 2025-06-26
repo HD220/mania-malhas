@@ -1,7 +1,7 @@
 import { describe, it, expect, vi, beforeEach } from "vitest";
-import { CreateNotificationUseCase, createNotificationInputSchema, CreateNotificationInput } from "./createNotificationUseCase";
+import { CreateNotificationUseCase, createNotificationInputSchema, CreateNotificationInput } from "./create-notification.usecase"; // Updated path
 import { NotificationRepository } from "@/features/notification/db/notification-repository";
-import { selectNotificationSchema, SelectNotification, notificationTypeEnum } from "@/features/notification/schemas/notificationSchema";
+import { selectNotificationSchema, SelectNotification, notificationTypeEnum } from "@/features/notification/schemas/notification.schema"; // Updated path
 import { ZodError } from "zod";
 import { DomainError } from "@/lib/errors/domainErrors";
 import { faker } from "@faker-js/faker";

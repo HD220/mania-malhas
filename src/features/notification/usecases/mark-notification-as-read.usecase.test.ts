@@ -1,8 +1,8 @@
 import { describe, it, expect, vi, beforeEach } from "vitest";
-import { MarkNotificationAsReadUseCase, MarkNotificationAsReadInput } from "./markNotificationAsReadUseCase";
+import { MarkNotificationAsReadUseCase, MarkNotificationAsReadInput } from "./mark-notification-as-read.usecase"; // Updated path
 import { NotificationRepository } from "@/features/notification/db/notification-repository";
-import { selectNotificationSchema, SelectNotification } from "@/features/notification/schemas/notificationSchema";
-import { notificationTypeEnum as actualEnumValues } from "@/db/postgres/schema/notification";
+import { selectNotificationSchema, SelectNotification } from "@/features/notification/schemas/notification.schema"; // Updated path
+import { notificationTypeEnum } from "@/features/notification/db/schema"; // Updated path
 import { ZodError } from "zod";
 import { NotFoundError, ForbiddenError } from "@/lib/errors/domainErrors";
 import { faker } from "@faker-js/faker";
@@ -26,7 +26,7 @@ const createMockNotification = (isRead: boolean, userId = sampleUserId, notifica
   return selectNotificationSchema.parse({
     id: notificationId,
     userId: userId,
-    type: actualEnumValues.enumValues[0],
+    type: notificationTypeEnum.enumValues[0],
     message: "Test message",
     relatedEntityId: null,
     relatedEntityType: null,
