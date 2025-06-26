@@ -14,11 +14,11 @@ description: >
   - `usecases/getUserProfileUseCase.ts` -> `usecases/get-user-profile.usecase.ts`
   - `usecases/updateUserProfileUseCase.ts` -> `usecases/update-user-profile.usecase.ts`
   E assim por diante. Imports devem ser atualizados.
-status: Pendente
+status: Concluído
 priority: P3
 complexity: 1
 created_date: 2024-08-08
-due_date:
+completion_date: "2024-08-09"
 dependencies:
   - REFAC-STRUCT-015
 parent_task: REFAC-STRUCT-015

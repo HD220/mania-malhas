@@ -15,7 +15,7 @@ import {
 } from "@/components/ui/carousel";
 import { AspectRatio } from "@/components/ui/aspect-ratio";
 import Link from "next/link";
-import { SelectProductWithImages } from "@/features/product/schemas/productImageSchema";
+import { SelectProductWithImages } from "@/features/product/schemas/product-image.schema"; // Updated
 
 export function ProductCard({
   id,

@@ -1,12 +1,12 @@
 import { describe, it, expect, vi, beforeEach } from 'vitest';
-import { updateProduct, UpdateProductServerResponse } from './editProductActions'; // getProductWithImagesById não será testada aqui
-import alterProductUseCase from '@/features/product/usecases/alterProductUseCase';
-import { InsertProductWithImages } from '@/features/product/schemas/productImageSchema';
+import { updateProduct, UpdateProductServerResponse } from './edit-product.action'; // Updated
+import alterProductUseCase from '@/features/product/usecases/alter-product.usecase'; // Updated
+import { InsertProductWithImages } from '@/features/product/schemas/product-image.schema'; // Updated
 import { ZodError } from 'zod';
-import { revalidatePath } from 'next/cache'; // Importar diretamente
+import { revalidatePath } from 'next/cache';
 
 // Mock do alterProductUseCase
-vi.mock('@/features/product/usecases/alterProductUseCase');
+vi.mock('@/features/product/usecases/alter-product.usecase'); // Updated
 
 // Mock de next/cache
 vi.mock('next/cache', async (importOriginal) => {
@@ -16,7 +16,6 @@ vi.mock('next/cache', async (importOriginal) => {
     revalidatePath: vi.fn(),
   };
 });
-// next/navigation não é usado, então o mock pode ser removido se não houver outros usos planejados
 
 describe('updateProduct Server Action', () => {
   const mockAlterProductUseCase = alterProductUseCase as ReturnType<typeof vi.fn>;
@@ -34,7 +33,7 @@ describe('updateProduct Server Action', () => {
   };
 
   it('should return success true and product data on successful update', async () => {
-    mockAlterProductUseCase.mockResolvedValue(undefined); // alterProductUseCase não retorna valor
+    mockAlterProductUseCase.mockResolvedValue(undefined);
 
     const response: UpdateProductServerResponse = await updateProduct({ id: productId, ...validProductData });
 
@@ -43,8 +42,8 @@ describe('updateProduct Server Action', () => {
     expect(response.message).toBe('Produto atualizado com sucesso!');
     expect(response.product).toEqual({ id: productId, ...validProductData });
     expect(response.errors).toBeUndefined();
-    expect(revalidatePath).toHaveBeenCalledWith('/product/list'); // Usar importado
-    expect(revalidatePath).toHaveBeenCalledWith(`/product/${productId}/edit`); // Usar importado
+    expect(revalidatePath).toHaveBeenCalledWith('/product/list');
+    expect(revalidatePath).toHaveBeenCalledWith(`/product/${productId}/edit`);
   });
 
   it('should return success false if ID is not provided', async () => {
@@ -56,7 +55,6 @@ describe('updateProduct Server Action', () => {
   });
 
   it('should return success false and Zod errors if use case throws ZodError', async () => {
-    // Este teste simula o ZodError sendo lançado pelo alterProductUseCase
     const fieldErrors = { price: ['Preço deve ser positivo'] };
     const mockZodError = new ZodError([{
         path: ['price'],
@@ -69,7 +67,6 @@ describe('updateProduct Server Action', () => {
 
     expect(response.success).toBe(false);
     expect(response.errors).toEqual(expect.objectContaining({ price: expect.any(Array) }));
-    // A mensagem pode vir do ZodError ou ser a genérica da action
     expect(response.message).toContain("Erro de validação");
   });
 

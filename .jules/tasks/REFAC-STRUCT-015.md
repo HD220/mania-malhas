@@ -13,12 +13,12 @@ description: >
   Deve-se dar atenção especial a manter a semântica do nome do arquivo,
   como por exemplo, incluir o nome da feature no arquivo para evitar colisões e
   melhorar a clareza (ex: `auth.actions.ts` em vez de apenas `actions.ts` dentro de `src/features/auth/actions/`).
-status: Subdividido
+status: Concluído
 priority: P3
 complexity: 2
 created_date: 2024-08-07
 due_date:
-completion_date: 2024-08-08 # Data do desmembramento
+completion_date: 2024-08-09 # Data da conclusão da última sub-tarefa
 dependencies:
   - AUDIT-001
   - ARCH-DOC-001

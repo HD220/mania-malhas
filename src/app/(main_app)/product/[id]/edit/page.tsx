@@ -1,4 +1,4 @@
-import { getProductWithImagesById, updateProduct } from "@/features/product/actions/editProductActions";
+import { getProductWithImagesById, updateProduct } from "@/features/product/actions/edit-product.action";
 import { ProductForm } from "@/features/product/components/ProductForm";
 import { notFound } from "next/navigation"; // Importar notFound
 

@@ -3,8 +3,8 @@
 import {
   InsertProductWithImages,
   insertProductWithImagesSchema,
-} from "@/features/product/schemas/productImageSchema";
-import createProductUseCase from "@/features/product/usecases/createProductUseCase";
+} from "@/features/product/schemas/product-image.schema"; // Updated
+import createProductUseCase from "@/features/product/usecases/create-product.usecase"; // Updated
 import { revalidatePath } from "next/cache";
 import { redirect } from "next/navigation";
 import { ZodError, z } from "zod";

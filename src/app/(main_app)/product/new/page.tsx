@@ -1,5 +1,5 @@
 import { ProductForm } from "@/features/product/components/ProductForm";
-import { createProduct } from "@/features/product/actions/newProductActions";
+import { createProduct } from "@/features/product/actions/new-product.action";
 
 export default function Page() {
   return (

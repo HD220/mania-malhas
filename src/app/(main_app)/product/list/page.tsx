@@ -1,7 +1,7 @@
 import { TabsContent } from "@/components/ui/tabs";
-import { getProducts } from "@/features/product/actions/listProductActions";
+import { getProducts } from "@/features/product/actions/list-products.action";
 import Tab from "./tabs";
-import { ProductCard } from "@/features/product/components/ProductCard";
+import { ProductCard } from "@/features/product/components/product-card";
 
 export default async function Page({
   searchParams: { search = "", status = "active" },

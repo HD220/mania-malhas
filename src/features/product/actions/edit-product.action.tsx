@@ -3,9 +3,9 @@
 import {
   InsertProductWithImages,
   insertProductWithImagesSchema,
-} from "@/features/product/schemas/productImageSchema";
-import alterProductUseCase from "@/features/product/usecases/alterProductUseCase";
-import getProductByIdUseCase from "@/features/product/usecases/getProductByIdUseCase";
+} from "@/features/product/schemas/product-image.schema"; // Updated
+import alterProductUseCase from "@/features/product/usecases/alter-product.usecase"; // Updated
+import getProductByIdUseCase from "@/features/product/usecases/get-product-by-id.usecase"; // Updated
 import { revalidatePath, unstable_noStore as noStore } from "next/cache";
 import { redirect } from "next/navigation";
 import { ZodError } from "zod";

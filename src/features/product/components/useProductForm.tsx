@@ -3,12 +3,12 @@
 import { useFieldArray, useForm, FieldError } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { uploadS3 } from "@/utils";
-import { getUrlUpload } from "@/features/product/actions/getUrlUploadAction";
+import { getUrlUpload } from "@/features/product/actions/get-url-upload.action";
 import { z } from "zod";
 import { InsertProductWithImages } from "@/features/product/schemas/productImageSchema";
 import { useToast } from "@/components/ui/use-toast";
-import { CreateProductServerResponse } from "@/features/product/actions/newProductActions";
-import { UpdateProductServerResponse } from "@/features/product/actions/editProductActions";
+import { CreateProductServerResponse } from "@/features/product/actions/new-product.action";
+import { UpdateProductServerResponse } from "@/features/product/actions/edit-product.action";
 import { redirect, useRouter } from "next/navigation";
 
 

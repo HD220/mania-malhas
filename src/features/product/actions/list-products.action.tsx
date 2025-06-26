@@ -1,6 +1,6 @@
 "use server";
 
-import getProductsUseCase from "@/features/product/usecases/getProductsUseCase";
+import getProductsUseCase from "@/features/product/usecases/get-products.usecase"; // Updated
 import { unstable_noStore as noStore } from "next/cache"; // Padronizado para noStore
 
 export async function getProducts(search: string, status: boolean) {
