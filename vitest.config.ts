@@ -10,7 +10,7 @@ export default defineConfig({
   test: {
     globals: true,
     environment: 'jsdom', // Ambiente para simular o DOM, útil para testes de UI ou hooks que dependem do DOM
-    setupFiles: ['./src/test/setup.ts'], // Arquivos para executar antes dos testes
+    setupFiles: ['./test-setup.ts'], // Arquivos para executar antes dos testes
     include: ['src/**/*.test.{ts,tsx}'], // Padrão para encontrar arquivos de teste
     coverage: {
       provider: 'v8', // ou 'istanbul'
@@ -23,9 +23,9 @@ export default defineConfig({
         'src/**/*.d.ts',
         'src/**/*.config.{ts,js}',
         'src/**/*.schema.{ts,tsx}', // Excluir schemas Zod da cobertura direta, pois são testados pelo uso
-        'src/db/postgres/env.ts',
-        'src/db/postgres/migrate.ts',
-        'src/lib/errors/domainErrors.ts', // Classes de erro simples
+        'src/lib/db-config/postgres/env.ts', // Updated path
+        'src/lib/db-config/postgres/migrate.ts', // Updated path
+        'src/lib/errors/domain-errors.ts', // Updated path
         // Adicione outros padrões para excluir
       ],
     },

@@ -10,11 +10,11 @@ description: >
   do executor de testes (ex: `vitest.config.ts`) pode precisar ser atualizada
   para referenciar o novo local do arquivo de setup. O diretório `src/test/`
   deve ser removido se ficar vazio.
-status: Pendente
+status: Concluído
 priority: P3
 complexity: 1
 created_date: 2024-08-07
-due_date:
+completion_date: "2024-08-09"
 dependencies:
   - AUDIT-001
   - ARCH-DOC-001

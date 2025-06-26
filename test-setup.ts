@@ -37,7 +37,7 @@ import '@testing-library/jest-dom/vitest'; // Para estender expect com matchers 
 
 // Por agora, a principal questão é a carga/validação do env.ts.
 // Se o carregamento automático do Vitest para .env não for suficiente,
-// precisaremos mockar '@/db/postgres/env'.
+// precisaremos mockar '@/lib/db-config/postgres/env'.
 
 // Tentativa de definir valores mínimos para process.env ANTES da importação de env.ts
 // Isto é uma tentativa, pode não funcionar devido à ordem de importação/execução dos módulos.
@@ -67,8 +67,8 @@ vi.stubGlobal('ResizeObserver', MockResizeObserver);
 
 // Attempt to preload and parse env.ts after process.env should be set up.
 try {
-  console.log('[TEST_SETUP] Attempting to load env from @/db/postgres/env...');
-  const env = await import('@/db/postgres/env');
+  console.log('[TEST_SETUP] Attempting to load env from @/lib/db-config/postgres/env...'); // Updated path
+  const env = await import('@/lib/db-config/postgres/env'); // Updated path
   // If it makes it here, env.default should be the parsed EnvSchema output
   console.log('[TEST_SETUP] Successfully loaded env. NODE_ENV:', env.default.NODE_ENV);
 } catch (e: any) {
