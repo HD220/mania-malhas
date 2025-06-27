@@ -1,12 +1,6 @@
 "use client";
 
-import {
-  Form,
-  FormControl,
-  FormField,
-  FormItem,
-  FormLabel,
-} from "@/components/ui/form";
+import { Button } from "@/components/ui/button";
 import {
   Card,
   CardContent,
@@ -15,15 +9,22 @@ import {
   CardHeader,
   CardTitle,
 } from "@/components/ui/card";
-import { Button } from "@/components/ui/button";
+import { Checkbox } from "@/components/ui/checkbox";
+import {
+  Form,
+  FormControl,
+  FormField,
+  FormItem,
+  FormLabel,
+} from "@/components/ui/form";
 import { InputField } from "@/components/ui/input-field";
+import { Textarea } from "@/components/ui/textarea";
+import { formatterPhoneNumber } from "@/lib/utils/general.utils"; // Updated import path
+
 import {
   UsePartnerFormProps,
   usePartnerForm,
 } from "./use-partner-form"; // Updated import path
-import { Checkbox } from "@/components/ui/checkbox";
-import { Textarea } from "@/components/ui/textarea";
-import { formatterPhoneNumber } from "@/lib/utils/general.utils"; // Updated import path
 
 export function PartnerForm({ initialValues, onSubmit }: UsePartnerFormProps) {
   const { form, submit } = usePartnerForm({

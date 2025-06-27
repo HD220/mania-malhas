@@ -1,15 +1,17 @@
 "use client";
 
-import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
+import { useRouter } from "next/navigation";
+import { useForm } from "react-hook-form";
 import { z } from "zod";
+
+import { useToast } from "@/components/ui/use-toast";
+import { CreatePartnerServerResponse, UpdatePartnerServerResponse } from "@/features/partner/actions";
 import {
   InsertPartner,
   insertPartnerSchema,
-} from "@/features/partner/schemas/partner.schema"; // Updated path
-import { useToast } from "@/components/ui/use-toast";
-import { useRouter } from "next/navigation";
-import { CreatePartnerServerResponse, UpdatePartnerServerResponse } from "@/features/partner/actions";
+} from "@/features/partner/types/partner.schema"; // Updated path
+
 
 export const formPartnerSchema = insertPartnerSchema;
 

@@ -1,13 +1,14 @@
 "use server";
 
-import {
-  InsertPartner,
-  insertPartnerSchema,
-} from "@/features/partner/schemas/partnerSchema";
-import createPartnerUseCase from "@/features/partner/usecases/createPartnerUseCase";
 import { revalidatePath } from "next/cache";
 import { redirect } from "next/navigation";
 import { ZodError } from "zod";
+
+import {
+  InsertPartner,
+  insertPartnerSchema,
+} from "@/features/partner/types/partner.schema";
+import createPartnerUseCase from "@/features/partner/usecases/create-partner.usecase";
 
 export type CreatePartnerServerResponse = {
   success: boolean;

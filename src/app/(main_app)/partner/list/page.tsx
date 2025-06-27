@@ -1,5 +1,6 @@
 import { DataTable } from "@/components/ui/data-table";
 import { getPartners } from "@/features/partner/actions";
+
 import { columns } from "./columns";
 import Tab from "./tabs";
 

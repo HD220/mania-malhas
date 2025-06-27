@@ -1,6 +1,6 @@
-import { db } from "@/lib/db-config/postgres"; // Updated
 import { partnerRepository } from "@/features/partner/db/partner-repository"; // Updated
-import { SelectPartner } from "@/features/partner/schemas/partner.schema"; // Updated
+import { SelectPartner } from "@/features/partner/types/partner.schema"; // Updated
+import { db } from "@/lib/db-config/postgres"; // Updated
 
 /**
  * Fetches a list of all active partners.

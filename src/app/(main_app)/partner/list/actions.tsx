@@ -1,7 +1,8 @@
 "use server";
 
-import searchPartnersUseCase from "@/features/partner/usecases/searchPartnersUseCase"; // Updated import
 import { unstable_noStore as noStore } from "next/cache"; // Corrected alias
+
+import searchPartnersUseCase from "@/features/partner/usecases/search-partners.usecase"; // Updated import
 
 export async function getPartners(search: string, status: boolean) {
   noStore(); // Corrected usage

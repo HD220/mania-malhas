@@ -1,9 +1,12 @@
-import { describe, it, expect, vi, beforeEach } from 'vitest';
-import { updatePartner, UpdatePartnerServerResponse } from './actions';
-import alterPartnerUseCase from '@/features/partner/usecases/alter-partner.usecase';
-import { InsertPartner } from '@/features/partner/schemas/partner.schema';
-import { ZodError } from 'zod';
 import { revalidatePath } from 'next/cache'; // Importar diretamente
+import { describe, it, expect, vi, beforeEach } from 'vitest';
+import { ZodError } from 'zod';
+
+import { InsertPartner } from '@/features/partner/types/partner.schema';
+import alterPartnerUseCase from '@/features/partner/usecases/alter-partner.usecase';
+
+import { updatePartner, UpdatePartnerServerResponse } from './actions';
+
 
 vi.mock('@/features/partner/usecases/alter-partner.usecase');
 vi.mock('next/cache', async (importOriginal) => {

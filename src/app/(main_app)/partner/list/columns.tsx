@@ -1,8 +1,8 @@
 "use client";
 
-import { SelectPartner } from "@/features/partner/schemas/partnerSchema";
 import { ColumnDef } from "@tanstack/react-table";
 import { MoreHorizontal } from "lucide-react";
+import Link from "next/link";
 
 import { Button } from "@/components/ui/button";
 import {
@@ -13,8 +13,8 @@ import {
   DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
-import { formatterPhoneNumber } from "@/utils";
-import Link from "next/link";
+import { SelectPartner } from "@/features/partner/types/partner.schema";
+import { formatterPhoneNumber } from "@/lib/utils";
 
 export const columns: ColumnDef<SelectPartner>[] = [
   {

@@ -1,14 +1,15 @@
 "use server";
 
-import {
-  InsertPartner,
-  insertPartnerSchema,
-} from "@/features/partner/schemas/partnerSchema";
-import alterPartnerUseCase from "@/features/partner/usecases/alterPartnerUseCase";
-import getPartnerByIdUseCase from "@/features/partner/usecases/getPartnerByIdUseCase";
 import { revalidatePath, unstable_noStore as noStore } from "next/cache";
 import { redirect } from "next/navigation";
 import { ZodError } from "zod";
+
+import {
+  InsertPartner,
+  insertPartnerSchema,
+} from "@/features/partner/types/partner.schema";
+import alterPartnerUseCase from "@/features/partner/usecases/alter-partner.usecase";
+import getPartnerByIdUseCase from "@/features/partner/usecases/get-partner-by-id.usecase";
 
 export type UpdatePartnerServerResponse = {
   success: boolean;

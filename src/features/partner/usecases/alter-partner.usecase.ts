@@ -1,11 +1,13 @@
-import { db } from "@/lib/db-config/postgres"; // Updated path
+import { ZodError } from "zod";
+
 import { partnerRepository } from "@/features/partner/db/partner-repository"; // Updated path
 import {
   InsertPartner,
   insertPartnerSchema,
   SelectPartner,
-} from "@/features/partner/schemas/partner.schema"; // Updated path
-import { ZodError } from "zod";
+} from "@/features/partner/types/partner.schema"; // Updated path
+import { db } from "@/lib/db-config/postgres"; // Updated path
+
 
 /**
  * Alters an existing partner with the provided data.

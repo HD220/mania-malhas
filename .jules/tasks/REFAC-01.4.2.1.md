@@ -2,7 +2,7 @@
 id: "REFAC-01.4.2.1"
 title: "Mover schemas Zod `partner` para `src/features/partner/types/`"
 priority: "P4"
-status: "Pendente"
+status: "Concluído"
 complexity: 1
 assigned_to: "AgenteJules"
 dependencies:
@@ -10,7 +10,7 @@ dependencies:
   - "REFAC-STRUCT-013.3" # Mover schema de tabela `partner.ts` (já concluído)
 parent_task: "REFAC-01.4"
 creation_date: "2024-08-09"
-completion_date: ""
+completion_date: "2024-08-09"
 tags:
   - "refactor"
   - "partner"
@@ -22,6 +22,12 @@ notes: |
   para o diretório `src/features/partner/types/`.
   Isso inclui schemas para criação, atualização e seleção de parceiros.
   Atualizar todos os imports que utilizam esses schemas.
+
+  **Nota de Implementação (2024-08-09):**
+  - Arquivo `partner.schema.ts` movido de `src/features/partner/schemas/` para `src/features/partner/types/`.
+  - Imports atualizados em todos os arquivos relevantes.
+  - Testes para a feature `partner` (`npm test src/features/partner/ "src/app/(main_app)/partner/"`) estão passando.
+  - Persistem erros de ESLint da regra `project-structure/independent-modules` em toda a feature `partner`, similar ao observado em outras features. Estes não foram resolvidos como parte desta tarefa.
 ---
 
 **Descrição Detalhada:**

@@ -1,11 +1,14 @@
-import { dbType } from "@/lib/db-config/postgres"; // Updated path
 import { and, eq, desc, or, ilike, sql } from "drizzle-orm";
+
+import { dbType } from "@/lib/db-config/postgres"; // Updated path
+
 import {
   InsertPartner,
   SelectPartner,
   insertPartnerSchema, // This schema itself might need to be renamed or its internal 'table' reference checked
   selectPartnerSchema,
-} from "../schemas/partner.schema"; // Updated path
+} from "../types/partner.schema"; // Updated path
+
 import { partnerTable } from "./schema"; // Updated path
 
 export type DBConnection = dbType["db"];

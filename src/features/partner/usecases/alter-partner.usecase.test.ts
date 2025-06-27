@@ -1,9 +1,12 @@
-import { describe, it, expect, vi, beforeEach } from 'vitest';
-import alterPartnerUseCase from './alter-partner.usecase'; // Updated
-import { partnerRepository } from '@/features/partner/db/partner-repository'; // Updated
-import { InsertPartner, insertPartnerSchema } from '@/features/partner/schemas/partner.schema';
-import { ZodError } from 'zod';
 import { faker } from '@faker-js/faker';
+import { describe, it, expect, vi, beforeEach } from 'vitest';
+import { ZodError } from 'zod';
+
+import { partnerRepository } from '@/features/partner/db/partner-repository'; // Updated
+import { InsertPartner, insertPartnerSchema } from '@/features/partner/types/partner.schema';
+
+import alterPartnerUseCase from './alter-partner.usecase'; // Updated
+
 
 // Mock do partnerRepository
 vi.mock('@/features/partner/db/partner-repository', () => ({ // Updated

@@ -1,13 +1,14 @@
 "use client";
 
-import { Search } from "@/components/ui/search";
-import { Button } from "@/components/ui/button";
 import Link from "next/link";
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { SelectPartner } from "@/features/partner/schemas/partnerSchema";
 import { usePathname, useRouter, useSearchParams } from "next/navigation";
 import { ReactNode } from "react";
+
+import { Button } from "@/components/ui/button";
 import { ScrollArea, ScrollBar } from "@/components/ui/scroll-area";
+import { Search } from "@/components/ui/search";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { SelectPartner } from "@/features/partner/types/partner.schema";
 
 export default function Tab({
   status,

@@ -1,5 +1,6 @@
 import { createInsertSchema, createSelectSchema } from "drizzle-zod";
 import { z } from "zod";
+
 import { partnerTable } from "@/features/partner/db/schema"; // Updated path
 
 export const insertPartnerSchema = createInsertSchema(partnerTable, {
