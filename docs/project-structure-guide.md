@@ -24,8 +24,9 @@ A pasta `src/` é a raiz para todo o código-fonte da aplicação.
 ### 3.1. `src/app/` - Roteamento, Páginas e Layouts
 
 *   **Propósito:** Contém todas as rotas, páginas e layouts da aplicação (Next.js App Router).
+    *   Para diretrizes detalhadas sobre o uso de Route Groups e estratégias de layout, consulte o [Guia de Layouts e Route Groups](./layout-and-route-groups-guide.md).
 *   **Estrutura:**
-    *   Route Groups (ex: `(admin)`, `(auth)`) são permitidos.
+    *   Route Groups (ex: `(admin)`, `(auth)`) são permitidos e encorajados para aplicar layouts distintos a seções da aplicação.
     *   Arquivos padrão do Next.js: `page.tsx`, `layout.tsx`, `loading.tsx`, `error.tsx`, `not-found.tsx`.
 *   **Componentes Específicos de Rota:** Devem residir em `components/` dentro da pasta da rota (ex: `src/app/(admin)/dashboard/components/overview-chart.tsx`).
 *   **Lógica Específica de Rota:** Server Actions (`actions.ts`) podem estar aqui se estritamente ligadas à rota. Se complexas/reutilizáveis, mover para `src/features/`.
