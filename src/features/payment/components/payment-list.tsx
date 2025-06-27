@@ -1,9 +1,10 @@
 "use client";
 
-import { SelectPayment } from "@/features/payment/schemas/paymentSchema";
-import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { format } from "date-fns";
 import { ptBR } from "date-fns/locale";
+
+import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
+import { SelectPayment } from "@/features/payment/schemas/payment.schema";
 
 interface PaymentListProps {
   payments: SelectPayment[];

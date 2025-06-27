@@ -120,11 +120,14 @@ export function formatterPhoneNumber(value: string): string {
   if (newValue.length <= 6) { // (XX) X to (XX) XXXX
     return `(${newValue.slice(0, 2)}) ${newValue.slice(2)}`;
   }
-  if (newValue.length <= 10) { // (XX) XXXXX-X to (XX) XXXXX-XXXX
+  // At this point, newValue has more than 6 digits.
+  if (newValue.length <= 10) { // Handles 7 to 10 digits. (XX) XXXX-XXXX or (XX) XXX-XXXX etc.
      newValue = newValue.replace(/(\d{2})(\d{4})(\d{1,4})/, "($1) $2-$3");
-  } else { // (XX) XXXXX-XXXX (for numbers with 11 digits like mobile) or longer
-     newValue = newValue.replace(/(\d{2})(\d{5})(\d{4}).*/, "($1) $2-$3");
+  } else { // Handles 11 digits (or more, capped by slice later). (XX) XXXXX-XXXX
+     // This regex is for 11-digit numbers (like mobile) and their partials.
+     newValue = newValue.replace(/(\d{2})(\d{5})(\d{1,4}).*/, "($1) $2-$3");
   }
   // Cap the length to the standard (XX) XXXXX-XXXX format (15 chars)
+  // or (XX) XXXX-XXXX (14 chars)
   return newValue.slice(0, 15);
 }

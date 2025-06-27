@@ -1,13 +1,15 @@
 "use client";
 
 import { useState, useEffect, useCallback } from "react";
-import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription, DialogFooter } from "@/components/ui/dialog";
+
 import { Button } from "@/components/ui/button";
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription, DialogFooter } from "@/components/ui/dialog";
+import { useToast } from "@/components/ui/use-toast";
+
+import { addPaymentAction, listPaymentsByTransactionAction, PaymentServerResponse } from "@/features/payment/actions";
 import { PaymentForm, PaymentFormData } from "@/features/payment/components/payment-form";
 import { PaymentList } from "@/features/payment/components/payment-list";
-import { addPaymentAction, listPaymentsByTransactionAction, PaymentServerResponse } from "@/features/payment/actions"; // Adjust path as needed
-import { SelectPayment } from "@/features/payment/schemas/paymentSchema";
-import { useToast } from "@/components/ui/use-toast";
+import { SelectPayment } from "@/features/payment/schemas/payment.schema";
 
 interface TransactionPaymentsModalProps {
   transactionId: string | null; // Null when modal is closed

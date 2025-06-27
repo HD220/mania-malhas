@@ -1,7 +1,8 @@
-import { dbType, db as defaultDb } from "@/db/postgres";
-import { paymentTable } from "@/db/postgres/schema/payment";
-import { InsertPayment, SelectPayment } from "../schemas/paymentSchema";
 import { eq, desc } from "drizzle-orm";
+
+import { paymentTable } from "@/features/payment/db/schema";
+import { InsertPayment, SelectPayment } from "@/features/payment/schemas/payment.schema";
+import { dbType, db as defaultDb } from "@/lib/db-config/postgres";
 
 /**
  * Type alias for the Drizzle database connection instance.

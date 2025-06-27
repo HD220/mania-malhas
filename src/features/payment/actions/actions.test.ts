@@ -6,7 +6,7 @@ import { ZodError } from 'zod';
 import { faker } from '@faker-js/faker';
 
 // Mock do createPaymentUseCase
-vi.mock('@/features/payment/usecases/createPaymentUseCase');
+vi.mock('@/features/payment/usecases/create-payment.usecase');
 
 // Mock de revalidatePath (se usado, embora esteja comentado na action)
 vi.mock('next/cache', () => ({
