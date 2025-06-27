@@ -11,7 +11,7 @@ description: >
   que não se encaixe no padrão de arquivos de tabela individuais, deve ser
   avaliado se pode ser refatorado, renomeado para `kebab-case` e movido para
   um local apropriado (ex: dentro de `src/lib/db-config/utils/` se for um utilitário).
-status: Pendente
+status: Concluído
 priority: P4
 complexity: 1
 created_date: 2024-08-08
