@@ -6,22 +6,22 @@ const menus: NavbarItemProps[] = [
   {
     label: "Mania Malhas",
     href: "/",
-    icon: <Package2 className="h-5 w-5" />,
+    icon: "icon_placeholder", // Temporary string
   },
   {
     label: "Contas a Receber",
     href: "/receivable/list",
-    icon: <HandCoins className="h-5 w-5" />,
+    icon: "icon_placeholder", // Temporary string
   },
   {
     label: "Produtos",
     href: "/product/list",
-    icon: <Package className="h-5 w-5" />,
+    icon: "icon_placeholder", // Temporary string
   },
   {
     label: "Clientes",
     href: "/partner/list",
-    icon: <Users className="h-5 w-5" />,
+    icon: "icon_placeholder", // Temporary string
   },
 ];
 

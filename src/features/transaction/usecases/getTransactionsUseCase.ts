@@ -1,6 +1,11 @@
 import { db } from "@/db/postgres";
-import { transactionRepository as createTransactionRepository, TransactionWithPartner } from "@/features/transaction/db/transactionRepository";
+import {
+  transactionRepository as createTransactionRepository,
+  OrderByParams as RepoOrderByParams,
+  TransactionSortBy
+} from "@/features/transaction/db/transactionRepository";
 import { SelectTransaction } from "@/features/transaction/schemas/transactionSchema";
+import { TransactionWithPartner } from "@/features/transaction/types/transaction.types"; // Corrected path
 
 export interface GetTransactionsFilters {
   status?: string;

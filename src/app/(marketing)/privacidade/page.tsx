@@ -13,7 +13,7 @@ export default function PrivacidadePage() {
       </h1>
       <p className="text-sm text-gray-500">Última atualização: 06 de Agosto de 2024</p>
 
-      <p>A Mania Malhas ("nós", "nosso" ou "a Empresa") está comprometida em proteger a privacidade dos seus usuários ("você", "seu"). Esta Política de Privacidade explica como coletamos, usamos, divulgamos e protegemos suas informações quando você utiliza nossa plataforma online e serviços relacionados (coletivamente, o "Serviço").</p>
+      <p>A Mania Malhas (&quot;nós&quot;, &quot;nosso&quot; ou &quot;a Empresa&quot;) está comprometida em proteger a privacidade dos seus usuários (&quot;você&quot;, &quot;seu&quot;). Esta Política de Privacidade explica como coletamos, usamos, divulgamos e protegemos suas informações quando você utiliza nossa plataforma online e serviços relacionados (coletivamente, o &quot;Serviço&quot;).</p>
 
       <h2>1. Informações que Coletamos</h2>
       <p>Podemos coletar informações sobre você de várias maneiras. As informações que podemos coletar através do Serviço incluem:</p>
@@ -81,7 +81,7 @@ export default function PrivacidadePage() {
       <p>Não coletamos intencionalmente informações pessoalmente identificáveis de crianças menores de 13 anos (ou idade aplicável em sua jurisdição). Se você tomar conhecimento de quaisquer dados que coletamos de crianças, entre em contato conosco usando as informações de contato fornecidas abaixo.</p>
 
       <h2>7. Alterações a Esta Política de Privacidade</h2>
-      <p>Podemos atualizar esta Política de Privacidade de tempos em tempos. Notificaremos você sobre quaisquer alterações publicando a nova Política de Privacidade nesta página e atualizando a data da "Última atualização". Aconselhamos que você revise esta Política de Privacidade periodicamente para quaisquer alterações.</p>
+      <p>Podemos atualizar esta Política de Privacidade de tempos em tempos. Notificaremos você sobre quaisquer alterações publicando a nova Política de Privacidade nesta página e atualizando a data da &quot;Última atualização&quot;. Aconselhamos que você revise esta Política de Privacidade periodicamente para quaisquer alterações.</p>
 
       <h2>8. Contato</h2>
       <p>Se você tiver dúvidas ou comentários sobre esta Política de Privacidade, entre em contato conosco em:</p>

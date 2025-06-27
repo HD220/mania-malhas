@@ -6,7 +6,7 @@ import Link from "next/link";
 
 import { Navbar } from "@/components/navbar/navbar";
 import { Button } from "@/components/ui/button";
-import menus from "@/lib/constants/navigation.constants"; // Direct import
+import menus from "@/lib/constants/navigation.constants.tsx"; // Direct import with .tsx
 
 export default function AsideBar() {
   return (

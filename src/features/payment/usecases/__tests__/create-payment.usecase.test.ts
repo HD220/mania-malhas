@@ -30,7 +30,7 @@ vi.mock('@/lib/db-config/postgres', () => ({ // Updated
   },
 }));
 
-import { faker } from '@faker-js/faker';
+// import { faker } from '@faker-js/faker'; // Removed duplicate
 
 
 describe('createPaymentUseCase', () => {

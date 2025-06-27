@@ -7,7 +7,9 @@ import {
   markAllAsReadAction,
   MarkAsReadActionClientInput,
   ListNotificationsActionInput,
-} from './index'; // Updated import
+  ListNotificationsForUserOutput, // Consolidated
+  MarkAllNotificationsAsReadOutput // Consolidated
+} from './index';
 
 // Import REAL schemas for validation testing if actions use them directly before calling use cases.
 // The actions.ts file does use listNotificationsForUserInputSchema directly for parsing.
@@ -17,17 +19,16 @@ import { ForbiddenError, NotFoundError } from "@/lib/errors/domainErrors";
 
 import {
   ListNotificationsForUserUseCase,
-  listNotificationsForUserInputSchema, // This is also exported by the use case module
-} from "@/features/notification/usecases/listNotificationsForUserUseCase";
+  listNotificationsForUserInputSchema,
+} from "@/features/notification/usecases/listNotificationsForUserUseCase"; // Path was already to .usecase in lint
 import {
   MarkNotificationAsReadUseCase,
-  markNotificationAsReadInputSchema, // This is also exported by the use case module
-} from "@/features/notification/usecases/markNotificationAsReadUseCase";
+  markNotificationAsReadInputSchema,
+} from "@/features/notification/usecases/markNotificationAsReadUseCase"; // Path was already to .usecase in lint
 import {
   MarkAllNotificationsAsReadUseCase,
-  markAllNotificationsAsReadInputSchema, // This is also exported by the use case module
-} from "@/features/notification/usecases/markAllNotificationsAsReadUseCase";
-import { ListNotificationsForUserOutput, MarkAllNotificationsAsReadOutput } from "./index"; // For types from action file
+  markAllNotificationsAsReadInputSchema,
+} from "@/features/notification/usecases/markAllNotificationsAsReadUseCase"; // Path was already to .usecase in lint
 
 // Mock Next.js cache revalidation
 vi.mock("next/cache", () => ({

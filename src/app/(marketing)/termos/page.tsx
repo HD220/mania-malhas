@@ -19,7 +19,7 @@ export default function TermosPage() {
 
       <p className="text-sm text-gray-500">Última atualização: 06 de Agosto de 2024</p>
 
-      <p>Bem-vindo à Mania Malhas! Estes Termos de Serviço ("Termos") regem o seu uso da nossa plataforma online e serviços relacionados (coletivamente, o "Serviço"), fornecidos pela Mania Malhas ("nós", "nosso" ou "a Empresa"). Ao acessar ou usar o nosso Serviço, você concorda em cumprir estes Termos.</p>
+      <p>Bem-vindo à Mania Malhas! Estes Termos de Serviço (&quot;Termos&quot;) regem o seu uso da nossa plataforma online e serviços relacionados (coletivamente, o &quot;Serviço&quot;), fornecidos pela Mania Malhas (&quot;nós&quot;, &quot;nosso&quot; ou &quot;a Empresa&quot;). Ao acessar ou usar o nosso Serviço, você concorda em cumprir estes Termos.</p>
 
       <h2>1. Aceitação dos Termos</h2>
       <p>Ao criar uma conta, acessar ou usar o Serviço de qualquer forma, você confirma que leu, entendeu e concorda em ficar vinculado por estes Termos. Se você não concorda com qualquer parte dos termos, então você não pode acessar o Serviço.</p>
@@ -44,7 +44,7 @@ export default function TermosPage() {
       <p>O Serviço e seu conteúdo original (excluindo conteúdo fornecido pelos usuários), características e funcionalidades são e permanecerão propriedade exclusiva da Mania Malhas e seus licenciadores. O Serviço é protegido por direitos autorais, marcas registradas e outras leis do Brasil e de países estrangeiros.</p>
 
       <h2>6. Conteúdo do Usuário</h2>
-      <p>Você retém todos os direitos sobre qualquer conteúdo que você enviar, postar ou exibir no ou através do Serviço ("Conteúdo do Usuário"). Ao enviar Conteúdo do Usuário, você nos concede uma licença mundial, não exclusiva, isenta de royalties para usar, copiar, reproduzir, processar, adaptar, modificar, publicar, transmitir, exibir e distribuir tal Conteúdo do Usuário em qualquer e todos os meios ou métodos de distribuição.</p>
+      <p>Você retém todos os direitos sobre qualquer conteúdo que você enviar, postar ou exibir no ou através do Serviço (&quot;Conteúdo do Usuário&quot;). Ao enviar Conteúdo do Usuário, você nos concede uma licença mundial, não exclusiva, isenta de royalties para usar, copiar, reproduzir, processar, adaptar, modificar, publicar, transmitir, exibir e distribuir tal Conteúdo do Usuário em qualquer e todos os meios ou métodos de distribuição.</p>
       <p>Você é o único responsável pelo seu Conteúdo do Usuário e pelas consequências de publicá-lo.</p>
 
       <h2>7. Taxas e Pagamentos (Se Aplicável)</h2>
@@ -59,7 +59,7 @@ export default function TermosPage() {
       <p>Em nenhuma circunstância a Mania Malhas, nem seus diretores, funcionários, parceiros, agentes, fornecedores ou afiliados, serão responsáveis por quaisquer danos indiretos, incidentais, especiais, consequenciais ou punitivos, incluindo, sem limitação, perda de lucros, dados, uso, boa vontade ou outras perdas intangíveis, resultantes de (i) seu acesso ou uso ou incapacidade de acessar ou usar o Serviço; (ii) qualquer conduta ou conteúdo de terceiros no Serviço; (iii) qualquer conteúdo obtido do Serviço; e (iv) acesso não autorizado, uso ou alteração de suas transmissões ou conteúdo, seja com base em garantia, contrato, ato ilícito (incluindo negligência) ou qualquer outra teoria legal, tenhamos ou não sido informados da possibilidade de tais danos.</p>
 
       <h2>10. Isenção de Garantias</h2>
-      <p>Seu uso do Serviço é por sua conta e risco. O Serviço é fornecido "COMO ESTÁ" e "CONFORME DISPONÍVEL". O Serviço é fornecido sem garantias de qualquer tipo, expressas ou implícitas, incluindo, mas não se limitando a, garantias implícitas de comercialização, adequação a uma finalidade específica, não infração ou curso de desempenho.</p>
+      <p>Seu uso do Serviço é por sua conta e risco. O Serviço é fornecido &quot;COMO ESTÁ&quot; e &quot;CONFORME DISPONÍVEL&quot;. O Serviço é fornecido sem garantias de qualquer tipo, expressas ou implícitas, incluindo, mas não se limitando a, garantias implícitas de comercialização, adequação a uma finalidade específica, não infração ou curso de desempenho.</p>
 
       <h2>11. Alterações nos Termos</h2>
       <p>Reservamo-nos o direito, a nosso exclusivo critério, de modificar ou substituir estes Termos a qualquer momento. Se uma revisão for material, tentaremos fornecer um aviso com pelo menos 30 dias de antecedência antes que quaisquer novos termos entrem em vigor. O que constitui uma alteração material será determinado a nosso exclusivo critério.</p>

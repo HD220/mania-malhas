@@ -1,8 +1,10 @@
-import { describe, it, expect, vi, beforeEach } from 'vitest';
-import getTransactionsUseCase from './getTransactionsUseCase';
-import { transactionRepository } from '@/features/transaction/db/transactionRepository';
-import { TransactionWithPartner } from '@/features/transaction/db/transactionRepository';
 import { faker } from '@faker-js/faker';
+import { describe, it, expect, vi, beforeEach } from 'vitest';
+
+import { transactionRepository } from '@/features/transaction/db/transactionRepository';
+import { TransactionWithPartner } from '@/features/transaction/types/transaction.types'; // Corrected path
+
+import getTransactionsUseCase from './getTransactionsUseCase';
 
 // Mock do transactionRepository
 vi.mock('@/features/transaction/db/transactionRepository', () => ({

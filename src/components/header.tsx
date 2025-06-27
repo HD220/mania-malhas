@@ -7,7 +7,7 @@ import { useState, useTransition } from "react"; // Combined React imports
 
 import { logoutUser } from "@/features/auth/actions/auth.actions";
 import { NotificationsPanel } from "@/features/notification/components/notifications-panel";
-import menus from "@/lib/constants/navigation.constants"; // Corrected path for menus
+import menus from "@/lib/constants/navigation.constants.tsx"; // Corrected path for menus with .tsx
 import { Navbar } from "@/components/navbar/navbar";
 import { ThemeToggle } from "@/components/theme-toggle";
 import { Button } from "@/components/ui/button";

@@ -1,6 +1,12 @@
 "use client";
 
+import { Plus, X } from "lucide-react";
+import Image from "next/image";
+import { HTMLAttributes, ReactNode } from "react";
+import { DropzoneInputProps } from "react-dropzone";
+
 import { useDropzone } from "@/components/providers/dropzone-provider";
+import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import {
   Carousel,
@@ -9,63 +15,76 @@ import {
   CarouselNext,
   CarouselPrevious,
 } from "@/components/ui/carousel";
-import { HTMLAttributes, ReactNode } from "react";
-import { DropzoneInputProps } from "react-dropzone";
-import Image from "next/image";
-import { Button } from "@/components/ui/button";
-import { Plus, X } from "lucide-react";
-import { FormProduct } from "../forms/product-form/useProductForm";
 import { Progress } from "./progress";
 
-export type DropzoneImageCarousel = {
+// Define a generic image type here for now to remove feature dependency
+export type GenericImageType = {
+  name: string;
+  url?: string; // URL might not exist for newly added files before upload
+  file?: File; // For files not yet uploaded
+  active: boolean;
+  progress?: number;
+};
+
+export type DropzoneImageCarouselProps = {
   multiple?: boolean;
   onRemove: (index: number) => Promise<void>;
-  files: FormProduct["images"];
+  files: GenericImageType[];
 };
 
 export function DropzoneImageCarousel({
   onRemove,
   files,
-  ...rest
-}: DropzoneImageCarousel) {
+  ...rest // Spread the rest of the props for the Carousel component
+}: DropzoneImageCarouselProps & Omit<React.ComponentProps<typeof Carousel>, 'children'>) { // Ensure ...rest is typed
   const { getRootProps, getInputProps, open } = useDropzone();
 
   return (
-    <Carousel className="mx-[50px]" {...getRootProps()}>
+    <Carousel className="mx-[50px]" {...getRootProps()} {...rest}>
       <CarouselContent className="">
         <DropzoneImageCarouselInput
           inputProps={getInputProps()}
           open={open}
-          {...rest}
         />
 
         {files?.map((file, index) => {
           return (
             file.active && (
-              <DropzoneImageCarouselItem key={`${file.name}`}>
+              <DropzoneImageCarouselItem key={`${file.name}-${index}`}> {/* Improved key */}
                 <Button
                   size="sm"
                   variant={"destructive"}
                   type="button"
                   className="absolute right-0 top-0 rounded-full p-1 h-auto -mx-0 -my-0 z-10"
-                  onClick={() => onRemove(index)}
+                  onClick={(e) => {
+                    e.stopPropagation(); // Prevent triggering dropzone's open
+                    onRemove(index);
+                  }}
                 >
                   <X className="h-3 w-3" />
                 </Button>
                 <DropzoneImageCarouselCard>
-                  <Image
-                    src={file.url!}
-                    alt={file.name}
-                    fill
-                    sizes="100%"
-                    className="object-cover"
-                    onLoad={() => URL.revokeObjectURL(file.url!)}
-                  />
-                  <Progress
-                    value={(file.progress || 0) * 100}
-                    className="absolute bottom-2 h-2 w-[90%]"
-                    progressClassName="bg-primary/50"
-                  />
+                  {file.url && ( /* Check if url exists before using it */
+                    <Image
+                      src={file.url}
+                      alt={file.name}
+                      fill
+                      sizes="100%"
+                      className="object-cover"
+                      onLoad={() => {
+                        if (file.url?.startsWith("blob:")) { // Only revoke blob URLs
+                           URL.revokeObjectURL(file.url);
+                        }
+                      }}
+                    />
+                  )}
+                  {file.progress !== undefined && file.progress < 1 && ( /* Show progress if defined and not complete */
+                    <Progress
+                      value={(file.progress || 0) * 100}
+                      className="absolute bottom-2 h-2 w-[90%]"
+                      progressClassName="bg-primary/50"
+                    />
+                  )}
                 </DropzoneImageCarouselCard>
               </DropzoneImageCarouselItem>
             )
@@ -89,7 +108,7 @@ export function DropzoneImageCarouselInput({
     <DropzoneImageCarouselItem>
       <DropzoneImageCarouselCard onClick={open}>
         <span className="text-3xl font-semibold">
-          <input {...inputProps} multiple />
+          <input {...inputProps} /> {/* Removed multiple as it's controlled by DropzoneOptions */}
           <Plus />
         </span>
       </DropzoneImageCarouselCard>
