@@ -4,11 +4,11 @@ import { revalidatePath } from "next/cache";
 import { redirect } from "next/navigation";
 import { ZodError } from "zod";
 
+import createPartnerUseCase from "@/features/partner/usecases/create-partner.usecase";
 import {
   InsertPartner,
-  insertPartnerSchema,
+  insertPartnerSchema, // Assuming this might be used for validation within the action itself
 } from "@/features/partner/types/partner.schema";
-import createPartnerUseCase from "@/features/partner/usecases/create-partner.usecase";
 
 export type CreatePartnerServerResponse = {
   success: boolean;

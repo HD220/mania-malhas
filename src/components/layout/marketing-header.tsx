@@ -1,5 +1,5 @@
-import Link from 'next/link';
 import Image from 'next/image';
+import Link from 'next/link';
 
 // Supondo que o logo esteja em /public/logo.png ou similar,
 // ou src/assets/logo.jpg como identificado anteriormente.

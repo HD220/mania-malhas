@@ -1,6 +1,13 @@
 "use client";
 
+import { format, isValid as isValidDate } from "date-fns";
+import { ptBR } from "date-fns/locale";
+import { ArrowDown, ArrowUp, ArrowUpDown, CalendarIcon, SearchIcon } from "lucide-react"; // Adicionar SearchIcon
+import { useCallback, useEffect, useState } from "react";
+import { useDebouncedCallback } from "use-debounce"; // Importar useDebouncedCallback
+
 import { Button } from "@/components/ui/button";
+import { Calendar } from "@/components/ui/calendar";
 import {
   Card,
   CardContent,
@@ -9,22 +16,17 @@ import {
   CardHeader,
   CardTitle,
 } from "@/components/ui/card";
-import { useEffect, useState, useCallback } from "react";
-import { listTransactionsAction } from "@/features/transaction/actions"; // CORRECTED PATH
-import { TransactionWithPartner } from "@/features/transaction/db/transactionRepository";
-import { TransactionPaymentsModal } from "@/features/payment/components/transaction-payments-modal";
-import { useToast } from "@/components/ui/use-toast";
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { Label } from "@/components/ui/label";
 import { Input } from "@/components/ui/input"; // Importar Input
-import { useDebouncedCallback } from "use-debounce"; // Importar useDebouncedCallback
-import { CalendarIcon, ArrowUpDown, ArrowUp, ArrowDown, SearchIcon } from "lucide-react"; // Adicionar SearchIcon
+import { Label } from "@/components/ui/label";
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
-import { Calendar } from "@/components/ui/calendar";
-import { format, isValid as isValidDate } from "date-fns";
-import { ptBR } from "date-fns/locale";
-import { cn } from "@/utils";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import { useToast } from "@/components/ui/use-toast";
+import { TransactionPaymentsModal } from "@/features/payment/components/transaction-payments-modal";
+import { listTransactionsAction } from "@/features/transaction/actions"; // CORRECTED PATH
+// Problematic import - TransactionWithPartner should be in types/schemas
+import { TransactionWithPartner } from "@/features/transaction/types/transaction.types";
 import { UseCaseOrderByParams } from "@/features/transaction/usecases/getTransactionsUseCase";
+import { cn } from "@/lib/utils"; // Corrected path for cn
 
 interface TransactionFilters {
   type?: "E" | "S";

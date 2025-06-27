@@ -1,8 +1,9 @@
 "use client"; // Navigation links and potential future user menu might need client interactivity
 
-import Link from 'next/link';
-import { Button } from '@/components/ui/button';
 import { Package2, UserCircle } from 'lucide-react'; // UserCircle as a placeholder icon
+import Link from 'next/link';
+
+import { Button } from '@/components/ui/button';
 
 export function MainAppHeader() {
   return (

@@ -1,29 +1,31 @@
-import { describe, it, expect, vi, beforeEach } from 'vitest';
-import { listTransactionsAction, TransactionServerResponse } from './actions';
-import getTransactionsUseCase, { PaginatedTransactionsResult, GetTransactionsFilters, UseCasePaginationParams, UseCaseOrderByParams } from '@/features/transaction/usecases/getTransactionsUseCase';
-import { TransactionWithPartner } from '@/features/transaction/db/transactionRepository';
 import { faker } from '@faker-js/faker';
+import { revalidatePath, unstable_noStore } from 'next/cache'; // Combined next/cache imports
+import { ZodError, ZodIssue } from 'zod'; // Zod should be before vitest based on typical ordering
+import { describe, it, expect, vi, beforeEach } from 'vitest';
 
-import { unstable_noStore } from 'next/cache'; // Importar diretamente
-
-import createTransactionUseCase, { CreateTransactionInput } from '@/features/transaction/usecases/createTransactionUseCase';
+import { TransactionWithPartner } from '@/features/transaction/db/transactionRepository'; // May need to move this type
 import { SelectTransaction } from '@/features/transaction/schemas/transactionSchema';
-import { ZodError, ZodIssue } from 'zod';
-import { revalidatePath } from 'next/cache';
-import { createTransactionAction, CreateTransactionServerResponse } from './actions';
-
-
-// Mock dos use cases
-import updateTransactionUseCase, { UpdateTransactionInput } from '@/features/transaction/usecases/updateTransactionUseCase';
-import { updateTransactionAction, UpdateTransactionServerResponse } from './actions';
-
+import createTransactionUseCase, { CreateTransactionInput } from '@/features/transaction/usecases/createTransactionUseCase';
 // Import deleteTransactionUseCase with its input schema
 import deleteTransactionUseCase, { deleteTransactionInputSchema } from '@/features/transaction/usecases/deleteTransactionUseCase';
-import { deleteTransactionAction, DeleteTransactionServerResponse } from './actions';
-
 // Import getTransactionByIdUseCase and its types/action
 import getTransactionByIdUseCase, { getTransactionByIdInputSchema } from '@/features/transaction/usecases/getTransactionByIdUseCase';
-import { getTransactionByIdAction, GetTransactionByIdServerResponse } from './actions';
+import getTransactionsUseCase, { PaginatedTransactionsResult, GetTransactionsFilters, UseCasePaginationParams, UseCaseOrderByParams } from '@/features/transaction/usecases/getTransactionsUseCase';
+// Mock dos use cases
+import updateTransactionUseCase, { UpdateTransactionInput } from '@/features/transaction/usecases/updateTransactionUseCase';
+
+import {
+  listTransactionsAction,
+  TransactionServerResponse,
+  createTransactionAction,
+  CreateTransactionServerResponse,
+  updateTransactionAction,
+  UpdateTransactionServerResponse,
+  deleteTransactionAction,
+  DeleteTransactionServerResponse,
+  getTransactionByIdAction,
+  GetTransactionByIdServerResponse
+} from './actions'; // Consolidated action imports
 
 // Specific error types (NotFoundError, DomainConflictError, ZodError) will be imported via vi.importActual or are standard
 
@@ -60,6 +62,9 @@ vi.mock('next/cache', async (importOriginal) => {
     revalidatePath: vi.fn(), // Mock revalidatePath
   };
 });
+
+// Ensure revalidatePath is also available directly if used outside the mock setup
+const mockedRevalidatePath = revalidatePath as ReturnType<typeof vi.fn>;
 
 const createMockTransactionWithPartner = (): TransactionWithPartner => ({
   id: faker.string.uuid(),

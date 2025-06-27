@@ -1,16 +1,14 @@
 "use server";
 
-import { z } from "zod";
 import { revalidatePath } from "next/cache";
+import { z } from "zod";
 
-import { GetUserProfileUseCase } from "@/features/user/usecases/getUserProfileUseCase";
-import { UpdateUserProfileUseCase, updateUserProfileUseCaseInputSchema } from "@/features/user/usecases/updateUserProfileUseCase";
-import { ChangeUserPasswordUseCase, changeUserPasswordUseCaseInputSchema } from "@/features/user/usecases/changeUserPasswordUseCase";
-
+import { ForbiddenError, NotFoundError } from "@/lib/errors/domain-errors";
 // Assuming SelectUser and UpdateUserProfile are correctly exported and used by use cases
 import { SelectUser, UpdateUserProfile as UpdateUserProfileData } from "@/features/user/schemas/userSchema";
-
-import { ForbiddenError, NotFoundError } from "@/lib/errors/domainErrors";
+import { ChangeUserPasswordUseCase, changeUserPasswordUseCaseInputSchema } from "@/features/user/usecases/changeUserPasswordUseCase";
+import { GetUserProfileUseCase } from "@/features/user/usecases/getUserProfileUseCase";
+import { UpdateUserProfileUseCase, updateUserProfileUseCaseInputSchema } from "@/features/user/usecases/updateUserProfileUseCase";
 
 /**
  * Placeholder for session management.

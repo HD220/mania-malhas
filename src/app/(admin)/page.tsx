@@ -1,8 +1,9 @@
-import { getDashboardStats } from "@/features/dashboard/actions"; // Ajuste o caminho se necessário
-import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
-import { Button } from "@/components/ui/button";
+import { DollarSign, ListChecks, Package, Users } from "lucide-react"; // Ícones
 import Link from "next/link";
-import { DollarSign, Package, Users, ListChecks } from "lucide-react"; // Ícones
+
+import { Button } from "@/components/ui/button";
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
+import { getDashboardStats } from "@/features/dashboard/actions"; // Ajuste o caminho se necessário
 
 /**
  * AdminDashboardPage serves as the main landing page for the admin panel.

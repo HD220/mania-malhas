@@ -1,13 +1,14 @@
+import { unstable_noStore } from 'next/cache'; // Importar diretamente
 import { describe, it, expect, vi, beforeEach } from 'vitest';
-import { getDashboardStats } from './actions';
-import countActiveProductsUseCase from '@/usecases/product/countActiveProductsUseCase';
+
 import countActivePartnersUseCase from '@/features/partner/usecases/count-active-partners.usecase';
+import countActiveProductsUseCase from '@/features/product/usecases/countActiveProductsUseCase';
 import getPendingTransactionsStatsUseCase from '@/features/transaction/usecases/getPendingTransactionsStatsUseCase';
 
-import { unstable_noStore } from 'next/cache'; // Importar diretamente
+import { getDashboardStats } from './actions';
 
 // Mock dos casos de uso
-vi.mock('@/usecases/product/countActiveProductsUseCase');
+vi.mock('@/features/product/usecases/countActiveProductsUseCase');
 vi.mock('@/features/partner/usecases/count-active-partners.usecase');
 vi.mock('@/features/transaction/usecases/getPendingTransactionsStatsUseCase');
 

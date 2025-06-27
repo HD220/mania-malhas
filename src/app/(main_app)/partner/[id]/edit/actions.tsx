@@ -1,15 +1,15 @@
 "use server";
 
 import { revalidatePath, unstable_noStore as noStore } from "next/cache";
-import { redirect } from "next/navigation";
+import { redirect } from "next/navigation"; // Assuming redirect might be used later
 import { ZodError } from "zod";
 
-import {
-  InsertPartner,
-  insertPartnerSchema,
-} from "@/features/partner/types/partner.schema";
 import alterPartnerUseCase from "@/features/partner/usecases/alter-partner.usecase";
 import getPartnerByIdUseCase from "@/features/partner/usecases/get-partner-by-id.usecase";
+import {
+  InsertPartner,
+  insertPartnerSchema, // Assuming this might be used for validation within the action itself
+} from "@/features/partner/types/partner.schema";
 
 export type UpdatePartnerServerResponse = {
   success: boolean;

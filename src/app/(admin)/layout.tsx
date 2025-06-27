@@ -1,10 +1,10 @@
 // Este arquivo não importa mais "@/styles/globals.css" diretamente se estiver no RootLayout
 // import "@/styles/globals.css";
-import { Header } from "@/components/header";
 import AsideBar from "@/components/aside-bar";
+import { Header } from "@/components/header";
 import { Breadcrumbs } from "@/components/navigation/breadcrumbs"; // Importar Breadcrumbs aqui
 // cn pode não ser necessário aqui se não houver classes condicionais específicas para este layout
-// import { cn } from "@/utils";
+// import { cn } from "@/lib/utils"; // Corrected path if cn was needed
 
 // Metadata pode ser definida aqui para o grupo (admin) se necessário,
 // ou herdada/modificada a partir do RootLayout.

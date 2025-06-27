@@ -1,11 +1,11 @@
-"use cliente";
+"use client"; // Corrected typo
 
+import { ReactNode, createContext, useContext } from "react";
 import {
   useDropzone as useReactDropzone,
   DropzoneOptions,
   DropzoneState,
 } from "react-dropzone";
-import { ReactNode, createContext, useContext } from "react";
 
 const DropzoneContext = createContext<DropzoneState | null>(null);
 

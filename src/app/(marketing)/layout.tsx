@@ -1,6 +1,7 @@
 import React from 'react';
-import MarketingHeader from '@/components/layout/marketing-header'; // Ajuste o path se necessário
-import MarketingFooter from '@/components/layout/marketing-footer'; // Ajuste o path se necessário
+
+import MarketingFooter from '@/components/layout/marketing-footer';
+import MarketingHeader from '@/components/layout/marketing-header';
 // Importar a fonte Inter globalmente se ainda não estiver no layout raiz principal,
 // ou se quisermos garantir que ela seja usada especificamente aqui.
 // import { Inter } from 'next/font/google';

@@ -1,9 +1,12 @@
-import Link from "next/link";
-
-import { Button } from "@/components/ui/button";
-import { Navbar } from "@/components/navbar/navbar";
-import menus from "@/constant";
 import { Bell, Package2 } from "lucide-react";
+import Link from "next/link";
+// Image and Logo were in original lint errors but not in the snippet, assuming not used.
+// import Image from "next/image";
+// import Logo from "@/assets/logo.jpg";
+
+import { Navbar } from "@/components/navbar/navbar";
+import { Button } from "@/components/ui/button";
+import menus from "@/lib/constants/navigation.constants"; // Direct import
 
 export default function AsideBar() {
   return (

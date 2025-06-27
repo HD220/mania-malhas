@@ -8,9 +8,10 @@ import { Button } from "@/components/ui/button";
 import { ScrollArea, ScrollBar } from "@/components/ui/scroll-area";
 import { Search } from "@/components/ui/search";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { SelectPartner } from "@/features/partner/types/partner.schema";
+// SelectPartner is not used, removing import
+// import { SelectPartner } from "@/features/partner/types/partner.schema";
 
-export default function Tab({
+export default function TabsPartner({ // Renamed component
   status,
   actives,
   inactives,

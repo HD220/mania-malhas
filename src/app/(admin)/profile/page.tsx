@@ -1,6 +1,4 @@
-import { getUserProfileAction } from "@/features/user/actions"; // Server action
-import { ProfileForm } from "@/features/user/components/profile-form";
-import { ChangePasswordForm } from "@/features/user/components/change-password-form";
+import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import {
   Card,
   CardContent,
@@ -8,8 +6,10 @@ import {
   CardHeader,
   CardTitle,
 } from "@/components/ui/card";
-import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Separator } from "@/components/ui/separator";
+import { getUserProfileAction } from "@/features/user/actions"; // Server action
+import { ChangePasswordForm } from "@/features/user/components/change-password-form";
+import { ProfileForm } from "@/features/user/components/profile-form";
 import type { SelectUser } from "@/features/user/schemas/userSchema";
 
 

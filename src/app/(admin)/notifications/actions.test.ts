@@ -1,6 +1,21 @@
-import { vi, describe, it, expect, beforeEach, afterEach } from "vitest";
-import { ZodError } from "zod";
 import { revalidatePath } from "next/cache";
+import { ZodError } from "zod";
+import { vi, describe, it, expect, beforeEach, afterEach } from "vitest";
+
+import { ForbiddenError, NotFoundError } from "@/lib/errors/domain-errors";
+import {
+  ListNotificationsForUserUseCase,
+  // listNotificationsForUserInputSchema, // Not directly used in test, action validates
+} from "@/features/notification/usecases/list-notifications-for-user.usecase";
+import {
+  MarkNotificationAsReadUseCase,
+  // markNotificationAsReadInputSchema, // Not directly used in test, action validates
+} from "@/features/notification/usecases/mark-notification-as-read.usecase";
+import {
+  MarkAllNotificationsAsReadUseCase,
+  // markAllNotificationsAsReadInputSchema, // Not directly used in test, action validates
+} from "@/features/notification/usecases/mark-all-notifications-as-read.usecase";
+
 import {
   listNotificationsAction,
   markAsReadAction,
@@ -8,25 +23,6 @@ import {
   MarkAsReadActionClientInput,
   ListNotificationsActionInput,
 } from "./actions";
-
-// Import REAL schemas for validation testing if actions use them directly before calling use cases.
-// The actions.ts file does use listNotificationsForUserInputSchema directly for parsing.
-
-
-import { ForbiddenError, NotFoundError } from "@/lib/errors/domainErrors";
-
-import {
-  ListNotificationsForUserUseCase,
-  listNotificationsForUserInputSchema,
-} from "@/features/notification/usecases/listNotificationsForUserUseCase";
-import {
-  MarkNotificationAsReadUseCase,
-  markNotificationAsReadInputSchema,
-} from "@/features/notification/usecases/markNotificationAsReadUseCase";
-import {
-  MarkAllNotificationsAsReadUseCase,
-  markAllNotificationsAsReadInputSchema,
-} from "@/features/notification/usecases/markAllNotificationsAsReadUseCase";
 
 // Mock Next.js cache revalidation
 vi.mock("next/cache", () => ({

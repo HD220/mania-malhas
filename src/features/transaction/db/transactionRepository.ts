@@ -10,9 +10,11 @@ import {
 import { transactionTable } from "@/db/postgres/schema/transaction"; // Adjusted import path
 import { partnerTable } from "@/db/postgres/schema/partner"; // Adjusted import path
 
+import { TransactionWithPartner } from "../types/transaction.types"; // Import the moved type
+
 export type DBConnection = dbType["db"];
 
-export type TransactionWithPartner = SelectTransaction & { partnerName?: string | null };
+// export type TransactionWithPartner = SelectTransaction & { partnerName?: string | null }; // Definition moved
 
 export interface TransactionFiltersForRepo {
   type?: "E" | "S";

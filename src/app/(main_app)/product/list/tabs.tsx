@@ -1,11 +1,15 @@
 "use client";
 
-import { Search } from "@/components/ui/search";
-import { Button } from "@/components/ui/button";
 import Link from "next/link";
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { usePathname, useRouter, useSearchParams } from "next/navigation";
 import { ReactNode } from "react";
+
+import { Button } from "@/components/ui/button";
+import { Search } from "@/components/ui/search";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+// ScrollArea and ScrollBar were not in the original file's lint errors, but were in partner/list/tabs.tsx
+// Adding them here if they were intended to be used, or they can be removed if not.
+// For now, assuming they are not used as they are not in the original component code block.
 
 export default function Tab({
   status,

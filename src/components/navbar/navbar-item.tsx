@@ -1,16 +1,14 @@
 "use client";
 
-import { cn } from "@/utils";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { ReactNode } from "react";
 
-export type NavbarItemProps = {
-  label: string;
-  href: string;
-  icon: ReactNode;
-  className?: string;
-};
+// ReactNode is part of NavbarItemProps, no separate import needed if only used for the type.
+// import { ReactNode } from "react";
+
+import { NavbarItemProps } from "@/lib/types/navigation.types";
+import { cn } from "@/lib/utils";
+
 
 export function NavbarItem({ href, label, icon }: NavbarItemProps) {
   const pathname = usePathname();

@@ -2,7 +2,7 @@ import { DataTable } from "@/components/ui/data-table";
 import { getPartners } from "@/features/partner/actions";
 
 import { columns } from "./columns";
-import Tab from "./tabs";
+import { TabsPartner } from "./tabs"; // Corrected import name
 
 export default async function Page({
   searchParams: { search = "", status = "active" },
@@ -16,7 +16,7 @@ export default async function Page({
 
   return (
     <div className="flex flex-col gap-2">
-      <Tab
+      <TabsPartner // Corrected usage
         status={status}
         actives={<DataTable columns={columns} data={actives} />}
         inactives={<DataTable columns={columns} data={inactives} />}

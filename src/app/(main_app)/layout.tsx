@@ -1,6 +1,7 @@
 import React from "react";
+
 import { MainAppHeader } from "@/components/layout/main-app-header";
-import { MainAppFooter } from "@/components/layout/main-app-footer";
+// import { MainAppFooter } from "@/components/layout/main-app-footer"; // Removed due to missing file
 
 export default function MainAppLayout({
   children,
@@ -13,7 +14,7 @@ export default function MainAppLayout({
       <main className="flex-grow p-6 bg-background">
         {children}
       </main>
-      <MainAppFooter />
+      {/* <MainAppFooter /> */} {/* Removed due to missing file */}
     </div>
   );
 }

@@ -1,6 +1,6 @@
-import { revalidatePath } from 'next/cache'; // Importar diretamente
-import { describe, it, expect, vi, beforeEach } from 'vitest';
+import { revalidatePath } from 'next/cache';
 import { ZodError } from 'zod';
+import { describe, it, expect, vi, beforeEach } from 'vitest';
 
 import { InsertPartner } from '@/features/partner/types/partner.schema';
 import createPartnerUseCase from '@/features/partner/usecases/create-partner.usecase';

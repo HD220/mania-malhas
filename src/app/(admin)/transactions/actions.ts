@@ -1,16 +1,25 @@
 "use server";
 
-// SelectTransaction não é mais o tipo primário aqui, mas TransactionWithPartner é.
-// Manter SelectTransaction se for usado em outros lugares ou para tipos base.
+import { unstable_noStore as noStore, revalidatePath } from "next/cache";
+import { ZodError } from "zod";
+
+// Type/Schema imports from features
 import { SelectTransaction } from "@/features/transaction/schemas/transactionSchema";
+import { TransactionWithPartner } from "@/features/transaction/types/transaction.types"; // Corrected import path
+import { DomainConflictError, NotFoundError } from "@/lib/errors/domain-errors";
+
+// Use Case imports from features
+import createTransactionUseCase, { CreateTransactionInput } from "@/features/transaction/usecases/createTransactionUseCase";
+import deleteTransactionUseCase, { deleteTransactionInputSchema } from "@/features/transaction/usecases/deleteTransactionUseCase";
+import getTransactionByIdUseCase, { getTransactionByIdInputSchema } from "@/features/transaction/usecases/getTransactionByIdUseCase";
 import getTransactionsUseCase, {
   GetTransactionsFilters,
   UseCasePaginationParams,
   PaginatedTransactionsResult,
-  UseCaseOrderByParams // Importar tipo de ordenação do caso de uso
+  UseCaseOrderByParams,
 } from "@/features/transaction/usecases/getTransactionsUseCase";
-import { unstable_noStore as noStore } from "next/cache";
-import { TransactionWithPartner } from "@/features/transaction/db/transactionRepository";
+import updateTransactionUseCase, { UpdateTransactionInput } from "@/features/transaction/usecases/updateTransactionUseCase";
+
 
 /**
  * Defines the standardized server response structure for transaction-related actions.

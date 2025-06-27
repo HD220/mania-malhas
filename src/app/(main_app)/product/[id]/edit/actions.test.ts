@@ -1,12 +1,14 @@
-import { describe, it, expect, vi, beforeEach } from 'vitest';
-import { updateProduct, UpdateProductServerResponse } from './actions'; // getProductWithImagesById não será testada aqui
-import alterProductUseCase from '@/usecases/product/alterProductUseCase';
-import { InsertProductWithImages } from '@/db/repositories/schemas/productImageSchema';
-import { ZodError } from 'zod';
 import { revalidatePath } from 'next/cache'; // Importar diretamente
+import { ZodError } from 'zod';
+import { describe, it, expect, vi, beforeEach } from 'vitest';
+
+import { InsertProductWithImages } from '@/features/product/schemas/productImageSchema';
+import alterProductUseCase from '@/features/product/usecases/alter-product.usecase';
+
+import { updateProduct, UpdateProductServerResponse } from './actions'; // getProductWithImagesById não será testada aqui
 
 // Mock do alterProductUseCase
-vi.mock('@/usecases/product/alterProductUseCase');
+vi.mock('@/features/product/usecases/alter-product.usecase');
 
 // Mock de next/cache
 vi.mock('next/cache', async (importOriginal) => {

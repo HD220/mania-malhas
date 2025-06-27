@@ -1,22 +1,21 @@
-import { vi, describe, it, expect, beforeEach, afterEach } from "vitest";
-import { ZodError } from "zod";
+import { faker } from "@faker-js/faker";
 import { revalidatePath } from "next/cache";
+import { ZodError } from "zod";
+import { vi, describe, it, expect, beforeEach, afterEach } from "vitest";
+
+import { ForbiddenError, NotFoundError } from "@/lib/errors/domain-errors";
+import { SelectUser, UpdateUserProfile as UpdateUserProfileData } from "@/features/user/schemas/userSchema";
+import { ChangeUserPasswordUseCase } from "@/features/user/usecases/changeUserPasswordUseCase";
+import { GetUserProfileUseCase } from "@/features/user/usecases/getUserProfileUseCase";
+import { UpdateUserProfileUseCase } from "@/features/user/usecases/updateUserProfileUseCase";
 
 import {
   getUserProfileAction,
   updateUserProfileAction,
   changeUserPasswordAction,
-  updateUserProfileActionSchema, // For testing input to updateUserProfileAction
-  changeUserPasswordActionSchema // For testing input to changeUserPasswordAction
+  // updateUserProfileActionSchema, // Action validates internally
+  // changeUserPasswordActionSchema // Action validates internally
 } from "./actions";
-
-import { GetUserProfileUseCase } from "@/features/user/usecases/getUserProfileUseCase";
-import { UpdateUserProfileUseCase } from "@/features/user/usecases/updateUserProfileUseCase";
-import { ChangeUserPasswordUseCase } from "@/features/user/usecases/changeUserPasswordUseCase";
-
-import { SelectUser, UpdateUserProfile as UpdateUserProfileData } from "@/features/user/schemas/userSchema";
-import { ForbiddenError, NotFoundError } from "@/lib/errors/domainErrors";
-import { faker } from "@faker-js/faker";
 
 // Mock Next.js cache revalidation
 vi.mock("next/cache", () => ({

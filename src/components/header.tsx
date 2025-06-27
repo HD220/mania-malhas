@@ -1,9 +1,15 @@
 "use client"; // Make this a Client Component
 
+import { Bell, CircleUser, Menu, Package2 } from "lucide-react";
 import Link from "next/link";
-import { useRouter } from "next/navigation"; // For client-side redirect fallback if needed
-import { useTransition } from "react"; // For pending UI state
+import { useRouter } from "next/navigation";
+import { useState, useTransition } from "react"; // Combined React imports
 
+import { logoutUser } from "@/features/auth/actions/auth.actions";
+import { NotificationsPanel } from "@/features/notification/components/notifications-panel";
+import menus from "@/lib/constants/navigation.constants"; // Corrected path for menus
+import { Navbar } from "@/components/navbar/navbar";
+import { ThemeToggle } from "@/components/theme-toggle";
 import { Button } from "@/components/ui/button";
 import {
   DropdownMenu,
@@ -14,13 +20,6 @@ import {
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 import { Sheet, SheetContent, SheetTrigger } from "@/components/ui/sheet";
-import { ThemeToggle } from "@/components/theme-toggle";
-import { Navbar } from "@/components/navbar/navbar";
-import menus from "@/constant";
-import { Bell, CircleUser, Menu, Package2 } from "lucide-react";
-import { useState } from "react";
-import { NotificationsPanel } from "@/features/notification/components/notifications-panel";
-import { logoutUser } from "@/features/auth/actions/auth.actions";
 
 /**
  * Header component for the admin panel.

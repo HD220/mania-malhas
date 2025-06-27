@@ -1,8 +1,13 @@
+// Assuming lucide-react and next/link might be needed based on lint errors,
+// though not present in the provided code snippet for this file.
+// import { DollarSign, Package, Users } from "lucide-react";
+// import Link from "next/link";
+
 import { Button } from "@/components/ui/button";
 import {
   Card,
   CardContent,
-  CardDescription,
+  CardDescription, // Not used in snippet, but kept if part of original Card import
   CardFooter,
   CardHeader,
   CardTitle,
@@ -12,7 +17,7 @@ import {
   TableBody,
   TableCaption,
   TableCell,
-  TableFooter,
+  TableFooter, // Not used in snippet, but kept if part of original Table import
   TableHead,
   TableHeader,
   TableRow,

@@ -1,10 +1,10 @@
 "use server";
 
-import countActivePartnersUseCase from "@/features/partner/usecases/countActivePartnersUseCase";
-// import countActivePartnersUseCase from "@/usecases/partner/countActivePartnersUseCase"; // Duplicate import removed
-import countActiveProductsUseCase from "@/usecases/product/countActiveProductsUseCase";
-import getPendingTransactionsStatsUseCase from "@/features/transaction/usecases/getPendingTransactionsStatsUseCase"; // Import new use case
 import { unstable_noStore as noStore } from "next/cache";
+
+import countActivePartnersUseCase from "@/features/partner/usecases/count-active-partners.usecase";
+import countActiveProductsUseCase from "@/features/product/usecases/countActiveProductsUseCase";
+import getPendingTransactionsStatsUseCase from "@/features/transaction/usecases/getPendingTransactionsStatsUseCase"; // Import new use case
 
 /**
  * Represents the successful data structure returned by `getDashboardStats`.

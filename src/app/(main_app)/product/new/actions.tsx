@@ -1,13 +1,14 @@
 "use server";
 
+import { revalidatePath } from "next/cache";
+import { redirect } from "next/navigation";
+import { ZodError, z } from "zod";
+
 import {
   InsertProductWithImages,
   insertProductWithImagesSchema,
 } from "@/features/product/schemas/productImageSchema";
-import createProductUseCase from "@/usecases/product/createProductUseCase";
-import { revalidatePath } from "next/cache";
-import { redirect } from "next/navigation";
-import { ZodError, z } from "zod";
+import createProductUseCase from "@/features/product/usecases/create-product.usecase";
 
 // Define a type for the structured error response
 export type FormattedZodError = z.inferFlattenedErrors<typeof insertProductWithImagesSchema>;

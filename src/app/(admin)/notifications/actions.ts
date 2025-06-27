@@ -1,26 +1,26 @@
 "use server";
 
-import { z } from "zod";
 import { revalidatePath } from "next/cache";
+import { z } from "zod";
+
+import { notificationRepository } from "@/db/repositories"; // userRepository removed
+import { ForbiddenError, NotFoundError } from "@/lib/errors/domain-errors";
 import {
   ListNotificationsForUserUseCase,
   listNotificationsForUserInputSchema,
   ListNotificationsForUserOutput,
-} from "@/features/notification/usecases/listNotificationsForUserUseCase";
+} from "@/features/notification/usecases/list-notifications-for-user.usecase";
 import {
   MarkNotificationAsReadUseCase,
-  markNotificationAsReadInputSchema,
-  MarkNotificationAsReadInput, // Import the type
-} from "@/features/notification/usecases/markNotificationAsReadUseCase";
+  // markNotificationAsReadInputSchema, // Schema is for use case internal validation or direct use
+  MarkNotificationAsReadInput,
+} from "@/features/notification/usecases/mark-notification-as-read.usecase";
 import {
   MarkAllNotificationsAsReadUseCase,
-  markAllNotificationsAsReadInputSchema,
+  // markAllNotificationsAsReadInputSchema, // Schema is for use case internal validation or direct use
   MarkAllNotificationsAsReadOutput,
-  MarkAllNotificationsAsReadInput, // Import the type
-} from "@/features/notification/usecases/markAllNotificationsAsReadUseCase";
-import { notificationRepository } from "@/db/repositories";
-import { userRepository } from "@/db/repositories"; // Needed for session placeholder
-import { ForbiddenError, NotFoundError } from "@/lib/errors/domainErrors";
+  MarkAllNotificationsAsReadInput,
+} from "@/features/notification/usecases/mark-all-notifications-as-read.usecase";
 
 /**
  * Placeholder for session management.

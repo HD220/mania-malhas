@@ -1,9 +1,11 @@
-import "@/globals.css";
-import { Inter } from "next/font/google";
 import type { Metadata } from "next";
-import { cn } from "@/utils";
+import { Inter } from "next/font/google";
+
 import { ThemeProvider } from "@/components/providers/theme-provider";
 import { Toaster } from "@/components/ui/toaster";
+import { cn } from "@/lib/utils"; // Corrected path
+
+import "@/globals.css"; // Global styles last
 
 const inter = Inter({ subsets: ["latin"], variable: "--font-sans" });
 

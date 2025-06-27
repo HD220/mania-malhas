@@ -1,6 +1,9 @@
 import { HTMLAttributes } from "react";
-import { cn } from "@/utils";
-import { NavbarItem, NavbarItemProps } from "./navbar-item";
+
+import { NavbarItemProps } from "@/lib/types/navigation.types"; // Corrected: Type comes from lib
+import { cn } from "@/lib/utils"; // Corrected path
+
+import { NavbarItem } from "./navbar-item";
 
 export type NavbarProps = HTMLAttributes<HTMLDivElement> & {
   className?: string;

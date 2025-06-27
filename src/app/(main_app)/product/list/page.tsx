@@ -1,7 +1,9 @@
-import { TabsContent } from "@/components/ui/tabs";
-import { getProducts } from "@/features/product/actions/list-products.action";
-import Tab from "./tabs";
+// TabsContent is not directly used, it's part of the Tab component from ./tabs
+// import { TabsContent } from "@/components/ui/tabs";
 import { ProductCard } from "@/features/product/components/product-card";
+import { getProducts } from "@/features/product/actions/list-products.action";
+
+import Tab from "./tabs"; // Local component
 
 export default async function Page({
   searchParams: { search = "", status = "active" },

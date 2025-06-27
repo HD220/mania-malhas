@@ -1,12 +1,12 @@
 "use client";
 
+// Fragment is not used in the provided code.
+// import { Fragment } from "react";
+import { ChevronRightIcon } from "lucide-react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { ChevronRightIcon } from "lucide-react"; // Exemplo de ícone
 
 interface BreadcrumbItem {
-  label: string;
-  href: string;
   label: string;
   href: string;
   isCurrent: boolean;

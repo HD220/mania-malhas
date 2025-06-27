@@ -1,6 +1,7 @@
-import { getProductWithImagesById, updateProduct } from "@/features/product/actions/edit-product.action";
+import { notFound } from "next/navigation";
+
 import { ProductForm } from "@/features/product/components/ProductForm";
-import { notFound } from "next/navigation"; // Importar notFound
+import { getProductWithImagesById, updateProduct } from "@/features/product/actions/edit-product.action";
 
 export default async function Page({ params }: { params: { id: string } }) {
   const product = await getProductWithImagesById(params.id);

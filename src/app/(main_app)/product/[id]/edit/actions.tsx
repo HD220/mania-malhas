@@ -1,14 +1,15 @@
 "use server";
 
-import {
-  InsertProductWithImages,
-  insertProductWithImagesSchema,
-} from "@/features/product/schemas/productImageSchema";
-import alterProductUseCase from "@/usecases/product/alterProductUseCase";
-import getProductByIdUseCase from "@/usecases/product/getProductByIdUseCase";
 import { revalidatePath, unstable_noStore as noStore } from "next/cache";
 import { redirect } from "next/navigation";
 import { ZodError } from "zod";
+
+import {
+  InsertProductWithImages,
+  insertProductWithImagesSchema, // Assuming this might be used for validation within the action
+} from "@/features/product/schemas/productImageSchema";
+import alterProductUseCase from "@/features/product/usecases/alter-product.usecase";
+import getProductByIdUseCase from "@/features/product/usecases/get-product-by-id.usecase";
 
 // Define a type for the structured error response, similar to createProduct
 // Assuming InsertProductWithImages is the schema used for validation

@@ -1,7 +1,7 @@
 "use client";
 
 import { ColumnDef } from "@tanstack/react-table";
-import { MoreHorizontal } from "lucide-react";
+import { MoreHorizontal } from "lucide-react"; // ArrowUpDown removed as it's not used
 import Link from "next/link";
 
 import { Button } from "@/components/ui/button";
