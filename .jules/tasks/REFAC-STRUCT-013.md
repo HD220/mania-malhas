@@ -9,12 +9,12 @@ description: >
   relevantes do diretório centralizado para arquivos `schema.ts` dentro do
   subdiretório `db/` de cada feature correspondente (ex: `src/features/user/db/schema.ts`,
   `src/features/product/db/schema.ts`).
-status: Subdividido
+status: Concluído
 priority: P3
 complexity: 2
 created_date: 2024-08-07
 due_date:
-completion_date: 2024-08-08 # Data do desmembramento
+completion_date: 2024-08-09 # Data da conclusão da última sub-tarefa e da tarefa pai
 dependencies:
   - REFAC-STRUCT-012
   - ARCH-DOC-001
@@ -48,3 +48,4 @@ Esta tarefa foi desmembrada nas seguintes sub-tarefas:
 ### Notas Adicionais:
 - A complexidade original era 2. Foi desmembrada em tarefas de complexidade 1 para cada movimentação de schema de feature e uma tarefa final de validação/agregação.
 - Investigar como o Drizzle lida com schemas distribuídos foi incorporado na tarefa `REFAC-STRUCT-013.7`.
+- Todas as sub-tarefas (`.1` a `.7`) foram concluídas em 2024-08-08. Esta tarefa pai é marcada como concluída em 2024-08-09.
