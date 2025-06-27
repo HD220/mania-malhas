@@ -4,15 +4,15 @@ import { revalidatePath, unstable_noStore as noStore } from "next/cache";
 import { redirect } from "next/navigation"; // Though not currently used, might be in future
 import { ZodError } from "zod";
 
-import alterPartnerUseCase from '@/features/partner/usecases/alter-partner.usecase';
-import createPartnerUseCase from '@/features/partner/usecases/create-partner.usecase';
-import getPartnerByIdUseCase from '@/features/partner/usecases/get-partner-by-id.usecase';
-import searchPartnersUseCase from "@/features/partner/usecases/search-partners.usecase";
-
 import {
   InsertPartner,
   insertPartnerSchema, // This might not be directly used by all actions, but good to have if needed
 } from "../types/partner.schema";
+import alterPartnerUseCase from '../usecases/alter-partner.usecase';
+import createPartnerUseCase from '../usecases/create-partner.usecase';
+import getPartnerByIdUseCase from '../usecases/get-partner-by-id.usecase';
+import searchPartnersUseCase from "../usecases/search-partners.usecase";
+
 
 // Types from [id]/edit/actions.tsx
 export type UpdatePartnerServerResponse = {

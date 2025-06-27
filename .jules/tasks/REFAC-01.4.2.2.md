@@ -2,14 +2,14 @@
 id: "REFAC-01.4.2.2"
 title: "Mover casos de uso (usecases) `partner` para `src/features/partner/usecases/`"
 priority: "P4"
-status: "Pendente"
+status: "Concluído"
 complexity: 1
 assigned_to: "AgenteJules"
 dependencies:
   - "REFAC-01.4.2.1" # Depende dos schemas Zod estarem no lugar certo
 parent_task: "REFAC-01.4"
 creation_date: "2024-08-09"
-completion_date: ""
+completion_date: "2024-08-09"
 tags:
   - "refactor"
   - "partner"
@@ -19,6 +19,12 @@ notes: |
   Mover toda a lógica de casos de uso (lógica de negócio) relacionada à feature `partner`
   para o diretório `src/features/partner/usecases/`.
   Atualizar todos os imports que utilizam esses casos de uso.
+
+  **Nota de Implementação (2024-08-09):**
+  - Arquivos de casos de uso para `partner` já estavam localizados em `src/features/partner/usecases/` e nomeados corretamente.
+  - Imports para estes use cases em `src/features/partner/actions/` e seus testes foram atualizados para usar caminhos relativos.
+  - Testes para a feature `partner` (`npm test src/features/partner/ "src/app/(main_app)/partner/"`) estão passando.
+  - Persistem erros de ESLint da regra `project-structure/independent-modules` em toda a feature `partner`.
 ---
 
 **Descrição Detalhada:**
