@@ -2,7 +2,7 @@
 id: "REFAC-01.3.2"
 title: "Mover casos de uso (usecases) `payment` para `src/features/payment/usecases/`"
 priority: "P4"
-status: "Pendente"
+status: "Em Andamento"
 complexity: 1
 assigned_to: "AgenteJules"
 dependencies:

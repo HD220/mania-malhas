@@ -1,5 +1,5 @@
 import { describe, it, expect, vi, beforeEach } from 'vitest';
-import createPaymentUseCase from './create-payment.usecase'; // Updated
+import createPaymentUseCase from '../create-payment.usecase'; // Updated
 import { db } from '@/lib/db-config/postgres';
 import { paymentRepository } from '@/features/payment/db/payment-repository';
 import { InsertPayment, insertPaymentSchema } from '@/features/payment/schemas/payment.schema';
