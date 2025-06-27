@@ -1,11 +1,12 @@
-import { describe, it, expect, vi, beforeEach } from 'vitest';
-import getPaymentsByTransactionIdUseCase from '../get-payments-by-transaction-id.usecase'; // Updated
-import { paymentRepository } from '@/features/payment/db/payment-repository';
-import { SelectPayment } from '@/features/payment/schemas/payment.schema';
 import { faker } from '@faker-js/faker';
+import { describe, it, expect, vi, beforeEach } from 'vitest';
+
+import { paymentRepository } from '../../db/payment-repository';
+import { SelectPayment } from '../../types/payment.schema';
+import getPaymentsByTransactionIdUseCase from '../get-payments-by-transaction-id.usecase'; // Updated
 
 // Mock do paymentRepository
-vi.mock('@/features/payment/db/payment-repository', () => ({
+vi.mock('../../db/payment-repository', () => ({ // Updated mock path
   paymentRepository: vi.fn().mockReturnValue({
     findByTransactionId: vi.fn(),
   }),

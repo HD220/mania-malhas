@@ -3,9 +3,9 @@
 import { revalidatePath } from "next/cache";
 import { ZodError } from "zod";
 
-import { InsertPayment, SelectPayment } from "@/features/payment/schemas/payment.schema";
-import createPaymentUseCase from "@/features/payment/usecases/create-payment.usecase";
-import getPaymentsByTransactionIdUseCase from "@/features/payment/usecases/get-payments-by-transaction-id.usecase";
+import { InsertPayment, SelectPayment } from "../types/payment.schema";
+import createPaymentUseCase from "../usecases/create-payment.usecase";
+import getPaymentsByTransactionIdUseCase from "../usecases/get-payments-by-transaction-id.usecase";
 
 // Assuming a similar error response structure as product actions
 export type PaymentServerResponse<T = null> = {

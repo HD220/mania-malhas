@@ -1,9 +1,11 @@
-import { db } from "@/lib/db-config/postgres"; // Updated
-import { paymentRepository } from "@/features/payment/db/payment-repository";
-import { InsertPayment, insertPaymentSchema } from "@/features/payment/schemas/payment.schema"; // Updated
-import { transactionTable } from "@/features/transaction/db/schema"; // Updated
 import { eq, sum, desc } from "drizzle-orm";
 import { ZodError } from "zod";
+
+import { db } from "@/lib/db-config/postgres"; // Updated
+import schema from "@/lib/db-config/postgres/schema";
+
+import { paymentRepository } from "../db/payment-repository";
+import { InsertPayment, insertPaymentSchema } from "../types/payment.schema";
 
 /**
  * Creates a new payment for a given transaction.
@@ -42,11 +44,11 @@ export default async function createPaymentUseCase(
   // This is a direct DB access. Ideally, this could go through a transactionRepository.
   const [transactionDetails] = await db
     .select({
-      totalValue: transactionTable.value,
-      type: transactionTable.type, // Type might be used for different payment rules in future
+      totalValue: schema.transactionTable.value,
+      type: schema.transactionTable.type, // Type might be used for different payment rules in future
     })
-    .from(transactionTable)
-    .where(eq(transactionTable.id, transactionId));
+    .from(schema.transactionTable)
+    .where(eq(schema.transactionTable.id, transactionId));
 
   if (!transactionDetails) {
     throw new Error("Transação não encontrada.");

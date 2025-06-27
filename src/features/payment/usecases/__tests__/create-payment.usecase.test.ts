@@ -1,13 +1,20 @@
+import { faker } from '@faker-js/faker'; // Moved up
 import { describe, it, expect, vi, beforeEach } from 'vitest';
-import createPaymentUseCase from '../create-payment.usecase'; // Updated
-import { db } from '@/lib/db-config/postgres';
-import { paymentRepository } from '@/features/payment/db/payment-repository';
-import { InsertPayment, insertPaymentSchema } from '@/features/payment/schemas/payment.schema';
-import { transactionTable } from '@/features/transaction/db/schema'; // Updated
 import { ZodError } from 'zod';
 
+import schemaLib from '@/lib/db-config/postgres/schema'; // Renamed to schemaLib to avoid conflict
+
+import { paymentRepository } from '../../db/payment-repository';
+import { InsertPayment, insertPaymentSchema } from '../../types/payment.schema';
+
+const { transactionTable } = schemaLib; // Destructure if only transactionTable is needed, or use schemaLib.transactionTable
+import { db } from '@/lib/db-config/postgres';
+
+import createPaymentUseCase from '../create-payment.usecase'; // Updated
+
+
 // Mock do paymentRepository
-vi.mock('@/features/payment/db/payment-repository', () => ({
+vi.mock('../../db/payment-repository', () => ({ // Updated mock path
   paymentRepository: vi.fn().mockReturnValue({
     insert: vi.fn(),
     findByTransactionId: vi.fn(),
@@ -23,8 +30,8 @@ vi.mock('@/lib/db-config/postgres', () => ({ // Updated
   },
 }));
 
-
 import { faker } from '@faker-js/faker';
+
 
 describe('createPaymentUseCase', () => {
   let mockPaymentRepo: ReturnType<typeof paymentRepository>;

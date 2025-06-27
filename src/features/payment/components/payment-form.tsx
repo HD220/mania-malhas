@@ -1,18 +1,19 @@
 "use client";
 
-import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
-import { z } from "zod";
-import { Form, FormField, FormItem, FormLabel, FormControl, FormMessage, FormDescription } from "@/components/ui/form";
-import { Input } from "@/components/ui/input";
-import { Button } from "@/components/ui/button";
-import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
-import { CalendarIcon } from "lucide-react";
-import { Calendar } from "@/components/ui/calendar";
-import { cn } from "@/utils";
 import { format } from "date-fns";
 import { ptBR } from "date-fns/locale";
+import { CalendarIcon } from "lucide-react";
+import { useForm } from "react-hook-form";
+import { z } from "zod";
+
+import { Button } from "@/components/ui/button";
+import { Calendar } from "@/components/ui/calendar";
+import { Form, FormField, FormItem, FormLabel, FormControl, FormMessage, FormDescription } from "@/components/ui/form";
+import { Input } from "@/components/ui/input";
 import { InputMoneyField } from "@/components/ui/input-money-field"; // Re-using InputMoneyField
+import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
+import { cn } from "@/lib/utils";
 
 // Schema Zod para o formulário de pagamento
 export const paymentFormSchema = z.object({

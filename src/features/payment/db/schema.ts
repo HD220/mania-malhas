@@ -1,4 +1,5 @@
 import { decimal, pgTable, timestamp, uuid } from "drizzle-orm/pg-core";
+
 // Assuming transactionTable will be moved to its feature schema
 import { transactionTable } from "@/features/transaction/db/schema";
 

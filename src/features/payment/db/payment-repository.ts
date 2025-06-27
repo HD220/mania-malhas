@@ -1,7 +1,7 @@
 import { eq, desc } from "drizzle-orm";
 
 import { paymentTable } from "@/features/payment/db/schema";
-import { InsertPayment, SelectPayment } from "@/features/payment/schemas/payment.schema";
+import { InsertPayment, SelectPayment } from "@/features/payment/types/payment.schema";
 import { dbType, db as defaultDb } from "@/lib/db-config/postgres";
 
 /**
