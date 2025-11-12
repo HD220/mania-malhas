@@ -2,26 +2,34 @@ import { Button } from "@/components/ui/button";
 import {
   Card,
   CardContent,
-  CardDescription,
   CardFooter,
   CardHeader,
   CardTitle,
 } from "@/components/ui/card";
+import { Search } from "@/components/ui/search";
 import {
   Table,
   TableBody,
   TableCaption,
   TableCell,
-  TableFooter,
   TableHead,
   TableHeader,
   TableRow,
 } from "@/components/ui/table";
+import Link from "next/link";
 
 export default function Page() {
   return (
     <div className="flex flex-col gap-2">
-      <div className="grid sm:grid-cols-2 gap-2">
+      <div className="flex flex-1 justify-end gap-2">
+        <div className="flex gap-2">
+          <Search className="flex" />
+          <Button asChild>
+            <Link href="/receivable/new">Nova</Link>
+          </Button>
+        </div>
+      </div>
+      <div className="grid sm:grid-cols-2 md:grid-cols-3 gap-2">
         <Card className="">
           <CardHeader>
             <CardTitle>Nicolas Fraga Faust</CardTitle>
@@ -54,30 +62,6 @@ export default function Page() {
               </TableBody>
               <TableCaption>A receber: R$ 61,80</TableCaption>
             </Table>
-          </CardContent>
-          <CardFooter className="p-2">
-            <Button className="w-full">Novo Pagamento</Button>
-          </CardFooter>
-        </Card>
-        <Card className="">
-          <CardHeader className="px-2">
-            <CardTitle>Nicolas Fraga Faust</CardTitle>
-          </CardHeader>
-          <CardContent className="flex flex-1 flex-col gap-2 p-2">
-            <div className="flex flex-1 flex-row gap-2">
-              <div className="flex flex-col flex-1 items-center justify-center bg-secondary p-2 ">
-                <span className="text-primary">Dívida</span>
-                <p className="text-primary-foreground">R$ 50,00</p>
-              </div>
-              <div className="flex flex-col flex-1 items-center justify-center bg-secondary p-2 ">
-                <span className="text-primary">Pago</span>
-                <p className="text-primary-foreground">R$ 50,00</p>
-              </div>
-            </div>
-            <div className="flex flex-col flex-1 items-center justify-center bg-secondary p-2  text-center">
-              <span className="text-primary">Pendente</span>
-              <p className="text-primary-foreground">R$ 50,00</p>
-            </div>
           </CardContent>
           <CardFooter className="p-2">
             <Button className="w-full">Novo Pagamento</Button>
